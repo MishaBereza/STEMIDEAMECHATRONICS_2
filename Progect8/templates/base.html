@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Adaptive Tournament</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <nav>
+      <a href="/">{{ t('home') }}</a>
+      |
+      {{ t('language') }}:
+      <a href="{{ url_for('set_language', lang='en') }}">EN</a> |
+      <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
+      {% set _cur = get_current_user() %}
+      {% if _cur %}
+        | <a href="/user/{{ _cur.id }}" title="Profile">👤 {{ _cur.first_name }}</a>
+      {% endif %}
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat,msg in messages %}
+          <div class="flash-message {{cat}}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>
+

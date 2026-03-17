@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h3>Leaderboard for {{tournament.name}}</h3>
+  <ol>
+    {% for team,score in team_scores %}
+      <li>{{team.name}} — {{"{{.2f}}".format(score)}}</li>
+    {% else %}
+      <li>{{ t('no_teams') }}</li>
+    {% endfor %}
+  </ol>
+{% endblock %}

@@ -1,0 +1,219 @@
+/* =========================
+   Admin Dashboard styles
+========================= */
+
+/* HEADER */
+
+.admin-header {
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+
+  padding:20px;
+  border-radius:8px;
+
+  margin-bottom:30px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.admin-header-title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.admin-header-description{
+  font-size:13px;
+  opacity:.9;
+}
+
+
+/* LOGOUT BUTTON */
+
+.admin-logout-btn{
+  padding:10px 20px;
+
+  background:rgba(255,255,255,.2);
+  color:white;
+
+  border-radius:6px;
+
+  text-decoration:none;
+
+  font-weight:600;
+
+  transition:.2s;
+}
+
+.admin-logout-btn:hover{
+  background:rgba(255,255,255,.35);
+}
+
+
+/* =========================
+   DASHBOARD GRID
+========================= */
+
+.admin-cards{
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(auto-fit,minmax(250px,1fr));
+
+  gap:20px;
+
+  margin-bottom:40px;
+
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.admin-card{
+
+  background:white;
+
+  padding:25px;
+
+  border-radius:8px;
+
+  box-shadow:0 4px 15px rgba(0,0,0,.1);
+
+  transition:.25s;
+
+  text-decoration:none;
+
+  color:inherit;
+
+}
+
+.admin-card:hover{
+
+  transform:translateY(-3px);
+
+  box-shadow:0 8px 25px rgba(0,0,0,.15);
+
+}
+
+.admin-card-icon{
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.admin-card-number{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.admin-card-number.users{color:#667eea;}
+.admin-card-number.tournaments{color:#28a745;}
+.admin-card-number.teams{color:#ffc107;}
+.admin-card-number.submissions{color:#17a2b8;}
+.admin-card-number.manage{color:#007bff;}
+.admin-card-number.create{color:#28a745;}
+.admin-card-number.password{color:#dc3545;}
+
+.admin-card-label{
+  font-weight:600;
+  font-size:18px;
+}
+
+.admin-card-label.users{color:#667eea;}
+.admin-card-label.tournaments{color:#28a745;}
+.admin-card-label.teams{color:#ffc107;}
+.admin-card-label.submissions{color:#17a2b8;}
+.admin-card-label.manage{color:#007bff;}
+.admin-card-label.create{color:#28a745;}
+.admin-card-label.password{color:#dc3545;}
+
+.admin-card-arrow{
+  font-size:12px;
+}
+
+.admin-card-arrow.users{color:#667eea;}
+.admin-card-arrow.manage{color:#007bff;}
+.admin-card-arrow.create{color:#28a745;}
+.admin-card-arrow.password{color:#dc3545;}
+
+.admin-card-description{
+  font-size:12px;
+  color:#666;
+  margin-top:5px;
+}
+
+.admin-card.create-tournament{
+  background:#f8f9fa;
+}
+
+
+/* =========================
+   PASSWORD CARD
+========================= */
+
+.admin-password-card{
+
+  display:block;
+
+  width:100%;
+  max-width:600px;
+
+  margin:60px auto;
+
+  background:white;
+
+  padding:25px;
+
+  border-radius:10px;
+
+  box-shadow:0 6px 20px rgba(0,0,0,.12);
+
+  text-decoration:none;
+  color:inherit;
+
+}
+
+.admin-password-card *{
+  text-decoration:none;
+}
+
+.admin-password-card:hover{
+
+  transform:translateY(-2px);
+
+  box-shadow:0 10px 28px rgba(0,0,0,.16);
+
+}
+
+
+/* =========================
+   TOOLS SECTION
+========================= */
+
+.admin-tools-section{
+
+  background:#f9f9f9;
+
+  padding:20px;
+
+  border-radius:8px;
+
+  border-left:4px solid #667eea;
+
+}
+
+
+/* =========================
+   BACK LINK
+========================= */
+
+.admin-back-link{
+
+  margin-top:30px;
+
+  text-align:center;
+
+}

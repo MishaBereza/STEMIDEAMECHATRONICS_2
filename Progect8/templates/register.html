@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/register.css">
+{% endblock %}
+{% block content %}
+
+  <div class="register-container">
+
+  <h2 class="register-title">
+    {{ t('register_user') }}
+  </h2>
+
+  <p class="register-description">
+    Fill in the form below to create your account
+  </p>
+
+  <form method="post" class="register-form">
+
+    <!-- FIRST NAME -->
+    <label>{{ t('first_name') }} *</label>
+    <input type="text" name="first_name" required>
+
+    <!-- LAST NAME -->
+    <label>{{ t('last_name') }} *</label>
+    <input type="text" name="last_name" required>
+
+    <!-- EMAIL -->
+    <label>{{ t('email') }} *</label>
+    <input type="email" name="email" required>
+
+    <!-- AGE -->
+    <label>{{ t('age') }}</label>
+    <input type="number" name="age" min="1" max="150">
+
+    <!-- BIO -->
+    <label>{{ t('about_you') }}</label>
+    <textarea name="bio" rows="4"></textarea>
+
+    <!-- BUTTONS -->
+    <div class="button-group">
+      <button type="submit" class="submit-button">
+        {{ t('register_btn') }}
+      </button>
+
+      <a href="/" class="cancel-button">
+        {{ t('back_home') }}
+      </a>
+    </div>
+
+  </form>
+
+</div>
+
+{% endblock %}

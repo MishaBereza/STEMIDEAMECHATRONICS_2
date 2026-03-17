@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>👥 Teams for {{ tournament.name }}</h2>
+
+<table border="1" cellpadding="8">
+  <tr><th>Name</th><th>Captain</th><th>Members</th><th>Repo</th><th>Live</th><th>Comments</th><th>Status</th><th>Actions</th></tr>
+  {% for team in teams %}
+    <tr>
+      <td>{{ team.name }}</td>
+      <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
+      <td>
+        {% for m in team.members.all() %}
+          {{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}
+        {% else %}
+          —
+        {% endfor %}
+      </td>
+      <td>{{ team.repo_url or '-' }}</td>
+      <td>{{ team.live_url or '-' }}</td>
+      <td>{{ team.comments or '-' }}</td>
+      <td>{{ team.submission_status or '-' }}</td>
+      <td>
+        {% if team.submission_status == 'Pending' %}
+          <form method="post" action="/admin/team/{{ team.id }}/decide" style="display:inline;">
+            <button name="decision" value="accept">✅ Accept</button>
+            <button name="decision" value="reject">❌ Reject</button>
+            <button name="decision" value="return">↩️ Return</button>
+          </form>
+        {% endif %}
+        <form method="post" action="/admin/team/{{ team.id }}/delete" style="display:inline; margin-left:5px;">
+          <button onclick="return confirm('Delete team?')">🗑️</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<p style="margin-top:20px;"><a href="/admin/tournaments">← Back to tournaments</a></p>
+
+{% endblock %}

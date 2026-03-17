@@ -1,0 +1,93 @@
+/* Index page styles */
+.home-title {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.action-link {
+  text-decoration: none;
+  width: 200px;
+}
+
+.action-card {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.action-card.admin {
+  background: #dc3545;
+}
+
+.action-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.action-text {
+  font-weight: 600;
+}
+
+.tournaments-title {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.tournaments-grid {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.tournament-link {
+  text-decoration: none;
+}
+
+.tournament-card {
+  padding: 20px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.tournament-name {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 16px;
+}
+
+.tournament-info {
+  color: #999;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.status-badge {
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.no-tournaments {
+  padding: 40px;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  color: #999;
+}

@@ -1,0 +1,64 @@
+/* Register page styles */
+.register-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.register-title {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.register-description {
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.register-form {
+  /* Form styles are in main.css */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.submit-button {
+  flex: 1;
+  padding: 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background: #5a67d8;
+}
+
+.cancel-button {
+  flex: 1;
+  padding: 12px;
+  background: #6c757d;
+  color: white;
+  border-radius: 6px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.cancel-button:hover {
+  background: #5a6268;
+}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/index.css">
+{% endblock %}
+{% block content %}
+  <h1 class="home-title">⚡ {{ t('home') }}</h1>
+
+  <div class="action-buttons">
+    <a href="/register" class="action-link">
+      <div class="action-card">
+        <div class="action-icon">👤</div>
+        <div class="action-text">{{ t('register') }}</div>
+      </div>
+    </a>
+    <!-- demo data creation removed from main menu per request -->
+    <a href="/admin" class="action-link">
+      <div class="action-card admin">
+        <div style="font-size: 28px; margin-bottom: 10px;">🔐</div>
+        <div style="font-weight: 600;">{{ t('admin_panel') }}</div>
+      </div>
+    </a>
+  </div>
+
+  <h3 class="tournaments-title">{{ t('tournaments') }}</h3>
+  <div class="tournaments-grid">
+    {% for t_item in tournaments %}
+      <a href="/tournament/{{t_item.id}}" class="tournament-link">
+        <div class="tournament-card">
+          <div class="tournament-name">{{t_item.name}}</div>
+          <div class="tournament-info">
+            {{ t('status') }}: <span class="status-badge">{{t_item.status}}</span>
+          </div>
+        </div>
+      </a>
+    {% else %}
+      <div class="no-tournaments">
+        {{ t('no_tournaments') }}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

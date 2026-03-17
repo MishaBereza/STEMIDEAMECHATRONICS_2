@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>✏️ {{ t('edit') }} {{ t('tournament_page') }}</h2>
+
+<form method="post" style="
+    max-width: 600px;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+">
+
+  <!-- NAME -->
+  <div style="margin-bottom:15px;">
+    <label><b>{{ t('name') }}</b></label><br>
+    <input name="name" value="{{ tournament.name }}" required
+           style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div style="margin-bottom:15px;">
+    <label><b>{{ t('description') }}</b></label><br>
+    <textarea name="description" rows="4"
+      style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">{{ tournament.description }}</textarea>
+  </div>
+
+
+  <!-- MAX TEAMS -->
+  <div style="margin-bottom:15px;">
+    <label><b>Max Teams</b></label><br>
+    <input type="number" name="max_teams" value="{{ tournament.max_teams or '' }}"
+           style="width:100%; padding:10px;">
+  </div>
+
+  <!-- STATUS -->
+  <div style="margin-bottom:20px;">
+    <label><b>{{ t('status') }}</b></label><br>
+    <select name="status" style="width:100%; padding:10px;">
+        <option value="Draft" {% if tournament.status=='Draft' %}selected{% endif %}>Draft</option>
+        <option value="Registration" {% if tournament.status=='Registration' %}selected{% endif %}>Registration</option>
+        <option value="Running" {% if tournament.status=='Running' %}selected{% endif %}>Running</option>
+        <option value="Submission" {% if tournament.status=='Submission' %}selected{% endif %}>Submission</option>
+        <option value="Finished" {% if tournament.status=='Finished' %}selected{% endif %}>Finished</option>
+    </select>
+  </div>
+
+  <!-- BUTTONS -->
+  <div style="display:flex; gap:10px;">
+    <button type="submit" style="
+        flex:1;
+        background:#28a745;
+        color:white;
+        padding:12px;
+        border:none;
+        border-radius:6px;
+        font-weight:bold;
+    ">
+      💾 {{ t('save') }}
+    </button>
+
+    <a href="/admin/tournaments" style="
+        flex:1;
+        background:#6c757d;
+        color:white;
+        padding:12px;
+        text-align:center;
+        border-radius:6px;
+        text-decoration:none;
+        font-weight:bold;
+    ">
+      ← {{ t('back_home') }}
+    </a>
+  </div>
+
+</form>
+
+{% endblock %}

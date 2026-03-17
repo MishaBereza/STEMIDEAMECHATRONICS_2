@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>🏆 Tournaments</h2>
+
+<table border="1" cellpadding="10">
+<tr>
+    <th>Name</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+
+{% for t in tournaments %}
+<tr>
+    <td>{{ t.name }}</td>
+    <td>{{ t.status }}</td>
+    <td>
+        <a href="{{ url_for('edit_tournament', tid=t.id) }}">✏️ Edit</a>
+        <a href="{{ url_for('admin_tournament_teams', tid=t.id) }}" style="margin-left:10px;">👥 Teams</a>
+
+        <form method="post" action="{{ url_for('delete_tournament', tid=t.id) }}" style="display:inline;">
+            <button onclick="return confirm('Delete?')">❌ Delete</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+
+</table>
+
+<br>
+<div style="margin-top:12px; margin-bottom:12px;">
+    <a href="{{ url_for('create_tournament') }}" style="padding:8px 12px; background:#28a745; color:white; border-radius:6px; text-decoration:none;">➕ Create Tournament</a>
+    &nbsp; <a href="{{ url_for('admin_dashboard') }}">← Back</a>
+</div>
+
+{% endblock %}

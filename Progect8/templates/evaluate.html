@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h3>Evaluate submission #{{s.id}}</h3>
+  <p>Repo: <a href="{{s.repo_url}}">{{s.repo_url}}</a></p>
+  <p>Demo: <a href="{{s.demo_url}}">{{s.demo_url}}</a></p>
+  <form method="post">
+    <label>{{ t('email') }}: <input name="jury_email" required></label><br>
+    <label>Tech score (0-100): <input name="score_tech" type="number" max="100" min="0"></label><br>
+    <label>Functionality score (0-100): <input name="score_func" type="number" max="100" min="0"></label><br>
+    <label>UI score (0-100): <input name="score_ui" type="number" max="100" min="0"></label><br>
+    <label>Comment: <textarea name="comment"></textarea></label><br>
+    <button type="submit">Save evaluation</button>
+  </form>
+{% endblock %}

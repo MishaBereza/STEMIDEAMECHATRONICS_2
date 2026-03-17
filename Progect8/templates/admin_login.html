@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
+{% block content %}
+  <div class="login-container">
+    <h2 class="login-title">🔐 Admin Login</h2>
+    
+    <div class="login-form-container">
+      <p class="login-description">Please enter admin password to access the admin panel</p>
+      
+      <form method="post">
+        <div>
+          <label for="password">Admin Password</label>
+          <input type="password" id="password" name="password" required autofocus>
+        </div>
+        
+        <button type="submit" style="width: 100%; margin-top: 25px;">Login</button>
+      </form>
+      
+      <p class="password-hint">
+        💡 Password is generated on server startup and saved in <strong>admin_password.txt</strong>
+      </p>
+    </div>
+    
+    <p class="back-link"><a href="/">Back to Home</a></p>
+  </div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Team: {{ team.name }}</h2>
+  <p>Captain: {{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</p>
+  <p>Members: {% for m in team.members.all() %}{{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}{% else %}-{% endfor %}</p>
+
+  {% if message %}
+    <div class="flash-message success">{{ message }}</div>
+  {% endif %}
+
+  {% if tournament and tournament.status.lower() in ['submission','running'] %}
+    <h3>📎 Submit your work</h3>
+    {% if can_submit %}
+      <details style="margin-bottom:20px;">
+        <summary style="cursor:pointer;font-weight:bold;">Edit team members</summary>
+        <div style="padding:10px 0;">
+          <label><b>Members emails (comma separated)</b><br>
+            <textarea name="members" rows="2" style="width:100%; padding:8px; border:1px solid #ccc;">{% for m in team.members.all() %}{{m.email}}{% if not loop.last %},{% endif %}{% endfor %}</textarea>
+          </label>
+          <p style="font-size:12px;color:#666;margin-top:8px;">Only the captain can change team membership; enter registered users' emails separated by commas.</p>
+        </div>
+      </details>
+    {% endif %}
+    <p style="color:#666; font-size:12px;">
+      {% if can_edit %}
+        {% if can_submit %}
+          Choose 'Save' to save your work. Use 'Submit' (captain only) to finalize submission.
+        {% else %}
+          You may attach links for your team. Only the captain can submit.
+        {% endif %}
+      {% else %}
+        Only team members can attach links. Ask your captain to submit the work.
+      {% endif %}
+    </p>
+    <form method="post" style="max-width: 500px; background:#f9f9f9; padding:20px; border-radius:8px;">
+      <div style="margin-bottom:15px;">
+        <label><b>GitHub Repository URL *</b></label><br>
+        <input type="url" name="repo_url" value="{{ team.repo_url or '' }}" {% if can_edit %}required{% else %}disabled{% endif %} style="width:100%; padding:8px; border:1px solid #ccc;">
+        <small style="color:#999;">Required: Link to your GitHub repository</small>
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label><b>Live Demo URL</b></label><br>
+        <input type="url" name="live_url" value="{{ team.live_url or '' }}" {% if not can_edit %}disabled{% endif %} style="width:100%; padding:8px; border:1px solid #ccc;">
+        <small style="color:#999;">Optional: Link to your live demo</small>
+      </div>
+      
+      <div style="margin-bottom:20px;">
+        <label><b>Comments</b></label><br>
+        <textarea name="comments" rows="3" {% if not can_edit %}disabled{% endif %} style="width:100%; padding:8px; border:1px solid #ccc;">{{ team.comments or '' }}</textarea>
+      </div>
+
+      {% if can_edit %}
+        <button name="action" value="save" style="padding:10px 20px; background:#17a2b8; color:white; border:none; border-radius:4px; margin-right:10px; cursor:pointer;">💾 Save</button>
+        {% if can_submit %}
+          <button name="action" value="send" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">🚀 Submit</button>
+        {% endif %}
+      {% endif %}
+    </form>
+    
+    {% if team.submission_status %}
+      <p style="margin-top:15px;"><b>Status:</b> <span style="padding:5px 10px; background:#e9ecef; border-radius:4px;">{{ team.submission_status }}</span></p>
+    {% endif %}
+  {% elif tournament.status.lower() == 'finished' %}
+    <p style="color:#666;">Tournament has finished. No more submissions allowed.</p>
+  {% else %}
+    <p style="color:#666;">Submission stage not active yet.</p>
+  {% endif %}
+
+  {% if team.submission_status %}
+    <p style="margin-top:15px;"><b>Status:</b> <span style="padding:5px 10px; background:#e9ecef; border-radius:4px;">{{ team.submission_status }}</span></p>
+  {% endif %}
+
+{% endblock %}
