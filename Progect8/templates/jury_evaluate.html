@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ t('jury_evaluation_panel') }}</h2>
+  <p>{{ t('welcome') }}, {{ current_user.name if current_user else 'Jury' }}!</p>
+
+  <h3>{{ t('submissions_to_evaluate') }}</h3>
+  {% if submissions %}
+    <ul>
+      {% for s in submissions %}
+        <li>{{ t('submissions_to_evaluate') }} #{{ s.id }} - {{ t('team') }}: {{ s.team.name }} - {{ t('round') }}: {{ s.round.title }} <a href="/evaluate/{{ s.id }}">Evaluate</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>{{ t('no_submissions') }}</p>
+  {% endif %}
+
+  {% if tournament %}
+    <h3 style="margin-top:25px;">Teams for {{ tournament.name }}</h3>
+    {% if teams %}
+      <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; max-width:900px;">
+        <tr><th>Name</th><th>Captain</th><th>Members</th><th>Repo</th><th>Live</th><th>Status</th></tr>
+        {% for team in teams %}
+          <tr>
+            <td>{{ team.name }}</td>
+            <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
+            <td>
+              {% for m in team.members.all() %}
+                {{ m.first_name }} {{ m.last_name }}{% if not loop.last %}, {% endif %}
+              {% else %}
+                —
+              {% endfor %}
+            </td>
+            <td>{{ team.repo_url or '-' }}</td>
+            <td>{{ team.live_url or '-' }}</td>
+            <td>{{ team.submission_status or '-' }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No teams found for this tournament.</p>
+    {% endif %}
+  {% else %}
+    <p>Tournament #1 not found.</p>
+  {% endif %}
+
+  <p><a href="/jury/logout">Logout</a></p>
+{% endblock %}

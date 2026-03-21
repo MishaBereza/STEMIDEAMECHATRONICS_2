@@ -60,7 +60,24 @@ TRANSLATIONS = {
         'new_password': 'New password',
         'confirm_password': 'Confirm password',
         'save': 'Save',
-        'back_to_admin': 'Back to admin'
+        'back_to_admin': 'Back to admin',
+        'comment': 'Comment',
+        'tech_score': 'Tech score',
+        'functionality_score': 'Functionality score',
+        'ui_score': 'UI score',
+        'jury_evaluation_panel': 'Jury Evaluation Panel',
+        'welcome': 'Welcome',
+        'submissions_to_evaluate': 'Submissions to Evaluate',
+        'no_submissions': 'No submissions to evaluate at this time.',
+        'tournament_teams': 'Teams for',
+        'team': 'Team',
+        'captain': 'Captain',
+        'members': 'Members',
+        'repo': 'Repo',
+        'live': 'Live',
+        'status': 'Status',
+        'logout': 'Logout',
+        'round': 'Round'
     },
 
     'uk': {
@@ -122,7 +139,24 @@ TRANSLATIONS = {
         'new_password': 'Новий пароль',
         'confirm_password': 'Підтвердьте пароль',
         'save': 'Зберегти',
-        'back_to_admin': 'Назад до адміну'
+        'back_to_admin': 'Назад до адміну',
+        'comment': 'Коментар',
+        'tech_score': 'Технічний бал',
+        'functionality_score': 'Бал функціональності',
+        'ui_score': 'Бал UI',
+        'jury_evaluation_panel': 'Панель журі',
+        'welcome': 'Ласкаво просимо',
+        'submissions_to_evaluate': 'Роботи для оцінювання',
+        'no_submissions': 'Немає робіт для оцінювання зараз.',
+        'tournament_teams': 'Команди для',
+        'team': 'Команда',
+        'captain': 'Капітан',
+        'members': 'Учасники',
+        'repo': 'Репозиторій',
+        'live': 'Демо',
+        'status': 'Статус',
+        'logout': 'Вийти',
+        'round': 'Раунд'
     }
 }
 

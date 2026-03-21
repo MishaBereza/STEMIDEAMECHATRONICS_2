@@ -90,3 +90,39 @@ def submit_solution(rid):
     # GET or re-render after validation error
     # if user not eligible or no teams, show message in template
     return render_template('submit.html', r=r, teams=teams, status_ok=status_ok, current_user=user)
+
+# ---------------- EVALUATE SUBMISSION ----------------
+def evaluate_submission(sid):
+    if 'jury_id' not in session:
+        flash('Please login as jury first', 'warning')
+        return redirect('/jury/login')
+    
+    jury = User.query.get(session['jury_id'])
+    if not jury or jury.role != 'jury':
+        session.pop('jury_id', None)
+        flash('Invalid jury session', 'danger')
+        return redirect('/jury/login')
+    
+    s = Submission.query.get_or_404(sid)
+    
+    if request.method == 'POST':
+        score_tech = request.form.get('score_tech')
+        score_func = request.form.get('score_func')
+        score_ui = request.form.get('score_ui')
+        comment = request.form.get('comment', '').strip()
+        
+        evaluation = Evaluation(
+            submission_id=s.id,
+            jury_id=jury.id,
+            score_tech=float(score_tech) if score_tech else None,
+            score_func=float(score_func) if score_func else None,
+            score_ui=float(score_ui) if score_ui else None,
+            comment=comment
+        )
+        from .models import db
+        db.session.add(evaluation)
+        db.session.commit()
+        flash('Evaluation saved', 'success')
+        return redirect('/jury/evaluate')
+    
+    return render_template('evaluate.html', s=s)

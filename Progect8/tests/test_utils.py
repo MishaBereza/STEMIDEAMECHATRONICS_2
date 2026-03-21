@@ -3,7 +3,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from utils import calculate_average_score, adjust_difficulty, generate_new_round
+from backend.utils import calculate_average_score, adjust_difficulty, generate_new_round
 
 
 def test_calculate_average_score():

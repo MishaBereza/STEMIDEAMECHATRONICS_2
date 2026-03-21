@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app, db
+from backend.app import app, db
 from backend.models import User, Tournament, Team
 from flask import session
 
@@ -41,7 +41,7 @@ def login(client, uid=None, admin=False):
 def test_captain_can_save_and_submit():
     teamid, tid, capid = create_team_for_status()
     # use request context to call view directly
-    from app import team_page, db
+    from backend.teams import team_page
     # save links
     with app.test_request_context(f'/team/{teamid}', method='POST', data={
         'repo_url': 'https://repo1',
@@ -154,7 +154,7 @@ def test_member_can_save_but_not_submit():
         team.members.append(member)
         db.session.commit()
         member_id = member.id
-    from app import team_page
+    from backend.teams import team_page
     # member should be able to save but not send
     with app.test_request_context(f'/team/{teamid}', method='POST', data={
         'repo_url':'x','live_url':'y','comments':'c','action':'save'
@@ -182,7 +182,7 @@ def test_member_can_save_but_not_submit():
 
 def test_no_form_when_not_submission():
     teamid, tid, capid = create_team_for_status(tour_status='Registration', tname='TeamZ')
-    from app import team_page
+    from backend.teams import team_page
     with app.test_request_context(f'/team/{teamid}', method='GET'):
         session['user_id'] = capid
         resp_html = team_page(teamid)

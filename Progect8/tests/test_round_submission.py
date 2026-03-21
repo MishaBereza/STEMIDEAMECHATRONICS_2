@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app, db
+from backend.app import app, db
 from backend.models import User, Tournament, Round, Team, Submission
 from flask import session
 

@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app, db
+from backend.app import app, db
 from backend.models import Tournament, Team, User, Round, Submission, Evaluation
 
 
@@ -30,7 +30,7 @@ def test_delete_tournament_cascades():
         db.session.commit()
 
         # now delete tournament using function directly
-        from app import delete_tournament
+        from backend.admin import delete_tournament
         # simulate admin session for call
         from flask import session
         with app.test_request_context(method='POST'):

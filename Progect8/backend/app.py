@@ -29,16 +29,16 @@ def translation_processor():
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
-    from translations import TRANSLATIONS
+    from .translations import TRANSLATIONS
     if lang in TRANSLATIONS:
         session['language'] = lang
     return redirect(request.referrer or url_for('index'))
 
-from .auth import register_user, admin_panel, admin_logout, admin_change_password
+from .auth import register_user, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
 from .tournaments import index, tournament_page, leaderboard
 from .teams import register_team, team_page
-from .submissions import submit_solution
-from .admin import admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, delete_tournament
+from .submissions import submit_solution, evaluate_submission
+from .admin import admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, delete_tournament, change_user_role
 
 # Register routes
 app.add_url_rule('/', 'index', index, methods=['GET'])
@@ -52,8 +52,10 @@ app.add_url_rule('/admin/logout', 'admin_logout', admin_logout, methods=['GET'])
 app.add_url_rule('/team/<int:teamid>', 'team_page', team_page, methods=['GET', 'POST'])
 app.add_url_rule('/admin/dashboard', 'admin_dashboard', admin_dashboard, methods=['GET'])
 app.add_url_rule('/admin/change_password', 'admin_change_password', admin_change_password, methods=['GET', 'POST'])
+app.add_url_rule('/profile/switch', 'profile_switch', profile_switch, methods=['GET', 'POST'])
 app.add_url_rule('/admin/users', 'admin_users', admin_users, methods=['GET'])
 app.add_url_rule('/admin/user/<int:uid>/delete', 'admin_delete_user', admin_delete_user, methods=['POST'])
+app.add_url_rule('/admin/user/<int:uid>/change-role', 'change_user_role', change_user_role, methods=['POST'])
 app.add_url_rule('/user/<int:uid>', 'user_profile', user_profile, methods=['GET'])
 app.add_url_rule('/admin/tournaments', 'admin_tournaments', admin_tournaments, methods=['GET'])
 app.add_url_rule('/admin/tournaments/create', 'admin_tournaments_create_redirect', admin_tournaments_create_redirect, methods=['GET'])
@@ -63,6 +65,11 @@ app.add_url_rule('/admin/team/<int:teamid>/decide', 'admin_team_decide', admin_t
 app.add_url_rule('/admin/tournament/create', 'create_tournament', create_tournament, methods=['GET', 'POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/edit', 'edit_tournament', edit_tournament, methods=['GET', 'POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/delete', 'delete_tournament', delete_tournament, methods=['POST'])
+app.add_url_rule('/jury/login', 'jury_login', jury_login, methods=['GET', 'POST'])
+app.add_url_rule('/jury/evaluate', 'jury_evaluate', jury_evaluate, methods=['GET'])
+app.add_url_rule('/evaluate/<int:sid>', 'evaluate_submission', evaluate_submission, methods=['GET', 'POST'])
+app.add_url_rule('/jury/logout', 'jury_logout', jury_logout, methods=['GET'])
+app.add_url_rule('/jury/part2', 'jury_part2', jury_part2, methods=['GET'])
 
 # ---------------- RUN ----------------
 if __name__ == '__main__':

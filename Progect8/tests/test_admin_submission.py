@@ -9,7 +9,7 @@ if not hasattr(werkzeug, '__version__'):
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app, db
+from backend.app import app, db
 from backend.models import User, Tournament, Team
 from flask import session
 
@@ -42,7 +42,7 @@ def test_admin_teams_page_shows_submission_and_actions():
         db.session.add(team)
         db.session.commit()
 
-    from app import admin_tournament_teams
+    from backend.admin import admin_tournament_teams
     # call the view function within a request context
     with app.test_request_context(f'/admin/tournament/{tid}/teams'):
         session['admin'] = True
@@ -75,7 +75,7 @@ def test_admin_decision_changes_status():
         db.session.commit()
         teamid = team.id
 
-    from app import admin_team_decide, admin_tournament_teams
+    from backend.admin import admin_team_decide, admin_tournament_teams
     # simulate POST decision
     with app.test_request_context(f'/admin/team/{teamid}/decide', method='POST', data={'decision':'accept'}):
         session['admin'] = True

@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash
-from .models import User, Tournament, Team, Round, Submission, Evaluation
+from .models import db, User, Tournament, Team, Round, Submission, Evaluation
 from functools import wraps
 from .app_helpers import admin_required
 
@@ -44,11 +44,22 @@ def admin_delete_user(uid):
             if u in team.members:
                 team.members.remove(u)
 
-    from .models import db
     db.session.delete(u)
     db.session.commit()
 
     flash('User deleted', 'success')
+    return redirect('/admin/users')
+
+# CHANGE USER ROLE
+def change_user_role(uid):
+    u = User.query.get_or_404(uid)
+    new_role = request.form.get('role')
+    if new_role in ['team', 'jury', 'admin']:
+        u.role = new_role
+        db.session.commit()
+        flash('User role updated', 'success')
+    else:
+        flash('Invalid role', 'warning')
     return redirect('/admin/users')
 
 # ---------------- USER PROFILE ----------------
@@ -109,7 +120,6 @@ def admin_delete_team(teamid):
     # delete submissions and their evaluations
     for s in team.submissions:
         for ev in s.evaluations:
-            from .models import db
             db.session.delete(ev)
         db.session.delete(s)
 
@@ -177,7 +187,6 @@ def delete_tournament(tid):
     for r in Round.query.filter_by(tournament_id=t.id):
         for s in r.submissions:
             for ev in s.evaluations:
-                from .models import db
                 db.session.delete(ev)
             db.session.delete(s)
         db.session.delete(r)

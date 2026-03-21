@@ -2,7 +2,10 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
-from app import app, db, register_user, register_team, user_profile
+from backend.app import app, db
+from backend.auth import register_user
+from backend.teams import register_team
+from backend.admin import user_profile
 from backend.models import User, Tournament, Team
 from flask import get_flashed_messages
 

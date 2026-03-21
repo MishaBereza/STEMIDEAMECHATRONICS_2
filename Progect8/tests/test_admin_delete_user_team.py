@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app, db
+from backend.app import app, db
 from backend.models import User, Tournament, Team
 
 
@@ -28,7 +28,7 @@ def test_admin_delete_user_and_team():
         db.session.commit()
 
         # delete member user
-        from app import admin_delete_user
+        from backend.admin import admin_delete_user
         from flask import session
         with app.test_request_context(method='POST'):
             session['admin'] = True
@@ -37,7 +37,7 @@ def test_admin_delete_user_and_team():
         assert User.query.filter_by(email='mem1@example.com').first() is None
 
         # delete team
-        from app import admin_delete_team
+        from backend.admin import admin_delete_team
         with app.test_request_context(method='POST'):
             session['admin'] = True
             resp = admin_delete_team(team.id)
