@@ -109,23 +109,115 @@ def jury_evaluate():
         session.pop('jury_id', None)
         return redirect('/jury/login')
 
-    from .models import Submission, Evaluation, Team, Tournament
-    # use tournament 1 data (as requested)
-    tournament = Tournament.query.get(1)
-    teams = []
-    if tournament:
-        teams = Team.query.filter_by(tournament_id=tournament.id).all()
+    from sqlalchemy import or_
+    from .models import Submission, Evaluation, Team, Tournament, Round
+    from datetime import datetime
+    
+    def sync_team_submissions(tournament):
+        """Backfill Submission rows from team-level submits so jury can evaluate them."""
+        if not tournament:
+            return
 
-    # only include submissions for pending teams
-    submissions = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.submission_status == 'Pending').all()
+        latest_round = Round.query.filter_by(tournament_id=tournament.id).order_by(Round.level.desc(), Round.id.desc()).first()
+        round_id = latest_round.id if latest_round else None
 
-    unevaluated = []
+        dirty = False
+        teams_with_work = Team.query.filter(
+            Team.tournament_id == tournament.id,
+            Team.repo_url.isnot(None),
+            Team.repo_url != ''
+        ).all()
+
+        for team in teams_with_work:
+            submission_query = Submission.query.filter_by(team_id=team.id)
+            if round_id is None:
+                submission = submission_query.filter(Submission.round_id.is_(None)).first()
+            else:
+                submission = submission_query.filter_by(round_id=round_id).first()
+            if submission:
+                changed = False
+                if not submission.repo_url and team.repo_url:
+                    submission.repo_url = team.repo_url
+                    changed = True
+                if not submission.demo_url and team.live_url:
+                    submission.demo_url = team.live_url
+                    changed = True
+                if not submission.description and team.comments:
+                    submission.description = team.comments
+                    changed = True
+                dirty = dirty or changed
+                continue
+
+            db.session.add(Submission(
+                team_id=team.id,
+                round_id=round_id,
+                repo_url=team.repo_url,
+                demo_url=team.live_url,
+                description=team.comments
+            ))
+            dirty = True
+
+        if dirty:
+            db.session.commit()
+
+    candidate_tournaments = Tournament.query.filter(
+        or_(
+            Tournament.status.ilike('%finished%'),
+            Tournament.status.ilike('%completed%'),
+            Tournament.status.ilike('%closed%'),
+            Tournament.status.ilike('%running%'),
+            Tournament.status.ilike('%submission%'),
+            Tournament.status.ilike('%registration%'),
+            Tournament.status.ilike('%draft%')
+        )
+    ).order_by(Tournament.id.desc()).all()
+
+    tournament = None
+    for ct in candidate_tournaments:
+        has_submission = Submission.query.join(Team, Submission.team_id == Team.id)\
+            .filter(Team.tournament_id == ct.id).first()
+        has_team_submit = Team.query.filter(
+            Team.tournament_id == ct.id,
+            Team.repo_url.isnot(None),
+            Team.repo_url != ''
+        ).first()
+        if has_submission or has_team_submit:
+            tournament = ct
+            break
+
+    if not tournament and candidate_tournaments:
+        tournament = candidate_tournaments[0]
+
+    if not tournament:
+        return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=None, teams=[], message_key='no_active_tournament')
+
+    sync_team_submissions(tournament)
+
+    now = datetime.utcnow()
+    finished_round = Round.query.filter(Round.tournament_id == tournament.id, Round.end_at <= now).first()
+    submissions = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id == tournament.id).all()
+    team_level_submissions = Team.query.filter(
+        Team.tournament_id == tournament.id,
+        Team.repo_url.isnot(None),
+        Team.repo_url != ''
+    ).all()
+
+    if not finished_round and not submissions and not team_level_submissions and tournament.status.lower() not in ('finished', 'completed', 'closed'):
+        # no ended rounds and no submissions yet: evaluation period not started
+        return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=tournament, teams=[], message_key='evaluation_not_started')
+
+    # if tournament still in early phase but submits are already present, allow evaluation
+
+    teams = Team.query.filter_by(tournament_id=tournament.id).all()
+
+    # For each submission, check if evaluated by this jury
+    team_evaluations = []
     for s in submissions:
-        already = Evaluation.query.filter_by(submission_id=s.id, jury_id=jury.id).first()
-        if not already:
-            unevaluated.append(s)
+        if s.team:  # Ensure team exists
+            already = Evaluation.query.filter_by(submission_id=s.id, jury_id=jury.id).first()
+            team_evaluations.append((s, already))
 
-    return render_template('jury_evaluate.html', submissions=unevaluated, current_user=jury, tournament=tournament, teams=teams)
+    return render_template('jury_evaluate.html', team_evaluations=team_evaluations, current_user=jury, tournament=tournament, teams=teams)
 
 def jury_logout():
     session.pop('jury_id', None)

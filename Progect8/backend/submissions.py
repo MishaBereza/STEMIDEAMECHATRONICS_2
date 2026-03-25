@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Round, Tournament, Team, Submission, User
+from .models import Round, Tournament, Team, Submission, User, Evaluation
 from .app_helpers import get_current_user
 
 # ---------------- SUBMISSION ----------------
@@ -106,17 +106,37 @@ def evaluate_submission(sid):
     s = Submission.query.get_or_404(sid)
     
     if request.method == 'POST':
-        score_tech = request.form.get('score_tech')
-        score_func = request.form.get('score_func')
-        score_ui = request.form.get('score_ui')
+        raw_scores = {f'score{i}': request.form.get(f'score{i}', '').strip() for i in range(1, 11)}
         comment = request.form.get('comment', '').strip()
+        parsed_scores = {}
+
+        for field_name, raw_value in raw_scores.items():
+            if not raw_value:
+                flash(f'{field_name} is required', 'warning')
+                return render_template('evaluate.html', s=s)
+            try:
+                score_value = float(raw_value)
+            except ValueError:
+                flash(f'{field_name} must be a number from 0 to 10', 'warning')
+                return render_template('evaluate.html', s=s)
+            if score_value < 0 or score_value > 10:
+                flash(f'{field_name} must be between 0 and 10', 'warning')
+                return render_template('evaluate.html', s=s)
+            parsed_scores[field_name] = score_value
         
         evaluation = Evaluation(
             submission_id=s.id,
             jury_id=jury.id,
-            score_tech=float(score_tech) if score_tech else None,
-            score_func=float(score_func) if score_func else None,
-            score_ui=float(score_ui) if score_ui else None,
+            score1=parsed_scores['score1'],
+            score2=parsed_scores['score2'],
+            score3=parsed_scores['score3'],
+            score4=parsed_scores['score4'],
+            score5=parsed_scores['score5'],
+            score6=parsed_scores['score6'],
+            score7=parsed_scores['score7'],
+            score8=parsed_scores['score8'],
+            score9=parsed_scores['score9'],
+            score10=parsed_scores['score10'],
             comment=comment
         )
         from .models import db

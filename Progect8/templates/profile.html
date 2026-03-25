@@ -1,32 +1,32 @@
 {% extends 'base.html' %}
 {% block content %}
   <h2>{{ t('user_profile') }}</h2>
-  
+
   <div style="max-width: 500px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea; padding: 30px; border-radius: 8px; margin-top: 20px;">
     <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
       <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('name') }}</div>
       <div style="font-size: 20px; font-weight: 700; color: #667eea;">{{ user.first_name }} {{ user.last_name }}</div>
     </div>
-    
+
     <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
       <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('email') }}</div>
       <div style="font-size: 16px; font-weight: 600;">{{ user.email }}</div>
     </div>
-    
+
     {% if user.age %}
       <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
         <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('age') }}</div>
         <div style="font-size: 16px; font-weight: 600;">{{ user.age }}</div>
       </div>
     {% endif %}
-    
+
     {% if user.bio %}
       <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
         <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('about') }}</div>
         <div style="font-size: 16px; line-height: 1.6;">{{ user.bio }}</div>
       </div>
     {% endif %}
-    
+
     <div>
       <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('role') }}</div>
       <div>
@@ -43,7 +43,7 @@
 
   <div style="margin-top: 20px;">
     <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Change profile (by email)</a>
-    <p style="font-size: 12px; color: #555; margin-top: 6px;">Перейти на форму ввода email для переключения профиля.</p>
+    <p style="font-size: 12px; color: #555; margin-top: 6px;">Перейдіть на форму вводу email для переключення профілю.</p>
   </div>
 
   {% if get_current_user() and get_current_user().role == 'jury' %}
@@ -59,13 +59,12 @@
         {% for team in teams_captain %}
           <li>
             <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
-            <!-- clicking Edit takes user to full team page for editing -->
             <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left:10px; font-size:90%;">Edit</a>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>—</p>
+      <p>-</p>
     {% endif %}
 
     <h3 style="margin-top:20px;">Teams as Member</h3>
@@ -76,32 +75,35 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>—</p>
+      <p>-</p>
     {% endif %}
 
     <h3 style="margin-top:24px;">Tournaments You're Participating In</h3>
     {% if participating %}
       <ul>
         {% for tour in participating %}
-          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} — {{ tour.status }}</a></li>
+          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a></li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>—</p>
+      <p>-</p>
     {% endif %}
 
     <h3 style="margin-top:24px;">Past Tournaments (Finished)</h3>
     {% if past %}
       <ul>
         {% for tour in past %}
-          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} — {{ tour.status }}</a></li>
+          <li>
+            <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a>
+            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#28a745; color:white; text-decoration:none; border-radius:4px; font-size:90%;">Leaderboard</a>
+          </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>—</p>
+      <p>-</p>
     {% endif %}
   </div>
-  
+
   <div style="margin-top: 30px;">
     <a href="/" style="padding: 12px 24px; background: #667eea; color: white; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">{{ t('back_home') }}</a>
   </div>

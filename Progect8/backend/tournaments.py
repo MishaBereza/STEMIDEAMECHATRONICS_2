@@ -1,14 +1,14 @@
-from flask import render_template
-from .models import Tournament, Team, Round, Submission, Evaluation
-from .utils import calculate_average_score, generate_new_round
-from .app_helpers import get_current_user
+from flask import render_template, flash, redirect, url_for
 
-# ---------------- MAIN ----------------
+from .app_helpers import get_current_user
+from .models import Team, Tournament
+
+
 def index():
     tournaments = Tournament.query.all()
     return render_template('index.html', tournaments=tournaments)
 
-# ---------------- TOURNAMENT ----------------
+
 def tournament_page(tid):
     t = Tournament.query.get_or_404(tid)
     user = get_current_user()
@@ -22,32 +22,34 @@ def tournament_page(tid):
                     break
     return render_template('tournament.html', tournament=t, myteam=myteam)
 
-# ---------------- LEADERBOARD ----------------
+
 def leaderboard(tid):
     t = Tournament.query.get_or_404(tid)
+    if t.status.lower() not in ['finished', 'completed', 'closed']:
+        flash('Leaderboard is only available for completed tournaments.', 'warning')
+        return redirect(url_for('tournament_page', tid=tid))
+
     teams = Team.query.filter_by(tournament_id=t.id).all()
-
     team_scores = []
-    all_scores = []
+
     for team in teams:
-        scores = []
-        for s in team.submissions:
-            evs = [ev.total() for ev in s.evaluations]
-            if evs:
-                scores.append(sum(evs)/len(evs))
-                all_scores.extend(evs)
-        avg = calculate_average_score(scores)
-        team_scores.append((team, avg))
+        evaluation_totals = []
+        for submission in team.submissions:
+            for evaluation in submission.evaluations:
+                total = evaluation.total()
+                if total > 0:
+                    evaluation_totals.append(total)
 
-    team_scores.sort(key=lambda x: x[1], reverse=True)
+        avg = sum(evaluation_totals) / len(evaluation_totals) if evaluation_totals else 0
 
-    # визначення поточного рівня з останнього раунду
-    current_level = 1
-    last_round = Round.query.filter_by(tournament_id=t.id).order_by(Round.level.desc()).first()
-    if last_round:
-        current_level = last_round.level
+        if avg > 80:
+            status_key = 'passed_next_round'
+        elif avg < 50:
+            status_key = 'not_passed'
+        else:
+            status_key = 'under_review'
 
-    # генерація рекомендації нового раунду (додаток В + С)
-    next_round = generate_new_round(current_level, all_scores)
+        team_scores.append((team, avg, status_key))
 
-    return render_template('leaderboard.html', tournament=t, team_scores=team_scores, next_round=next_round)
+    team_scores.sort(key=lambda item: item[1], reverse=True)
+    return render_template('leaderboard.html', tournament=t, team_scores=team_scores)

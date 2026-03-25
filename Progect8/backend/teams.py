@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Tournament, Team, User
+from .models import Tournament, Team, User, Round, Submission
 from .app_helpers import get_current_user
 
 # ---------------- TEAM ----------------
@@ -91,6 +91,27 @@ def team_page(teamid):
     can_submit = user and (user.id == team.captain_id or session.get('admin'))
     message = None
 
+    def sync_team_submission_record():
+        """Mirror captain/team submission data into Submission for jury evaluation."""
+        if not t or not team.repo_url:
+            return
+
+        latest_round = Round.query.filter_by(tournament_id=t.id).order_by(Round.level.desc(), Round.id.desc()).first()
+        round_id = latest_round.id if latest_round else None
+        submission_query = Submission.query.filter_by(team_id=team.id)
+        if round_id is None:
+            submission = submission_query.filter(Submission.round_id.is_(None)).first()
+        else:
+            submission = submission_query.filter_by(round_id=round_id).first()
+        if not submission:
+            submission = Submission(team_id=team.id, round_id=round_id)
+            from .models import db
+            db.session.add(submission)
+
+        submission.repo_url = team.repo_url
+        submission.demo_url = team.live_url
+        submission.description = team.comments
+
     # if tournament has finished and team hasn't submitted yet (status blank/None), auto-mark submitted
     if t and t.status.lower() == 'finished' and team.submission_status in (None, '', 'None'):
         team.submission_status = 'Submitted'
@@ -124,6 +145,7 @@ def team_page(teamid):
                     team.submission_status = 'Pending'
                     from datetime import datetime
                     team.submitted_at = datetime.utcnow()
+                    sync_team_submission_record()
                 else:
                     flash('Only the captain can submit', 'warning')
             from .models import db

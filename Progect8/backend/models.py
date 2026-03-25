@@ -101,12 +101,19 @@ class Evaluation(db.Model):
     submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
     jury_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    score_tech = db.Column(db.Float)
-    score_func = db.Column(db.Float)
-    score_ui = db.Column(db.Float)
+    score1 = db.Column(db.Float)
+    score2 = db.Column(db.Float)
+    score3 = db.Column(db.Float)
+    score4 = db.Column(db.Float)
+    score5 = db.Column(db.Float)
+    score6 = db.Column(db.Float)
+    score7 = db.Column(db.Float)
+    score8 = db.Column(db.Float)
+    score9 = db.Column(db.Float)
+    score10 = db.Column(db.Float)
 
     comment = db.Column(db.Text)
 
     def total(self):
-        parts = [p for p in (self.score_tech, self.score_func, self.score_ui) if p is not None]
+        parts = [p for p in (self.score1, self.score2, self.score3, self.score4, self.score5, self.score6, self.score7, self.score8, self.score9, self.score10) if p is not None]
         return sum(parts) if parts else 0

@@ -77,7 +77,13 @@ TRANSLATIONS = {
         'live': 'Live',
         'status': 'Status',
         'logout': 'Logout',
-        'round': 'Round'
+        'round': 'Round',
+        'passed_next_round': 'Passed to next round',
+        'not_passed': 'Not passed',
+        'under_review': 'Under review',
+        'evaluation_not_started': 'Evaluation not started yet. Wait until submission period ends.',
+        'no_active_tournament': 'No active tournament available for evaluation at this moment.',
+        'leaderboard_only_finished': 'Leaderboard is only available for completed tournaments.'
     },
 
     'uk': {
@@ -156,7 +162,13 @@ TRANSLATIONS = {
         'live': 'Демо',
         'status': 'Статус',
         'logout': 'Вийти',
-        'round': 'Раунд'
+        'round': 'Раунд',
+        'passed_next_round': 'Пройшов у наступний раунд',
+        'not_passed': 'Не пройшов',
+        'under_review': 'На розгляді',
+        'evaluation_not_started': 'Оцінювання ще не розпочато. Зачекайте, поки період подачі заявок закінчиться.',
+        'no_active_tournament': 'Немає активного турніру для оцінювання в цей момент.',
+        'leaderboard_only_finished': 'Лідерборд доступний тільки для завершених турнірів.'
     }
 }
 

@@ -26,21 +26,32 @@ def admin_delete_user(uid):
         flash('Cannot delete admin user', 'warning')
         return redirect('/admin/users')
 
-    # if user is captain of any team, require removing teams first
-    cap = Team.query.filter_by(captain_id=u.id).first()
-    if cap:
-        flash('User is captain of a team; remove the team first', 'warning')
-        return redirect('/admin/users')
+    # delete any teams where the user is captain, but keep the other users themselves
+    captain_teams = Team.query.filter_by(captain_id=u.id).all()
+    for team in captain_teams:
+        try:
+            members = team.members.all()
+        except Exception:
+            members = list(team.members)
+        for member in members:
+            try:
+                team.members.remove(member)
+            except Exception:
+                pass
+
+        for s in team.submissions:
+            for ev in s.evaluations:
+                db.session.delete(ev)
+            db.session.delete(s)
+
+        db.session.delete(team)
 
     # remove from any membership associations
-    # u.teams may be an InstrumentedList
     for team in list(u.teams):
-        # team.members may be dynamic
         try:
             if hasattr(team.members, 'remove'):
                 team.members.remove(u)
         except Exception:
-            # fallback: query and remove
             if u in team.members:
                 team.members.remove(u)
 

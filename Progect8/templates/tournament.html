@@ -11,7 +11,9 @@
         {% if tournament.status in ['Submission','Running'] and ( (current and myteam) or session.get('admin') ) %}
           - <a href="/round/{{r.id}}/submit">{{ t('submit') }}</a>
         {% endif %}
-        - <a href="/leaderboard/{{tournament.id}}">Leaderboard</a>
+        {% if tournament.status.lower() in ['finished', 'completed', 'closed'] %}
+          - <a href="/leaderboard/{{tournament.id}}">Leaderboard</a>
+        {% endif %}
       </li>
     {% else %}
       <li>{{ t('attach') }}</li>

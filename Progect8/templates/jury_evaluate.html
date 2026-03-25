@@ -3,45 +3,47 @@
   <h2>{{ t('jury_evaluation_panel') }}</h2>
   <p>{{ t('welcome') }}, {{ current_user.name if current_user else 'Jury' }}!</p>
 
-  <h3>{{ t('submissions_to_evaluate') }}</h3>
-  {% if submissions %}
-    <ul>
-      {% for s in submissions %}
-        <li>{{ t('submissions_to_evaluate') }} #{{ s.id }} - {{ t('team') }}: {{ s.team.name }} - {{ t('round') }}: {{ s.round.title }} <a href="/evaluate/{{ s.id }}">Evaluate</a></li>
-      {% endfor %}
-    </ul>
+  {% if message_key %}
+    <p style="color: orange;">{{ t(message_key) }}</p>
   {% else %}
-    <p>{{ t('no_submissions') }}</p>
-  {% endif %}
-
-  {% if tournament %}
-    <h3 style="margin-top:25px;">Teams for {{ tournament.name }}</h3>
-    {% if teams %}
-      <table border="1" cellpadding="6" style="border-collapse: collapse; width:100%; max-width:900px;">
-        <tr><th>Name</th><th>Captain</th><th>Members</th><th>Repo</th><th>Live</th><th>Status</th></tr>
-        {% for team in teams %}
-          <tr>
-            <td>{{ team.name }}</td>
-            <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
-            <td>
-              {% for m in team.members.all() %}
-                {{ m.first_name }} {{ m.last_name }}{% if not loop.last %}, {% endif %}
-              {% else %}
-                —
-              {% endfor %}
-            </td>
-            <td>{{ team.repo_url or '-' }}</td>
-            <td>{{ team.live_url or '-' }}</td>
-            <td>{{ team.submission_status or '-' }}</td>
+    <h3>Команди для оцінювання</h3>
+    {% if team_evaluations %}
+      <table style="border-collapse: collapse; width: 100%; max-width: 800px; margin: 20px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <thead>
+          <tr style="background-color: #f8f9fa;">
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Команда</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Репозиторій</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">Статус</th>
+            <th style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">Дія</th>
           </tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+          {% for s, evaluation in team_evaluations %}
+            <tr style="background-color: {% if loop.index % 2 == 0 %}#f8f9fa{% endif %}">
+              <td style="border: 1px solid #ddd; padding: 12px;">{{ s.team.name }}</td>
+              <td style="border: 1px solid #ddd; padding: 12px;"><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
+              <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
+                {% if evaluation %}
+                  <span style="color: green;">Оцінено ({{ evaluation.total() }} балів)</span>
+                {% else %}
+                  <span style="color: red;">Не оцінено</span>
+                {% endif %}
+              </td>
+              <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
+                {% if not evaluation %}
+                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">Оцінити</a>
+                {% else %}
+                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">Переглянути</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
       </table>
     {% else %}
-      <p>No teams found for this tournament.</p>
+      <p>Немає команд для оцінювання</p>
     {% endif %}
-  {% else %}
-    <p>Tournament #1 not found.</p>
   {% endif %}
 
-  <p><a href="/jury/logout">Logout</a></p>
+  <p><a href="/jury/logout">Вийти</a></p>
 {% endblock %}
