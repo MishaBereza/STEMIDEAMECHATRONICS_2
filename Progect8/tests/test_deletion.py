@@ -37,7 +37,7 @@ def test_delete_tournament_cascades():
             session['admin'] = True
             resp = delete_tournament(t.id)
         # check db state
-        assert Tournament.query.get(t.id) is None
+        assert db.session.get(Tournament, t.id) is None
         assert Team.query.filter_by(tournament_id=t.id).count() == 0
         # membership associations should be gone (no rows in team_members)
         from backend.models import team_members

@@ -14,9 +14,8 @@ app.static_folder = os.path.join(os.path.dirname(__file__), '..', 'static')
 
 db.init_app(app)
 
-@app.before_first_request
-def create_tables():
-    # create tables if they don't exist; don't drop to preserve data on restart
+with app.app_context():
+    # Create tables during app setup because Flask 3.x removed before_first_request.
     db.create_all()
 
 @app.context_processor

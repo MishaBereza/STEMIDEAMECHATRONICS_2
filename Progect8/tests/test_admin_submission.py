@@ -1,11 +1,4 @@
 import os, sys
-import werkzeug
-
-# some Werkzeug releases no longer expose __version__ attribute which
-# Flask's testing utilities expect when constructing the test_client. Add
-# a dummy version to avoid AttributeError in our tests.
-if not hasattr(werkzeug, '__version__'):
-    werkzeug.__version__ = '2.3.0'
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -83,7 +76,7 @@ def test_admin_decision_changes_status():
     # the response should be a redirect
     assert resp.status_code in (301, 302)
     with app.app_context():
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         assert team.submission_status == 'Accepted'
 
     # check tournament teams page again

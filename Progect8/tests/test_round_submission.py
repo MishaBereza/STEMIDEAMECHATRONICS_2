@@ -67,7 +67,7 @@ def test_round_submit_membership_and_repo():
 
     # change tournament to Running and repeat check
     with app.app_context():
-        t = Tournament.query.get(tid)
+        t = db.session.get(Tournament, tid)
         t.status = 'Running'
         db.session.commit()
     resp4 = client.get(f'/round/{rid}/submit')

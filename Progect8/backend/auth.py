@@ -104,7 +104,7 @@ def jury_login():
 def jury_evaluate():
     if 'jury_id' not in session:
         return redirect('/jury/login')
-    jury = User.query.get(session['jury_id'])
+    jury = db.session.get(User, session['jury_id'])
     if not jury or jury.role != 'jury':
         session.pop('jury_id', None)
         return redirect('/jury/login')
@@ -228,7 +228,7 @@ def jury_logout():
 def jury_part2():
     if 'jury_id' not in session:
         return redirect('/jury/login')
-    jury = User.query.get(session['jury_id'])
+    jury = db.session.get(User, session['jury_id'])
     if not jury or jury.role != 'jury':
         session.pop('jury_id', None)
         return redirect('/jury/login')

@@ -1,11 +1,11 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Round, Tournament, Team, Submission, User, Evaluation
+from .models import Round, Tournament, Team, Submission, User, Evaluation, db
 from .app_helpers import get_current_user
 
 # ---------------- SUBMISSION ----------------
 def submit_solution(rid):
     r = Round.query.get_or_404(rid)
-    t = Tournament.query.get(r.tournament_id)
+    t = db.session.get(Tournament, r.tournament_id)
 
     user = get_current_user()
     # limit team options to user's own teams (or all for admin)
@@ -47,7 +47,7 @@ def submit_solution(rid):
             flash('Invalid team selection', 'warning')
             return redirect(url_for('submit_solution', rid=rid))
 
-        team_obj = Team.query.get(sel_team_id)
+        team_obj = db.session.get(Team, sel_team_id)
         if not team_obj or team_obj.tournament_id != r.tournament_id:
             flash('Invalid team selection', 'warning')
             return redirect(url_for('submit_solution', rid=rid))
@@ -81,7 +81,6 @@ def submit_solution(rid):
                 demo_url=request.form.get('demo_url','').strip(),
                 description=request.form.get('description','').strip()
             )
-            from .models import db
             db.session.add(submission)
             db.session.commit()
             flash('Submitted', 'success')
@@ -97,7 +96,7 @@ def evaluate_submission(sid):
         flash('Please login as jury first', 'warning')
         return redirect('/jury/login')
     
-    jury = User.query.get(session['jury_id'])
+    jury = db.session.get(User, session['jury_id'])
     if not jury or jury.role != 'jury':
         session.pop('jury_id', None)
         flash('Invalid jury session', 'danger')
@@ -139,7 +138,6 @@ def evaluate_submission(sid):
             score10=parsed_scores['score10'],
             comment=comment
         )
-        from .models import db
         db.session.add(evaluation)
         db.session.commit()
         flash('Evaluation saved', 'success')

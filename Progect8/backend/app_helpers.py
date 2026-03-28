@@ -1,5 +1,5 @@
 from flask import session, flash, redirect, url_for
-from .models import User
+from .models import User, db
 from .translations import get_text, TRANSLATIONS
 from functools import wraps
 
@@ -7,7 +7,7 @@ from functools import wraps
 def get_current_user():
     uid = session.get('user_id')
     if uid:
-        return User.query.get(uid)
+        return db.session.get(User, uid)
     return None
 
 def inject_user():

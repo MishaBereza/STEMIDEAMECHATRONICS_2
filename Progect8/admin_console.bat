@@ -2,6 +2,23 @@
 chcp 65001 >nul
 setlocal enabledelayedexpansion
 
+set "PY_CMD="
+set "VENV_PY=.venv\Scripts\python.exe"
+
+where py >nul 2>&1
+if not errorlevel 1 (
+    py -3.14 --version >nul 2>&1
+    if not errorlevel 1 set "PY_CMD=py -3.14"
+)
+
+if not defined PY_CMD (
+    where python >nul 2>&1
+    if not errorlevel 1 (
+        for /f "delims=" %%i in ('python -c "import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}')" 2^>nul') do set "PY_VER=%%i"
+        if "!PY_VER!"=="3.14" set "PY_CMD=python"
+    )
+)
+
 :menu
 cls
 echo.
@@ -40,9 +57,12 @@ goto menu
 :demo_data
 echo.
 echo Creating demo data...
-call .venv\Scripts\activate.bat
 set FLASK_APP=backend.app
-python -c "from app import app, db; app.app_context().push(); db.create_all(); print('Demo data created')"
+if exist "%VENV_PY%" (
+    call "%VENV_PY%" -c "from backend.app import app; from backend.models import db; app.app_context().push(); db.create_all(); print('Demo data created')"
+) else (
+    echo Virtual environment not found. Run start.bat first.
+)
 echo.
 pause
 goto menu
@@ -60,9 +80,15 @@ if exist ".venv" (
 )
 echo.
 echo Creating new environment...
-python -m venv .venv
-call .venv\Scripts\activate.bat
-pip install -r requirements.txt >nul 2>&1
+if not defined PY_CMD (
+    echo ERROR: Python 3.14 was not found.
+    pause
+    goto menu
+)
+call %PY_CMD% -m venv .venv
+if exist "%VENV_PY%" (
+    call "%VENV_PY%" -m pip install -r requirements.txt >nul 2>&1
+)
 echo Done! Run start.bat to begin
 pause
 goto menu

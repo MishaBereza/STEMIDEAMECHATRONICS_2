@@ -84,7 +84,7 @@ def user_profile(uid):
     past = []
     seen = set()
     for team in teams_captain + teams_member:
-        t = Tournament.query.get(team.tournament_id)
+        t = db.session.get(Tournament, team.tournament_id)
         if not t or t.id in seen:
             continue
         seen.add(t.id)

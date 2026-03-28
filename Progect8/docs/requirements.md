@@ -4,11 +4,11 @@
 Перелік Python-залежностей проєкту.
 
 ## Вміст
-- Flask==2.2.5
-- Flask-SQLAlchemy==3.0.3
-- SQLAlchemy==2.0.20
-- pytest==7.4.0
-- python-dotenv==1.0.0
+- Flask>=3.1,<3.2
+- Flask-SQLAlchemy>=3.1,<3.2
+- SQLAlchemy>=2.0.36,<2.1
+- pytest>=8.3,<9
+- python-dotenv>=1.0,<2
 
 ## Запуск
 ```powershell

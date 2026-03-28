@@ -41,4 +41,4 @@ def test_admin_delete_user_and_team():
         with app.test_request_context(method='POST'):
             session['admin'] = True
             resp = admin_delete_team(team.id)
-        assert Team.query.get(team.id) is None
+        assert db.session.get(Team, team.id) is None

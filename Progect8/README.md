@@ -2,6 +2,8 @@ Adaptive Difficulty Tournament System
 
 Quick start
 
+Recommended runtime: Python 3.13+
+
 1. Create a virtual environment (recommended) and install dependencies:
 
 ```powershell

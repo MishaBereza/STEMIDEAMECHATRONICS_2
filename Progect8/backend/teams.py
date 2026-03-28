@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Tournament, Team, User, Round, Submission
+from .models import Tournament, Team, User, Round, Submission, db
 from .app_helpers import get_current_user
 
 # ---------------- TEAM ----------------
@@ -50,7 +50,6 @@ def register_team(tid):
             captain_id=captain.id,
             tournament_id=t.id
         )
-        from .models import db
         db.session.add(team)
         db.session.commit()
         for u in members:
@@ -70,7 +69,7 @@ def register_team(tid):
 # ---------------- TEAM VIEW & SUBMISSION ----------------
 def team_page(teamid):
     team = Team.query.get_or_404(teamid)
-    t = Tournament.query.get(team.tournament_id)
+    t = db.session.get(Tournament, team.tournament_id)
     user = get_current_user()
 
     # determine membership (captain + members) with email fallback
@@ -105,7 +104,6 @@ def team_page(teamid):
             submission = submission_query.filter_by(round_id=round_id).first()
         if not submission:
             submission = Submission(team_id=team.id, round_id=round_id)
-            from .models import db
             db.session.add(submission)
 
         submission.repo_url = team.repo_url
@@ -115,7 +113,6 @@ def team_page(teamid):
     # if tournament has finished and team hasn't submitted yet (status blank/None), auto-mark submitted
     if t and t.status.lower() == 'finished' and team.submission_status in (None, '', 'None'):
         team.submission_status = 'Submitted'
-        from .models import db
         db.session.commit()
 
     # allow save/submit until tournament is finished
@@ -148,7 +145,6 @@ def team_page(teamid):
                     sync_team_submission_record()
                 else:
                     flash('Only the captain can submit', 'warning')
-            from .models import db
             db.session.commit()
             # message depends on whether action was save or attempt to send
             if request.form.get('action') == 'save':

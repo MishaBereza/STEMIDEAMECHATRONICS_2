@@ -55,7 +55,7 @@ def test_captain_can_save_and_submit():
     # after save we expect html response
     assert 'Saved' in resp
     with app.app_context():
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         assert team.repo_url == 'https://repo1'
         assert team.submission_status != 'Pending'
     # now submit
@@ -70,12 +70,12 @@ def test_captain_can_save_and_submit():
         resp = team_page(teamid)
     assert 'Submitted' in resp
     with app.app_context():
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         assert team.submission_status == 'Pending'
 
     # change tournament to Running and verify captain can still save and submit
     with app.app_context():
-        t = Tournament.query.get(tid)
+        t = db.session.get(Tournament, tid)
         t.status = 'Running'
         db.session.commit()
     # save under running
@@ -90,7 +90,7 @@ def test_captain_can_save_and_submit():
         resp2 = team_page(teamid)
     assert 'Saved' in resp2
     with app.app_context():
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         assert team.repo_url == 'https://repo2'
     with app.test_request_context(f'/team/{teamid}', method='POST', data={
         'repo_url': 'https://repo2',
@@ -103,7 +103,7 @@ def test_captain_can_save_and_submit():
         resp3 = team_page(teamid)
     assert 'Submitted' in resp3
     with app.app_context():
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         assert team.submission_status == 'Pending'
 
         # captain can edit members list via POST
@@ -119,7 +119,7 @@ def test_captain_can_save_and_submit():
         assert 'Saved' in resp4
         # new member not yet registered so should not add
         with app.app_context():
-            team = Team.query.get(teamid)
+            team = db.session.get(Team, teamid)
             assert team.members.count() == 0
 
         # register new member and add again
@@ -138,7 +138,7 @@ def test_captain_can_save_and_submit():
             resp5 = team_page(teamid)
         assert 'Saved' in resp5
         with app.app_context():
-            team = Team.query.get(teamid)
+            team = db.session.get(Team, teamid)
             assert team.members.count() == 1
             assert team.members.first().email == 'newuser@example.com'
 
@@ -150,7 +150,7 @@ def test_member_can_save_but_not_submit():
         member = User(first_name='Member', last_name='User', email='member@example.com')
         db.session.add(member)
         db.session.commit()
-        team = Team.query.get(teamid)
+        team = db.session.get(Team, teamid)
         team.members.append(member)
         db.session.commit()
         member_id = member.id
@@ -164,7 +164,7 @@ def test_member_can_save_but_not_submit():
         resp = team_page(teamid)
     assert 'Saved' in resp
     with app.app_context():
-        t2 = Team.query.get(teamid)
+        t2 = db.session.get(Team, teamid)
         assert t2.repo_url == 'x'
         assert t2.submission_status != 'Pending'
     # attempt to submit should not change status
@@ -176,7 +176,7 @@ def test_member_can_save_but_not_submit():
         resp2 = team_page(teamid)
     assert 'Submitted' not in resp2
     with app.app_context():
-        t3 = Team.query.get(teamid)
+        t3 = db.session.get(Team, teamid)
         assert t3.submission_status != 'Pending'
 
 
@@ -208,7 +208,7 @@ def test_auto_submit_on_finished():
     client = app.test_client()
     login(client, capid)
     with app.app_context():
-        t = Tournament.query.get(tid2)
+        t = db.session.get(Tournament, tid2)
         t.status = 'Finished'
         db.session.commit()
     resp = client.get(f'/team/{teamid}')
