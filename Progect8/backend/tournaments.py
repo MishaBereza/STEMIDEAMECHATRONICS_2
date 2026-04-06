@@ -42,12 +42,12 @@ def leaderboard(tid):
 
         avg = sum(evaluation_totals) / len(evaluation_totals) if evaluation_totals else 0
 
-        if avg > 80:
-            status_key = 'passed_next_round'
-        elif avg < 50:
-            status_key = 'not_passed'
-        else:
+        if not evaluation_totals:
             status_key = 'under_review'
+        elif avg > 50:
+            status_key = 'passed_next_round'
+        else:
+            status_key = 'not_passed'
 
         team_scores.append((team, avg, status_key))
 

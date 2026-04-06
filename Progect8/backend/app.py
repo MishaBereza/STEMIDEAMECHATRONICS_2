@@ -3,6 +3,7 @@ from .models import db
 from .translations import get_text
 from .app_helpers import get_current_user, inject_user, translation, admin_required
 import os
+from sqlalchemy import inspect, text
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.dirname(__file__), '..', 'data.db')
@@ -14,9 +15,47 @@ app.static_folder = os.path.join(os.path.dirname(__file__), '..', 'static')
 
 db.init_app(app)
 
+
+def migrate_evaluation_table():
+    inspector = inspect(db.engine)
+    if 'evaluation' not in inspector.get_table_names():
+        return
+
+    existing_columns = {column['name'] for column in inspector.get_columns('evaluation')}
+    required_columns = {
+        'score1': 'ALTER TABLE evaluation ADD COLUMN score1 FLOAT',
+        'score2': 'ALTER TABLE evaluation ADD COLUMN score2 FLOAT',
+        'score3': 'ALTER TABLE evaluation ADD COLUMN score3 FLOAT',
+        'score4': 'ALTER TABLE evaluation ADD COLUMN score4 FLOAT',
+        'score5': 'ALTER TABLE evaluation ADD COLUMN score5 FLOAT',
+        'score6': 'ALTER TABLE evaluation ADD COLUMN score6 FLOAT',
+        'score7': 'ALTER TABLE evaluation ADD COLUMN score7 FLOAT',
+        'score8': 'ALTER TABLE evaluation ADD COLUMN score8 FLOAT',
+        'score9': 'ALTER TABLE evaluation ADD COLUMN score9 FLOAT',
+        'score10': 'ALTER TABLE evaluation ADD COLUMN score10 FLOAT',
+        'score_tech': 'ALTER TABLE evaluation ADD COLUMN score_tech FLOAT',
+        'score_func': 'ALTER TABLE evaluation ADD COLUMN score_func FLOAT',
+        'score_ui': 'ALTER TABLE evaluation ADD COLUMN score_ui FLOAT',
+    }
+
+    for column_name, ddl in required_columns.items():
+        if column_name not in existing_columns:
+            db.session.execute(text(ddl))
+
+    legacy_score_columns = [f'score{i}' for i in range(1, 11)]
+    if all(column in existing_columns for column in legacy_score_columns):
+        score_sum = ' + '.join([f'COALESCE({column}, 0)' for column in legacy_score_columns])
+        db.session.execute(text(
+            f'UPDATE evaluation SET score_tech = {score_sum} '
+            'WHERE score_tech IS NULL'
+        ))
+
+    db.session.commit()
+
 with app.app_context():
     # Create tables during app setup because Flask 3.x removed before_first_request.
     db.create_all()
+    migrate_evaluation_table()
 
 @app.context_processor
 def inject_user_processor():
@@ -33,7 +72,7 @@ def set_language(lang):
         session['language'] = lang
     return redirect(request.referrer or url_for('index'))
 
-from .auth import register_user, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
+from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
 from .tournaments import index, tournament_page, leaderboard
 from .teams import register_team, team_page
 from .submissions import submit_solution, evaluate_submission
@@ -42,6 +81,8 @@ from .admin import admin_dashboard, admin_users, admin_delete_user, user_profile
 # Register routes
 app.add_url_rule('/', 'index', index, methods=['GET'])
 app.add_url_rule('/register', 'register_user', register_user, methods=['GET', 'POST'])
+app.add_url_rule('/login', 'user_login', user_login, methods=['GET', 'POST'])
+app.add_url_rule('/logout', 'user_logout', user_logout, methods=['GET'])
 app.add_url_rule('/tournament/<int:tid>', 'tournament_page', tournament_page, methods=['GET'])
 app.add_url_rule('/tournament/<int:tid>/register', 'register_team', register_team, methods=['GET', 'POST'])
 app.add_url_rule('/round/<int:rid>/submit', 'submit_solution', submit_solution, methods=['GET', 'POST'])

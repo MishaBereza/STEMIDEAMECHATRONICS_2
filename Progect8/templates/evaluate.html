@@ -13,7 +13,7 @@
       </tr>
       {% for i in range(1, 11) %}
         <tr>
-          <td>Критерій {{ i }}</td>
+          <td>Criterion {{ i }}</td>
           <td style="padding: 8px; min-width: 180px;">
             <input
               name="score{{ i }}"
@@ -28,7 +28,7 @@
               style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
             >
             <div class="score-error" id="score{{ i }}-error" style="color: #c62828; font-size: 12px; margin-top: 4px; display: none;">
-              Можна вводити числа від 0 до 10.
+              Enter a number from 0 to 10 using no more than 2 digits.
             </div>
           </td>
         </tr>

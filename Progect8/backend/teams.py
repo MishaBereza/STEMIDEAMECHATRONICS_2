@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Tournament, Team, User, Round, Submission, db
+from .models import Tournament, Team, User, Round, Submission, Evaluation, db
 from .app_helpers import get_current_user
 
 # ---------------- TEAM ----------------
@@ -71,6 +71,7 @@ def team_page(teamid):
     team = Team.query.get_or_404(teamid)
     t = db.session.get(Tournament, team.tournament_id)
     user = get_current_user()
+    is_finished = bool(t and t.status.lower() in ('finished', 'completed', 'closed'))
 
     # determine membership (captain + members) with email fallback
     is_member = False
@@ -111,12 +112,12 @@ def team_page(teamid):
         submission.description = team.comments
 
     # if tournament has finished and team hasn't submitted yet (status blank/None), auto-mark submitted
-    if t and t.status.lower() == 'finished' and team.submission_status in (None, '', 'None'):
+    if is_finished and team.submission_status in (None, '', 'None'):
         team.submission_status = 'Submitted'
         db.session.commit()
 
     # allow save/submit until tournament is finished
-    if request.method == 'POST' and can_edit and t and t.status.lower() != 'finished':
+    if request.method == 'POST' and can_edit and t and not is_finished:
         repo = request.form.get('repo_url','').strip()
         live = request.form.get('live_url','').strip()
         members_emails = [e.strip().lower() for e in request.form.get('members','').split(',') if e.strip()]
@@ -152,4 +153,32 @@ def team_page(teamid):
             elif request.form.get('action') == 'send' and can_submit:
                 message = 'Submitted'
 
-    return render_template('team.html', team=team, tournament=t, can_edit=can_edit, can_submit=can_submit, message=message)
+    evaluation_rows = []
+    if is_finished:
+        submissions = Submission.query.filter_by(team_id=team.id).order_by(Submission.id.desc()).all()
+        for submission in submissions:
+            submission_evaluations = Evaluation.query.filter_by(submission_id=submission.id).order_by(Evaluation.id.asc()).all()
+            for evaluation in submission_evaluations:
+                jury = db.session.get(User, evaluation.jury_id)
+                scores = [
+                    evaluation.score1, evaluation.score2, evaluation.score3, evaluation.score4, evaluation.score5,
+                    evaluation.score6, evaluation.score7, evaluation.score8, evaluation.score9, evaluation.score10
+                ]
+                evaluation_rows.append({
+                    'submission': submission,
+                    'jury': jury,
+                    'evaluation': evaluation,
+                    'scores': scores,
+                    'total': evaluation.total(),
+                })
+
+    return render_template(
+        'team.html',
+        team=team,
+        tournament=t,
+        can_edit=can_edit,
+        can_submit=can_submit,
+        message=message,
+        evaluation_rows=evaluation_rows,
+        is_finished=is_finished
+    )

@@ -6,44 +6,113 @@
   {% if message_key %}
     <p style="color: orange;">{{ t(message_key) }}</p>
   {% else %}
-    <h3>Команди для оцінювання</h3>
-    {% if team_evaluations %}
-      <table style="border-collapse: collapse; width: 100%; max-width: 800px; margin: 20px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <thead>
-          <tr style="background-color: #f8f9fa;">
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Команда</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Репозиторій</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">Статус</th>
-            <th style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">Дія</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s, evaluation in team_evaluations %}
-            <tr style="background-color: {% if loop.index % 2 == 0 %}#f8f9fa{% endif %}">
-              <td style="border: 1px solid #ddd; padding: 12px;">{{ s.team.name }}</td>
-              <td style="border: 1px solid #ddd; padding: 12px;"><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
-              <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
-                {% if evaluation %}
-                  <span style="color: green;">Оцінено ({{ evaluation.total() }} балів)</span>
-                {% else %}
-                  <span style="color: red;">Не оцінено</span>
-                {% endif %}
-              </td>
-              <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
-                {% if not evaluation %}
-                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">Оцінити</a>
-                {% else %}
-                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">Переглянути</a>
-                {% endif %}
-              </td>
+    <h3>Submissions for Evaluation</h3>
+
+    <div style="display: flex; gap: 10px; margin: 20px 0 12px;">
+      <button type="button" id="tab-pending" style="padding: 10px 16px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer;">
+        Not Reviewed ({{ pending_evaluations|length }})
+      </button>
+      <button type="button" id="tab-reviewed" style="padding: 10px 16px; border: 1px solid #28a745; border-radius: 6px; background: white; color: #28a745; cursor: pointer;">
+        Reviewed ({{ reviewed_evaluations|length }})
+      </button>
+    </div>
+
+    <div id="panel-pending">
+      {% if pending_evaluations %}
+        <table style="border-collapse: collapse; width: 100%; max-width: 900px; margin: 20px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Team</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Repository</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Status</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Action</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Немає команд для оцінювання</p>
-    {% endif %}
+          </thead>
+          <tbody>
+            {% for s, evaluation in pending_evaluations %}
+              <tr style="background-color: {% if loop.index % 2 == 0 %}#f8f9fa{% endif %}">
+                <td style="border: 1px solid #ddd; padding: 12px;">{{ s.team.name }}</td>
+                <td style="border: 1px solid #ddd; padding: 12px;"><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
+                <td style="border: 1px solid #ddd; padding: 12px; text-align: center;"><span style="color: red;">Not reviewed</span></td>
+                <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
+                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">Evaluate</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No unreviewed submissions.</p>
+      {% endif %}
+    </div>
+
+    <div id="panel-reviewed" style="display: none;">
+      {% if reviewed_evaluations %}
+        <table style="border-collapse: collapse; width: 100%; max-width: 900px; margin: 20px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Team</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Repository</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Status</th>
+              <th style="border: 1px solid #ddd; padding: 12px; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s, evaluation in reviewed_evaluations %}
+              <tr style="background-color: {% if loop.index % 2 == 0 %}#f8f9fa{% endif %}">
+                <td style="border: 1px solid #ddd; padding: 12px;">{{ s.team.name }}</td>
+                <td style="border: 1px solid #ddd; padding: 12px;"><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
+                <td style="border: 1px solid #ddd; padding: 12px; text-align: center;"><span style="color: green;">Reviewed ({{ evaluation.total() }} points)</span></td>
+                <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">
+                  <a href="/evaluate/{{ s.id }}" style="padding: 5px 10px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">View</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No reviewed submissions yet.</p>
+      {% endif %}
+    </div>
   {% endif %}
 
-  <p><a href="/jury/logout">Вийти</a></p>
+  <p><a href="/jury/logout">Logout</a></p>
+
+  <script>
+    (function () {
+      const pendingTab = document.getElementById('tab-pending');
+      const reviewedTab = document.getElementById('tab-reviewed');
+      const pendingPanel = document.getElementById('panel-pending');
+      const reviewedPanel = document.getElementById('panel-reviewed');
+
+      if (!pendingTab || !reviewedTab || !pendingPanel || !reviewedPanel) {
+        return;
+      }
+
+      function showPending() {
+        pendingPanel.style.display = 'block';
+        reviewedPanel.style.display = 'none';
+        pendingTab.style.background = '#007bff';
+        pendingTab.style.color = 'white';
+        pendingTab.style.border = 'none';
+        reviewedTab.style.background = 'white';
+        reviewedTab.style.color = '#28a745';
+        reviewedTab.style.border = '1px solid #28a745';
+      }
+
+      function showReviewed() {
+        pendingPanel.style.display = 'none';
+        reviewedPanel.style.display = 'block';
+        reviewedTab.style.background = '#28a745';
+        reviewedTab.style.color = 'white';
+        reviewedTab.style.border = 'none';
+        pendingTab.style.background = 'white';
+        pendingTab.style.color = '#007bff';
+        pendingTab.style.border = '1px solid #007bff';
+      }
+
+      pendingTab.addEventListener('click', showPending);
+      reviewedTab.addEventListener('click', showReviewed);
+    })();
+  </script>
 {% endblock %}

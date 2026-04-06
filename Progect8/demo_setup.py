@@ -41,8 +41,9 @@ with app.app_context():
                 evaluation = Evaluation(
                     submission_id=submission.id,
                     jury_id=jury_user.id,
-                    score1=85, score2=90, score3=88, score4=92, score5=87,
-                    score6=89, score7=91, score8=86, score9=93, score10=88,
+                    score_tech=85,
+                    score_func=90,
+                    score_ui=88,
                     comment='Excellent work, good presentation and code quality.'
                 )
                 db.session.add(evaluation)

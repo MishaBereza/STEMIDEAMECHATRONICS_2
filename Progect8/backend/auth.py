@@ -58,6 +58,31 @@ def register_user():
 
     return render_template('register.html')
 
+
+def user_login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        if not email:
+            flash('Email is required', 'warning')
+            return redirect(url_for('user_login'))
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash('User not found', 'danger')
+            return redirect(url_for('user_login'))
+
+        session['user_id'] = user.id
+        flash('Logged in successfully', 'success')
+        return redirect(url_for('user_profile', uid=user.id))
+
+    return render_template('user_login.html')
+
+
+def user_logout():
+    session.pop('user_id', None)
+    flash('Logged out', 'info')
+    return redirect(url_for('index'))
+
 # ---------------- ADMIN LOGIN ----------------
 def admin_panel():
     if request.method == 'POST':
@@ -210,14 +235,26 @@ def jury_evaluate():
 
     teams = Team.query.filter_by(tournament_id=tournament.id).all()
 
-    # For each submission, check if evaluated by this jury
-    team_evaluations = []
+    # Split submissions into pending and reviewed tabs for this jury
+    pending_evaluations = []
+    reviewed_evaluations = []
     for s in submissions:
         if s.team:  # Ensure team exists
             already = Evaluation.query.filter_by(submission_id=s.id, jury_id=jury.id).first()
-            team_evaluations.append((s, already))
+            if already:
+                reviewed_evaluations.append((s, already))
+            else:
+                pending_evaluations.append((s, already))
 
-    return render_template('jury_evaluate.html', team_evaluations=team_evaluations, current_user=jury, tournament=tournament, teams=teams)
+    return render_template(
+        'jury_evaluate.html',
+        team_evaluations=pending_evaluations + reviewed_evaluations,
+        pending_evaluations=pending_evaluations,
+        reviewed_evaluations=reviewed_evaluations,
+        current_user=jury,
+        tournament=tournament,
+        teams=teams
+    )
 
 def jury_logout():
     session.pop('jury_id', None)
@@ -232,8 +269,8 @@ def jury_part2():
     if not jury or jury.role != 'jury':
         session.pop('jury_id', None)
         return redirect('/jury/login')
-    
-    return render_template('jury_part2.html')
+
+    return redirect('/jury/evaluate')
 
 # ---------------- PROFILE SWITCH ----------------
 def profile_switch():

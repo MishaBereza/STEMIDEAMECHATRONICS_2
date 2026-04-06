@@ -15,7 +15,11 @@
       <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
       {% set _cur = get_current_user() %}
       {% if _cur %}
-        | <a href="/user/{{ _cur.id }}" title="Profile">👤 {{ _cur.first_name }}</a>
+        | <a href="/user/{{ _cur.id }}" title="Profile">Profile: {{ _cur.first_name }}</a>
+        | <a href="/logout">Logout</a>
+      {% else %}
+        | <a href="/login">Login</a>
+        | <a href="/register">{{ t('register') }}</a>
       {% endif %}
     </nav>
 
@@ -32,4 +36,3 @@
     </div>
   </body>
 </html>
-

@@ -3,19 +3,24 @@
   <link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
 {% block content %}
-  <h1 class="home-title">⚡ {{ t('home') }}</h1>
+  <h1 class="home-title">{{ t('home') }}</h1>
 
   <div class="action-buttons">
+    <a href="/login" class="action-link">
+      <div class="action-card">
+        <div class="action-icon">-></div>
+        <div class="action-text">Login</div>
+      </div>
+    </a>
     <a href="/register" class="action-link">
       <div class="action-card">
-        <div class="action-icon">👤</div>
+        <div class="action-icon">User</div>
         <div class="action-text">{{ t('register') }}</div>
       </div>
     </a>
-    <!-- demo data creation removed from main menu per request -->
     <a href="/admin" class="action-link">
       <div class="action-card admin">
-        <div style="font-size: 28px; margin-bottom: 10px;">🔐</div>
+        <div style="font-size: 28px; margin-bottom: 10px;">Admin</div>
         <div style="font-weight: 600;">{{ t('admin_panel') }}</div>
       </div>
     </a>

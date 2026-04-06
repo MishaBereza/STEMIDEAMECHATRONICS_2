@@ -113,6 +113,9 @@ def evaluate_submission(sid):
             if not raw_value:
                 flash(f'{field_name} is required', 'warning')
                 return render_template('evaluate.html', s=s)
+            if len(raw_value) > 2:
+                flash(f'{field_name} must contain no more than 2 digits', 'warning')
+                return render_template('evaluate.html', s=s)
             try:
                 score_value = float(raw_value)
             except ValueError:
@@ -122,6 +125,8 @@ def evaluate_submission(sid):
                 flash(f'{field_name} must be between 0 and 10', 'warning')
                 return render_template('evaluate.html', s=s)
             parsed_scores[field_name] = score_value
+
+        total_score = sum(parsed_scores.values())
         
         evaluation = Evaluation(
             submission_id=s.id,
@@ -136,11 +141,17 @@ def evaluate_submission(sid):
             score8=parsed_scores['score8'],
             score9=parsed_scores['score9'],
             score10=parsed_scores['score10'],
+            score_tech=total_score,
             comment=comment
         )
         db.session.add(evaluation)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash('Failed to save evaluation', 'danger')
+            return render_template('evaluate.html', s=s)
         flash('Evaluation saved', 'success')
-        return redirect('/jury/evaluate')
+        return redirect(url_for('jury_evaluate'))
     
     return render_template('evaluate.html', s=s)
