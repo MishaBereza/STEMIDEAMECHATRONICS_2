@@ -51,6 +51,8 @@ class Team(db.Model):
 
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'))
 
+    tournament = db.relationship('Tournament', backref='teams', lazy=True)
+
     submissions = db.relationship('Submission', backref='team', lazy=True)
 
     # contest‑wide submission data (links/comments)

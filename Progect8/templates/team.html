@@ -30,13 +30,22 @@
     <section class="surface-card form-card">
       <h3>{{ t('submit_your_work') }}</h3>
 
-      {% if can_submit %}
+      {% if can_edit_members %}
         <details class="surface-toggle">
           <summary>{{ t('edit_team_members') }}</summary>
           <div>
-            <label for="members"><b>{{ t('members_emails_label') }}</b></label>
-            <textarea id="members" name="members" rows="2">{% for m in team.members.all() %}{{m.email}}{% if not loop.last %},{% endif %}{% endfor %}</textarea>
+            <label><b>{{ t('members_emails_label') }}</b></label>
+            <div id="members-container">
+              {% for m in team.members.all() %}
+                <div class="member-item">
+                  <input type="email" name="members" value="{{ m.email }}" required>
+                  <button type="button" onclick="removeMember(this)">{{ t('delete') }}</button>
+                </div>
+              {% endfor %}
+            </div>
+            <button type="button" onclick="addMember()">{{ t('add_member') }}</button>
             <p class="note-line">{{ t('members_emails_help') }}</p>
+            <span id="delete-text" style="display:none">{{ t('delete') }}</span>
           </div>
         </details>
       {% endif %}
@@ -53,33 +62,44 @@
         {% endif %}
       </p>
 
-      <form method="post">
-        <div class="form-group">
-          <label for="repo_url">{{ t('github_repo_url') }} *</label>
-          <input id="repo_url" type="url" name="repo_url" value="{{ team.repo_url or '' }}" {% if can_edit %}required{% else %}disabled{% endif %}>
-          <small class="muted-text">{{ t('required_repo_link') }}</small>
-        </div>
-
-        <div class="form-group">
-          <label for="live_url">{{ t('live_demo_url') }}</label>
-          <input id="live_url" type="url" name="live_url" value="{{ team.live_url or '' }}" {% if not can_edit %}disabled{% endif %}>
-          <small class="muted-text">{{ t('optional_live_demo') }}</small>
-        </div>
-
-        <div class="form-group">
-          <label for="comments">{{ t('comments') }}</label>
-          <textarea id="comments" name="comments" rows="3" {% if not can_edit %}disabled{% endif %}>{{ team.comments or '' }}</textarea>
-        </div>
-
-        {% if can_edit %}
-          <div class="button-row">
-            <button name="action" value="save" class="action-btn">{{ t('save') }}</button>
-            {% if can_submit %}
-              <button name="action" value="send" class="action-btn success">{{ t('submit') }}</button>
-            {% endif %}
-          </div>
+      {% if can_edit %}
+        {% if not can_submit %}
+          <details class="surface-toggle">
+            <summary>{{ t('edit_submission') }}</summary>
+            <div>
         {% endif %}
-      </form>
+        <form method="post">
+          <div class="form-group">
+            <label for="repo_url">{{ t('github_repo_url') }} *</label>
+            <input id="repo_url" type="url" name="repo_url" value="{{ team.repo_url or '' }}" {% if can_edit %}required{% else %}disabled{% endif %}>
+            <small class="muted-text">{{ t('required_repo_link') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="live_url">{{ t('live_demo_url') }}</label>
+            <input id="live_url" type="url" name="live_url" value="{{ team.live_url or '' }}" {% if not can_edit %}disabled{% endif %}>
+            <small class="muted-text">{{ t('optional_live_demo') }}</small>
+          </div>
+
+          <div class="form-group">
+            <label for="comments">{{ t('comments') }}</label>
+            <textarea id="comments" name="comments" rows="3" {% if not can_edit %}disabled{% endif %}>{{ team.comments or '' }}</textarea>
+          </div>
+
+          {% if can_edit %}
+            <div class="button-row">
+              <button name="action" value="save" class="action-btn">{{ t('save') }}</button>
+              {% if can_submit %}
+                <button name="action" value="send" class="action-btn success">{{ t('submit') }}</button>
+              {% endif %}
+            </div>
+          {% endif %}
+        </form>
+        {% if not can_submit %}
+            </div>
+          </details>
+        {% endif %}
+      {% endif %}
     </section>
   {% elif is_finished %}
     <section class="surface-card">
@@ -145,4 +165,19 @@
     </section>
   {% endif %}
 </div>
+
+<script>
+function addMember() {
+  const container = document.getElementById('members-container');
+  const deleteText = document.getElementById('delete-text').textContent;
+  const div = document.createElement('div');
+  div.className = 'member-item';
+  div.innerHTML = `<input type="email" name="members" value="" required><button type="button" onclick="removeMember(this)">${deleteText}</button>`;
+  container.appendChild(div);
+}
+
+function removeMember(btn) {
+  btn.parentElement.remove();
+}
+</script>
 {% endblock %}

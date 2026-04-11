@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/interface.css">
+{% endblock %}
+{% block content %}
+<div class="content-shell">
+  <section class="surface-card">
+    <h2>{{ t('edit_team_members') }} - {{ team.name }}</h2>
+    <p><strong>{{ t('tournament') }}:</strong> {{ tournament.name }}</p>
+    <p><strong>{{ t('captain') }}:</strong> {{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</p>
+
+    {% if message %}
+      <p class="note-line">{{ message }}</p>
+    {% endif %}
+
+    <form method="post">
+      <label><b>{{ t('members_emails_label') }}</b></label>
+      <div id="members-container">
+        {% for m in team.members.all() %}
+          <div class="member-item">
+            <input type="email" name="members" value="{{ m.email }}" required>
+            <button type="button" onclick="removeMember(this)">{{ t('delete') }}</button>
+          </div>
+        {% endfor %}
+      </div>
+      <button type="button" onclick="addMember()">{{ t('add_member') }}</button>
+      <p class="note-line">{{ t('members_emails_help') }}</p>
+      <span id="delete-text" style="display:none">{{ t('delete') }}</span>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" name="action" value="update_members" class="submit-btn">{{ t('save') }}</button>
+        <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left: 10px; padding: 10px 20px; background: #666; color: white; text-decoration: none; border-radius: 4px;">{{ t('back') }}</a>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+function addMember() {
+  const container = document.getElementById('members-container');
+  const deleteText = document.getElementById('delete-text').textContent;
+  const div = document.createElement('div');
+  div.className = 'member-item';
+  div.innerHTML = `<input type="email" name="members" value="" required><button type="button" onclick="removeMember(this)">${deleteText}</button>`;
+  container.appendChild(div);
+}
+
+function removeMember(btn) {
+  btn.parentElement.remove();
+}
+</script>
+{% endblock %}</content>
+<parameter name="filePath">c:\Users\User\Documents\GitHub\Progect_8_comand_-2\Progect8\templates\edit_team_members.html

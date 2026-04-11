@@ -12,10 +12,10 @@
 .empty-state-box {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(130, 181, 255, 0.14);
+  border: 1px solid rgba(255, 165, 0, 0.2);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(14, 28, 48, 0.86) 0%, rgba(8, 18, 32, 0.92) 100%);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.24);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.1);
 }
 
 .hero-copy {
@@ -33,8 +33,8 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: rgba(71, 215, 255, 0.1);
-  color: #8de5ff;
+  background: rgba(255, 165, 0, 0.1);
+  color: #ff8c00;
 }
 
 .hero-title {
@@ -51,7 +51,7 @@
 .category-card p,
 .tournament-description,
 .empty-state-box p {
-  color: #97aac8;
+  color: #666666;
   line-height: 1.7;
 }
 
@@ -82,15 +82,15 @@
 }
 
 .primary-button {
-  background: linear-gradient(135deg, #47d7ff 0%, #8a7dff 100%);
-  color: #051120;
+  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  color: #ffffff;
 }
 
 .secondary-button,
 .panel-link {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  color: #eef5ff;
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333333;
 }
 
 .primary-button:hover,
@@ -111,21 +111,21 @@
 .stat-chip {
   padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 165, 0, 0.2);
 }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #333333;
 }
 
 .stat-label {
   display: block;
   margin-top: 6px;
-  color: #8fa5c7;
+  color: #666666;
   font-size: 0.92rem;
 }
 
@@ -144,9 +144,9 @@
   padding: 18px;
   border-radius: 22px;
   background:
-    radial-gradient(circle at top right, rgba(71, 215, 255, 0.14), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at top right, rgba(255, 165, 0, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.95));
+  border: 1px solid rgba(255, 165, 0, 0.2);
 }
 
 .hero-panel-title {
@@ -158,7 +158,7 @@
 .hero-panel-text {
   margin: 0;
   max-width: 34ch;
-  color: #9db0cb;
+  color: #666666;
   line-height: 1.75;
 }
 
@@ -230,8 +230,8 @@
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #08111e;
-  background: linear-gradient(135deg, #5cffb3 0%, #47d7ff 100%);
+  color: #ffffff;
+  background: linear-gradient(135deg, #32cd32 0%, #ffa500 100%);
 }
 
 .tournament-description {
@@ -240,12 +240,12 @@
 
 .tournament-footer {
   margin-top: 22px;
-  color: #dce8fb;
+  color: #333333;
   font-weight: 700;
 }
 
 .arrow-mark {
-  color: #8fe6ff;
+  color: #ffa500;
 }
 
 .empty-state {

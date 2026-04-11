@@ -43,6 +43,7 @@
             </td>
             <td>
               <div class="table-actions">
+                <a href="/edit_team_members/{{ team.id }}" class="inline-btn">{{ t('edit_composition') }}</a>
                 {% if team.submission_status == 'Pending' %}
                   <form method="post" action="/admin/team/{{ team.id }}/decide" class="table-actions">
                     <button name="decision" value="accept" class="inline-btn">{{ t('accepted') }}</button>

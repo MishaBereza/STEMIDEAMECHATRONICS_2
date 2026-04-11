@@ -82,6 +82,7 @@ def team_page(teamid):
                     is_member = True
                     break
     can_edit = (is_member or session.get('admin'))
+    can_edit_members = (is_member and t and t.status == 'Registration') or session.get('admin')
     can_submit = user and (user.id == team.captain_id or session.get('admin'))
     message = None
 
@@ -110,14 +111,14 @@ def team_page(teamid):
     if request.method == 'POST' and can_edit and t and not is_finished:
         repo = request.form.get('repo_url', '').strip()
         live = request.form.get('live_url', '').strip()
-        members_emails = [e.strip().lower() for e in request.form.get('members', '').split(',') if e.strip()]
+        members_emails = [e.strip().lower() for e in request.form.getlist('members') if e.strip()]
         if not repo:
             message = _t('github_repo_required')
         else:
             team.repo_url = repo
             team.live_url = live
             team.comments = request.form.get('comments', '')
-            if can_submit:
+            if can_edit_members:
                 team.members = []
                 for email in members_emails:
                     if email == team.captain.email.lower():
@@ -163,8 +164,51 @@ def team_page(teamid):
         team=team,
         tournament=t,
         can_edit=can_edit,
+        can_edit_members=can_edit_members,
         can_submit=can_submit,
         message=message,
         evaluation_rows=evaluation_rows,
         is_finished=is_finished
+    )
+
+
+def edit_team_members(teamid):
+    team = Team.query.get_or_404(teamid)
+    t = db.session.get(Tournament, team.tournament_id)
+    user = get_current_user()
+    is_member = False
+    if user:
+        if user.id == team.captain_id or user in team.members:
+            is_member = True
+        elif team.captain and team.captain.email.lower() == user.email.lower():
+            is_member = True
+        else:
+            for m in team.members:
+                if m.email.lower() == user.email.lower():
+                    is_member = True
+                    break
+    can_edit_members = (is_member and t and t.status == 'Registration') or session.get('admin')
+    if not can_edit_members:
+        flash(_t('no_permission'), 'error')
+        return redirect(url_for('team_page', teamid=teamid))
+
+    message = None
+    if request.method == 'POST' and can_edit_members:
+        members_emails = [e.strip().lower() for e in request.form.getlist('members') if e.strip()]
+        if request.form.get('action') == 'update_members':
+            team.members = []
+            for email in members_emails:
+                if email == team.captain.email.lower():
+                    continue
+                u = User.query.filter_by(email=email).first()
+                if u and u.id != team.captain_id:
+                    team.members.append(u)
+            db.session.commit()
+            message = _t('members_updated')
+
+    return render_template(
+        'edit_team_members.html',
+        team=team,
+        tournament=t,
+        message=message
     )

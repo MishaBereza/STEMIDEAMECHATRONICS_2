@@ -5,9 +5,9 @@
 /* HEADER */
 
 .admin-header {
-  background: linear-gradient(135deg, rgba(71, 215, 255, 0.2), rgba(138, 125, 255, 0.22));
-  color: #f3f8ff;
-  border: 1px solid rgba(130, 181, 255, 0.16);
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 215, 0, 0.2));
+  color: #333333;
+  border: 1px solid rgba(255, 165, 0, 0.2);
 
   padding:20px;
   border-radius:24px;
@@ -35,9 +35,9 @@
 .admin-logout-btn{
   padding:10px 20px;
 
-  background:rgba(255,255,255,.08);
-  color:#f7fbff;
-  border: 1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.9);
+  color:#333333;
+  border: 1px solid rgba(255,165,0,.3);
 
   border-radius:999px;
 
@@ -49,7 +49,7 @@
 }
 
 .admin-logout-btn:hover{
-  background:rgba(255,255,255,.14);
+  background:rgba(255,255,255,.95);
 }
 
 
@@ -142,20 +142,20 @@
 ========================= */
 
 .admin-card{
-  background: linear-gradient(180deg, rgba(14, 28, 48, 0.88) 0%, rgba(8, 18, 32, 0.92) 100%);
-  border: 1px solid rgba(130, 181, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
+  border: 1px solid rgba(255, 165, 0, 0.2);
 
   padding:25px;
 
   border-radius:24px;
 
-  box-shadow:0 22px 60px rgba(0,0,0,.22);
+  box-shadow:0 22px 60px rgba(0,0,0,.1);
 
   transition:.25s;
 
   text-decoration:none;
 
-  color:#eef5ff;
+  color:#333333;
 
 }
 
@@ -163,7 +163,7 @@
 
   transform:translateY(-3px);
 
-  box-shadow:0 26px 70px rgba(0,0,0,.28);
+  box-shadow:0 26px 70px rgba(0,0,0,.15);
 
 }
 
@@ -209,12 +209,12 @@
 
 .admin-card-description{
   font-size:12px;
-  color:#9cb0cb;
+  color:#666666;
   margin-top:5px;
 }
 
 .admin-card.create-tournament{
-  background: linear-gradient(160deg, rgba(71, 215, 255, 0.12), rgba(138, 125, 255, 0.16));
+  background: linear-gradient(160deg, rgba(255, 165, 0, 0.1), rgba(255, 215, 0, 0.1));
 }
 
 
@@ -231,17 +231,17 @@
 
   margin:60px auto;
 
-  background: linear-gradient(180deg, rgba(14, 28, 48, 0.88) 0%, rgba(8, 18, 32, 0.92) 100%);
-  border: 1px solid rgba(130, 181, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
+  border: 1px solid rgba(255, 165, 0, 0.2);
 
   padding:25px;
 
   border-radius:24px;
 
-  box-shadow:0 22px 60px rgba(0,0,0,.22);
+  box-shadow:0 22px 60px rgba(0,0,0,.1);
 
   text-decoration:none;
-  color:#eef5ff;
+  color:#333333;
 
 }
 

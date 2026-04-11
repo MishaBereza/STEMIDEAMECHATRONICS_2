@@ -2,38 +2,38 @@
 {% block content %}
   <h2>{{ t('user_profile') }}</h2>
 
-  <div style="max-width: 500px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea; padding: 30px; border-radius: 8px; margin-top: 20px;">
+  <div style="max-width: 500px; background: #ffffff; border: 2px solid #ffa500; padding: 30px; border-radius: 8px; margin-top: 20px;">
     <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
-      <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('name') }}</div>
-      <div style="font-size: 20px; font-weight: 700; color: #667eea;">{{ user.first_name }} {{ user.last_name }}</div>
+      <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('name') }}</div>
+      <div style="font-size: 20px; font-weight: 700; color: #ffa500;">{{ user.first_name }} {{ user.last_name }}</div>
     </div>
 
     <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
-      <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('email') }}</div>
+      <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('email') }}</div>
       <div style="font-size: 16px; font-weight: 600;">{{ user.email }}</div>
     </div>
 
     {% if user.age %}
       <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
-        <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('age') }}</div>
+        <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('age') }}</div>
         <div style="font-size: 16px; font-weight: 600;">{{ user.age }}</div>
       </div>
     {% endif %}
 
     {% if user.bio %}
       <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
-        <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('about') }}</div>
+        <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('about') }}</div>
         <div style="font-size: 16px; line-height: 1.6;">{{ user.bio }}</div>
       </div>
     {% endif %}
 
     <div>
-      <div style="font-size: 14px; color: #999; margin-bottom: 5px;">{{ t('role') }}</div>
+      <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('role') }}</div>
       <div>
         <span style="display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 13px;
-          {% if user.role == 'admin' %}background: #ffcccc; color: #cc0000;
-          {% elif user.role == 'jury' %}background: #ccf; color: #0066cc;
-          {% else %}background: #ccffcc; color: #00cc00;
+          {% if user.role == 'admin' %}background: #ffe0b2; color: #e65100;
+          {% elif user.role == 'jury' %}background: #fff3e0; color: #ef6c00;
+          {% else %}background: #fff8e1; color: #f57c00;
           {% endif %}">
           {% if user.role == 'admin' %}
             {{ t('admin_short') }}
@@ -48,13 +48,13 @@
   </div>
 
   <div style="margin-top: 20px;">
-    <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
+    <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
     <p style="font-size: 12px; color: #555; margin-top: 6px;">{{ t('use_email_switch') }}</p>
   </div>
 
   {% if get_current_user() and get_current_user().role == 'jury' %}
     <div style="margin-top: 20px;">
-      <a href="/jury/evaluate" style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('jury_evaluation_panel') }}</a>
+      <a href="/jury/evaluate" style="display: inline-block; padding: 12px 24px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('jury_evaluation_panel') }}</a>
     </div>
   {% endif %}
 
@@ -65,7 +65,10 @@
         {% for team in teams_captain %}
           <li>
             <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
-            <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left:10px; font-size:90%;">{{ t('edit') }}</a>
+            <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit') }}</a>
+            {% if team.tournament.status == 'Registration' %}
+              <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
@@ -77,7 +80,12 @@
     {% if teams_member %}
       <ul>
         {% for team in teams_member %}
-          <li><a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a></li>
+          <li>
+            <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
+            {% if team.tournament.status == 'Registration' %}
+              <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
+            {% endif %}
+          </li>
         {% endfor %}
       </ul>
     {% else %}
@@ -101,7 +109,7 @@
         {% for tour in past %}
           <li>
             <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a>
-            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#28a745; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
+            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
           </li>
         {% endfor %}
       </ul>
@@ -111,6 +119,6 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <a href="/" style="padding: 12px 24px; background: #667eea; color: white; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">{{ t('back_home') }}</a>
+    <a href="/" style="padding: 12px 24px; background: #ffa500; color: white; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">{{ t('back_home') }}</a>
   </div>
 {% endblock %}

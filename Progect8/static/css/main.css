@@ -1,15 +1,15 @@
 :root {
-  --bg: #07111f;
-  --bg-soft: #0d1b31;
-  --panel: rgba(12, 25, 44, 0.78);
-  --panel-border: rgba(130, 181, 255, 0.16);
-  --text: #ecf3ff;
-  --muted: #98abc7;
-  --accent: #47d7ff;
-  --accent-strong: #8a7dff;
-  --success: #5cffb3;
-  --warning: #ffb14a;
-  --danger: #ff7272;
+  --bg: #ffffff;
+  --bg-soft: #f9f9f9;
+  --panel: rgba(255, 255, 255, 0.95);
+  --panel-border: rgba(255, 165, 0, 0.3);
+  --text: #333333;
+  --muted: #666666;
+  --accent: #ffa500;
+  --accent-strong: #ff8c00;
+  --success: #32cd32;
+  --warning: #ffd700;
+  --danger: #ff6347;
 }
 
 * {
@@ -26,9 +26,9 @@ body {
   font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(71, 215, 255, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(138, 125, 255, 0.18), transparent 22%),
-    linear-gradient(180deg, #08101d 0%, #07111f 45%, #050b14 100%);
+    radial-gradient(circle at top left, rgba(255, 165, 0, 0.1), transparent 28%),
+    radial-gradient(circle at top right, rgba(255, 215, 0, 0.1), transparent 22%),
+    linear-gradient(180deg, #ffffff 0%, #f5f5f5 45%, #e0e0e0 100%);
 }
 
 a {
@@ -55,13 +55,13 @@ a {
 .page-glow-left {
   top: -100px;
   left: -120px;
-  background: #1dd6ff;
+  background: #ffa500;
 }
 
 .page-glow-right {
   top: 90px;
   right: -140px;
-  background: #8a7dff;
+  background: #ffd700;
 }
 
 .topbar {
@@ -69,8 +69,8 @@ a {
   top: 0;
   z-index: 5;
   backdrop-filter: blur(18px);
-  background: rgba(5, 11, 20, 0.65);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .topbar-inner {
@@ -89,7 +89,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f4f8ff;
+  color: #333333;
 }
 
 .topbar-links {
@@ -104,17 +104,17 @@ a {
 .topbar-links a {
   text-decoration: none;
   font-weight: 600;
-  color: #dfe8f8;
+  color: #666666;
 }
 
 .topbar-links a:hover {
-  color: white;
+  color: #ffa500;
 }
 
 .nav-divider {
   width: 1px;
   height: 18px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .language-switcher {
@@ -133,27 +133,27 @@ a {
   padding: 14px 16px;
   border: 1px solid transparent;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
 }
 
 .flash-message.success {
-  border-color: rgba(92, 255, 179, 0.24);
-  background: rgba(92, 255, 179, 0.09);
-  color: #d4ffe9;
+  border-color: rgba(50, 205, 50, 0.3);
+  background: rgba(50, 205, 50, 0.1);
+  color: #006400;
 }
 
 .flash-message.warning {
-  border-color: rgba(255, 177, 74, 0.24);
-  background: rgba(255, 177, 74, 0.09);
-  color: #ffe5c2;
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.1);
+  color: #b8860b;
 }
 
 .flash-message.danger,
 .flash-message.error {
-  border-color: rgba(255, 114, 114, 0.24);
-  background: rgba(255, 114, 114, 0.1);
-  color: #ffd2d2;
+  border-color: rgba(255, 99, 71, 0.3);
+  background: rgba(255, 99, 71, 0.1);
+  color: #8b0000;
 }
 
 .container {
@@ -178,18 +178,18 @@ a {
 }
 
 .container a:not(.primary-button):not(.secondary-button):not(.panel-link):not(.brand-mark) {
-  color: #8fe6ff;
+  color: #ffa500;
 }
 
 .container a:not(.primary-button):not(.secondary-button):not(.panel-link):not(.brand-mark):hover {
-  color: #c9f5ff;
+  color: #ff8c00;
 }
 
 form label {
   display: block;
   margin-bottom: 6px;
   font-weight: 600;
-  color: #d6e2f7;
+  color: #333333;
 }
 
 form input,
@@ -198,11 +198,11 @@ form select {
   width: 100%;
   padding: 12px 14px;
   margin: 8px 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #cccccc;
   border-radius: 12px;
   box-sizing: border-box;
-  background: rgba(10, 20, 36, 0.9);
-  color: var(--text);
+  background: #ffffff;
+  color: #333333;
 }
 
 form button {

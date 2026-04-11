@@ -74,7 +74,7 @@ def set_language(lang):
 
 from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
 from .tournaments import index, tournament_page, leaderboard
-from .teams import register_team, team_page
+from .teams import register_team, team_page, edit_team_members
 from .submissions import submit_solution, evaluate_submission
 from .admin import admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, delete_tournament, change_user_role
 
@@ -90,6 +90,7 @@ app.add_url_rule('/leaderboard/<int:tid>', 'leaderboard', leaderboard, methods=[
 app.add_url_rule('/admin', 'admin_panel', admin_panel, methods=['GET', 'POST'])
 app.add_url_rule('/admin/logout', 'admin_logout', admin_logout, methods=['GET'])
 app.add_url_rule('/team/<int:teamid>', 'team_page', team_page, methods=['GET', 'POST'])
+app.add_url_rule('/edit_team_members/<int:teamid>', 'edit_team_members', edit_team_members, methods=['GET', 'POST'])
 app.add_url_rule('/admin/dashboard', 'admin_dashboard', admin_dashboard, methods=['GET'])
 app.add_url_rule('/admin/change_password', 'admin_change_password', admin_change_password, methods=['GET', 'POST'])
 app.add_url_rule('/profile/switch', 'profile_switch', profile_switch, methods=['GET', 'POST'])

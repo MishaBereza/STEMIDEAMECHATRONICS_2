@@ -27,7 +27,7 @@
               maxlength="2"
               style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
             >
-            <div class="score-error" id="score{{ i }}-error" style="color: #c62828; font-size: 12px; margin-top: 4px; display: none;">
+            <div class="score-error" id="score{{ i }}-error" style="color: #e65100; font-size: 12px; margin-top: 4px; display: none;">
               {{ t('enter_number_0_10') }}
             </div>
           </td>
@@ -36,7 +36,7 @@
     </table>
     <br>
     <label>{{ t('comment') }}: <textarea name="comment"></textarea></label><br>
-    <button type="submit">{{ t('save_score') }}</button>
+    <button type="submit" class="submit-btn">{{ t('save_score') }}</button>
   </form>
 
   <script>

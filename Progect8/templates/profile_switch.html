@@ -5,7 +5,7 @@
 
   <form method="post" action="/profile/switch">
     <label>{{ t('email') }}: <input type="email" name="switch_email" required style="width: 300px; padding: 8px;"></label>
-    <button type="submit" style="padding: 8px 16px; margin-left: 6px;">{{ t('switch') }}</button>
+    <button type="submit" style="padding: 8px 16px; margin-left: 6px; background: #ffa500; color: white; border: none; border-radius: 4px;">{{ t('switch') }}</button>
   </form>
 
   <p style="margin-top: 20px;"><a href="/user/{{ get_current_user().id if get_current_user() else 0 }}">{{ t('back_to_profile') }}</a></p>

@@ -35,7 +35,7 @@
 .submit-button {
   flex: 1;
   padding: 12px;
-  background: #667eea;
+  background: #ffa500;
   color: white;
   border: none;
   border-radius: 6px;
@@ -44,14 +44,14 @@
 }
 
 .submit-button:hover {
-  background: #5a67d8;
+  background: #ff8c00;
 }
 
 .cancel-button {
   flex: 1;
   padding: 12px;
-  background: #6c757d;
-  color: white;
+  background: #f0f0f0;
+  color: #333333;
   border-radius: 6px;
   text-align: center;
   text-decoration: none;
@@ -60,5 +60,5 @@
 }
 
 .cancel-button:hover {
-  background: #5a6268;
+  background: #e0e0e0;
 }
