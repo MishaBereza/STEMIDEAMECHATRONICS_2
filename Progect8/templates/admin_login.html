@@ -4,25 +4,23 @@
 {% endblock %}
 {% block content %}
   <div class="login-container">
-    <h2 class="login-title">🔐 Admin Login</h2>
-    
+    <h2 class="login-title">{{ t('admin_login_title') }}</h2>
+
     <div class="login-form-container">
-      <p class="login-description">Please enter admin password to access the admin panel</p>
-      
+      <p class="login-description">{{ t('admin_login_description') }}</p>
+
       <form method="post">
         <div>
-          <label for="password">Admin Password</label>
+          <label for="password">{{ t('admin_password_label') }}</label>
           <input type="password" id="password" name="password" required autofocus>
         </div>
-        
-        <button type="submit" style="width: 100%; margin-top: 25px;">Login</button>
+
+        <button type="submit" style="width: 100%; margin-top: 25px;">{{ t('login') }}</button>
       </form>
-      
-      <p class="password-hint">
-        💡 Password is generated on server startup and saved in <strong>admin_password.txt</strong>
-      </p>
+
+      <p class="password-hint">{{ t('password_hint') }}</p>
     </div>
-    
-    <p class="back-link"><a href="/">Back to Home</a></p>
+
+    <p class="back-link"><a href="/">{{ t('back_home') }}</a></p>
   </div>
 {% endblock %}

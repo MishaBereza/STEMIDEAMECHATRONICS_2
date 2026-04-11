@@ -3,44 +3,68 @@
   <link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
 {% block content %}
-  <h1 class="home-title">{{ t('home') }}</h1>
+  <section class="hero-section">
+    <div class="hero-copy">
+      <div class="eyebrow">{{ t('digital_arena_eyebrow') }}</div>
+      <h1 class="hero-title">{{ t('hero_title') }}</h1>
+      <div class="hero-actions">
+        <a href="/register" class="primary-button">{{ t('register') }}</a>
+        <a href="/login" class="secondary-button">{{ t('login') }}</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span class="stat-value">{{ registration_tournaments_count }}</span>
+          <span class="stat-label">{{ t('active_tournaments') }}</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">01</span>
+          <span class="stat-label">{{ t('unified_platform') }}</span>
+        </div>
+      </div>
+    </div>
 
-  <div class="action-buttons">
-    <a href="/login" class="action-link">
-      <div class="action-card">
-        <div class="action-icon">-></div>
-        <div class="action-text">Login</div>
+    <div class="hero-panel">
+      <div class="hero-panel-content">
+        <span class="mini-label">{{ t('platform_access') }}</span>
+        <h2 class="hero-panel-title">{{ t('platform_panel_title') }}</h2>
+        <div class="hero-panel-actions">
+          <a href="/admin" class="panel-link">{{ t('admin_panel') }}</a>
+        </div>
       </div>
-    </a>
-    <a href="/register" class="action-link">
-      <div class="action-card">
-        <div class="action-icon">User</div>
-        <div class="action-text">{{ t('register') }}</div>
-      </div>
-    </a>
-    <a href="/admin" class="action-link">
-      <div class="action-card admin">
-        <div style="font-size: 28px; margin-bottom: 10px;">Admin</div>
-        <div style="font-weight: 600;">{{ t('admin_panel') }}</div>
-      </div>
-    </a>
-  </div>
+    </div>
+  </section>
 
-  <h3 class="tournaments-title">{{ t('tournaments') }}</h3>
-  <div class="tournaments-grid">
-    {% for t_item in tournaments %}
-      <a href="/tournament/{{t_item.id}}" class="tournament-link">
-        <div class="tournament-card">
-          <div class="tournament-name">{{t_item.name}}</div>
-          <div class="tournament-info">
-            {{ t('status') }}: <span class="status-badge">{{t_item.status}}</span>
+  <section class="tournaments-section">
+    <div class="section-heading">
+      <span class="section-kicker">{{ t('tournaments') }}</span>
+      <h2>{{ t('open_arenas_title') }}</h2>
+      <p>{{ t('open_arenas_text') }}</p>
+    </div>
+
+    <div class="tournaments-grid">
+      {% for t_item in tournaments %}
+        <a href="/tournament/{{t_item.id}}" class="tournament-link">
+          <article class="tournament-card">
+            <div class="tournament-topline">
+              <span class="tournament-pill">{{ t('tournament_card_label') }}</span>
+              <span class="status-badge">{{t_item.status}}</span>
+            </div>
+            <h3 class="tournament-name">{{t_item.name}}</h3>
+            <div class="tournament-footer">
+              <span>{{ t('open_page') }}</span>
+              <span class="arrow-mark">-></span>
+            </div>
+          </article>
+        </a>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-box">
+            <span class="section-kicker">{{ t('no_live_items') }}</span>
+            <h3>{{ t('no_tournaments') }}</h3>
+            <p>{{ t('create_first_contest') }}</p>
           </div>
         </div>
-      </a>
-    {% else %}
-      <div class="no-tournaments">
-        {{ t('no_tournaments') }}
-      </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}

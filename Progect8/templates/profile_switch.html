@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Switch Profile by Email</h2>
-  <p>Введите email существующего пользователя для переключения профиля.</p>
+  <h2>{{ t('switch_profile_by_email') }}</h2>
+  <p>{{ t('switch_profile_description') }}</p>
 
   <form method="post" action="/profile/switch">
-    <label>Email: <input type="email" name="switch_email" required style="width: 300px; padding: 8px;"></label>
-    <button type="submit" style="padding: 8px 16px; margin-left: 6px;">Switch</button>
+    <label>{{ t('email') }}: <input type="email" name="switch_email" required style="width: 300px; padding: 8px;"></label>
+    <button type="submit" style="padding: 8px 16px; margin-left: 6px;">{{ t('switch') }}</button>
   </form>
 
-  <p style="margin-top: 20px;"><a href="/user/{{ get_current_user().id if get_current_user() else 0 }}">Back to profile</a></p>
+  <p style="margin-top: 20px;"><a href="/user/{{ get_current_user().id if get_current_user() else 0 }}">{{ t('back_to_profile') }}</a></p>
 {% endblock %}

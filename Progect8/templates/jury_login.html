@@ -4,21 +4,21 @@
 {% endblock %}
 {% block content %}
   <div class="login-container">
-    <h2 class="login-title">🔐 Jury Login</h2>
-    
+    <h2 class="login-title">{{ t('jury_login_title') }}</h2>
+
     <div class="login-form-container">
-      <p class="login-description">Please enter your email to access the jury panel</p>
-      
+      <p class="login-description">{{ t('jury_login_description') }}</p>
+
       <form method="post">
         <div>
-          <label for="email">Email</label>
+          <label for="email">{{ t('email') }}</label>
           <input type="email" id="email" name="email" required autofocus>
         </div>
-        
-        <button type="submit" style="width: 100%; margin-top: 25px;">Login</button>
+
+        <button type="submit" style="width: 100%; margin-top: 25px;">{{ t('login') }}</button>
       </form>
     </div>
-    
-    <p class="back-link"><a href="/">Back to Home</a></p>
+
+    <p class="back-link"><a href="/">{{ t('back_home') }}</a></p>
   </div>
 {% endblock %}

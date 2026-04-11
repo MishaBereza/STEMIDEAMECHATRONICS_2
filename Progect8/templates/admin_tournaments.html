@@ -1,36 +1,43 @@
 {% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
 {% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('tournaments') }}</h2>
 
-<h2>🏆 Tournaments</h2>
+  <div class="table-shell">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>{{ t('name') }}</th>
+          <th>{{ t('status') }}</th>
+          <th>{{ t('actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t_item in tournaments %}
+          <tr>
+            <td>{{ t_item.name }}</td>
+            <td><span class="status-pill default">{{ t_item.status }}</span></td>
+            <td>
+              <div class="table-actions">
+                <a href="{{ url_for('edit_tournament', tid=t_item.id) }}" class="inline-btn">{{ t('edit') }}</a>
+                <a href="{{ url_for('admin_tournament_teams', tid=t_item.id) }}" class="inline-btn">{{ t('teams') }}</a>
+                <form method="post" action="{{ url_for('delete_tournament', tid=t_item.id) }}" class="inline-form">
+                  <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-<table border="1" cellpadding="10">
-<tr>
-    <th>Name</th>
-    <th>Status</th>
-    <th>Actions</th>
-</tr>
-
-{% for t in tournaments %}
-<tr>
-    <td>{{ t.name }}</td>
-    <td>{{ t.status }}</td>
-    <td>
-        <a href="{{ url_for('edit_tournament', tid=t.id) }}">✏️ Edit</a>
-        <a href="{{ url_for('admin_tournament_teams', tid=t.id) }}" style="margin-left:10px;">👥 Teams</a>
-
-        <form method="post" action="{{ url_for('delete_tournament', tid=t.id) }}" style="display:inline;">
-            <button onclick="return confirm('Delete?')">❌ Delete</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
-
-</table>
-
-<br>
-<div style="margin-top:12px; margin-bottom:12px;">
-    <a href="{{ url_for('create_tournament') }}" style="padding:8px 12px; background:#28a745; color:white; border-radius:6px; text-decoration:none;">➕ Create Tournament</a>
-    &nbsp; <a href="{{ url_for('admin_dashboard') }}">← Back</a>
+  <div class="form-actions">
+    <a href="{{ url_for('create_tournament') }}" class="submit-btn">{{ t('create_tournament_cta') }}</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="secondary-btn">{{ t('back') }}</a>
+  </div>
 </div>
-
 {% endblock %}

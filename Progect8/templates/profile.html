@@ -35,31 +35,37 @@
           {% elif user.role == 'jury' %}background: #ccf; color: #0066cc;
           {% else %}background: #ccffcc; color: #00cc00;
           {% endif %}">
-          {{ user.role.upper() }}
+          {% if user.role == 'admin' %}
+            {{ t('admin_short') }}
+          {% elif user.role == 'jury' %}
+            {{ t('jury_short') }}
+          {% else %}
+            {{ t('team') }}
+          {% endif %}
         </span>
       </div>
     </div>
   </div>
 
   <div style="margin-top: 20px;">
-    <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Change profile (by email)</a>
-    <p style="font-size: 12px; color: #555; margin-top: 6px;">Use email to switch to an existing profile.</p>
+    <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
+    <p style="font-size: 12px; color: #555; margin-top: 6px;">{{ t('use_email_switch') }}</p>
   </div>
 
   {% if get_current_user() and get_current_user().role == 'jury' %}
     <div style="margin-top: 20px;">
-      <a href="/jury/evaluate" style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Оцінювання робіт</a>
+      <a href="/jury/evaluate" style="display: inline-block; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('jury_evaluation_panel') }}</a>
     </div>
   {% endif %}
 
   <div style="margin-top: 40px;">
-    <h3>Teams as Captain</h3>
+    <h3>{{ t('teams_as_captain') }}</h3>
     {% if teams_captain %}
       <ul>
         {% for team in teams_captain %}
           <li>
             <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
-            <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left:10px; font-size:90%;">Edit</a>
+            <a href="{{ url_for('team_page', teamid=team.id) }}" style="margin-left:10px; font-size:90%;">{{ t('edit') }}</a>
           </li>
         {% endfor %}
       </ul>
@@ -67,7 +73,7 @@
       <p>-</p>
     {% endif %}
 
-    <h3 style="margin-top:20px;">Teams as Member</h3>
+    <h3 style="margin-top:20px;">{{ t('teams_as_member') }}</h3>
     {% if teams_member %}
       <ul>
         {% for team in teams_member %}
@@ -78,7 +84,7 @@
       <p>-</p>
     {% endif %}
 
-    <h3 style="margin-top:24px;">Tournaments You're Participating In</h3>
+    <h3 style="margin-top:24px;">{{ t('tournaments_participating') }}</h3>
     {% if participating %}
       <ul>
         {% for tour in participating %}
@@ -89,13 +95,13 @@
       <p>-</p>
     {% endif %}
 
-    <h3 style="margin-top:24px;">Past Tournaments (Finished)</h3>
+    <h3 style="margin-top:24px;">{{ t('past_tournaments_finished') }}</h3>
     {% if past %}
       <ul>
         {% for tour in past %}
           <li>
             <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a>
-            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#28a745; color:white; text-decoration:none; border-radius:4px; font-size:90%;">Leaderboard</a>
+            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#28a745; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
           </li>
         {% endfor %}
       </ul>

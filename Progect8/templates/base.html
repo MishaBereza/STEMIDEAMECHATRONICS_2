@@ -2,37 +2,50 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Adaptive Tournament</title>
     <link rel="stylesheet" href="/static/css/main.css">
     {% block head %}{% endblock %}
   </head>
   <body>
-    <nav>
-      <a href="/">{{ t('home') }}</a>
-      |
-      {{ t('language') }}:
-      <a href="{{ url_for('set_language', lang='en') }}">EN</a> |
-      <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
-      {% set _cur = get_current_user() %}
-      {% if _cur %}
-        | <a href="/user/{{ _cur.id }}" title="Profile">Profile: {{ _cur.first_name }}</a>
-        | <a href="/logout">Logout</a>
-      {% else %}
-        | <a href="/login">Login</a>
-        | <a href="/register">{{ t('register') }}</a>
-      {% endif %}
-    </nav>
+    <div class="page-shell">
+      <div class="page-glow page-glow-left"></div>
+      <div class="page-glow page-glow-right"></div>
+      <nav class="topbar">
+        <div class="topbar-inner">
+          <a href="/" class="brand-mark">Adaptive Tournament</a>
+          <div class="topbar-links">
+            <a href="/">{{ t('home') }}</a>
+            <span class="nav-divider"></span>
+            <span class="language-switcher">{{ t('language') }}:</span>
+            <a href="{{ url_for('set_language', lang='en') }}">EN</a>
+            <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
+            {% set _cur = get_current_user() %}
+            <span class="nav-divider"></span>
+            {% if _cur %}
+              <a href="/user/{{ _cur.id }}" title="Profile">Profile: {{ _cur.first_name }}</a>
+              <a href="/logout">Logout</a>
+            {% else %}
+              <a href="/login">{{ t('login') }}</a>
+              <a href="/register">{{ t('register') }}</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat,msg in messages %}
-          <div class="flash-message {{cat}}">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for cat,msg in messages %}
+              <div class="flash-message {{cat}}">{{ msg }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-    <div class="container">
-      {% block content %}{% endblock %}
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
     </div>
   </body>
 </html>

@@ -3,22 +3,23 @@ from .models import User, db
 from .translations import get_text, TRANSLATIONS
 from functools import wraps
 
-# ---------------- HELPERS ----------------
+
 def get_current_user():
     uid = session.get('user_id')
     if uid:
         return db.session.get(User, uid)
     return None
 
+
 def inject_user():
-    # expose helper to templates
     return {'get_current_user': get_current_user}
+
 
 def translation():
     lang = session.get('language', 'en')
 
-    def t(key):
-        return get_text(key, lang)
+    def t(key, **kwargs):
+        return get_text(key, lang, **kwargs)
 
     return {
         't': t,
@@ -26,12 +27,12 @@ def translation():
         'supported_languages': list(TRANSLATIONS.keys())
     }
 
-# ---------------- ADMIN HELPERS ----------------
+
 def admin_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if not session.get('admin'):
-            flash('Please login as admin', 'warning')
+            flash(get_text('please_login_as_admin', session.get('language', 'en')), 'warning')
             return redirect(url_for('admin_panel'))
         return fn(*args, **kwargs)
     return wrapper

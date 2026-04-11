@@ -4,152 +4,79 @@
 {% endblock %}
 {% block content %}
 
-<h2>📊 {{ t('admin_panel') }}</h2>
+<h2>{{ t('admin_panel') }}</h2>
 
-<!-- 🔷 HEADER -->
 <div class="admin-header">
   <div>
-    <div class="admin-header-title">
-      {{ t('admin_panel') }}
-    </div>
-    <div class="admin-header-description">
-      {{ t('description') }}
-    </div>
+    <div class="admin-header-title">{{ t('admin_panel') }}</div>
+    <div class="admin-header-description">{{ t('description') }}</div>
   </div>
 
-  <a href="/admin/logout" class="admin-logout-btn">
-     {{ t('logout') }}
-  </a>
+  <a href="/admin/logout" class="admin-logout-btn">{{ t('logout') }}</a>
 </div>
 
-<!-- 🔷 CARDS -->
-<div class="admin-cards">
-
-  <!-- USERS -->
+<div class="admin-cards-clickable">
   <a href="/admin/users" class="admin-card">
-    <div class="admin-card-icon">👥</div>
-
-    <div class="admin-card-number users">
-      {{ users_count }}
-    </div>
-
-    <div class="admin-card-label users">
-      {{ t('users') }}
-    </div>
-
-    <div class="admin-card-arrow users">
-      → {{ t('manage') }}
-    </div>
+    <div class="admin-card-icon">{{ t('users') }}</div>
+    <div class="admin-card-number users">{{ users_count }}</div>
+    <div class="admin-card-label users">{{ t('users') }}</div>
+    <div class="admin-card-arrow users">{{ t('manage') }}</div>
   </a>
 
-  <!-- TOURNAMENTS -->
-  <div class="admin-card">
-    <div class="admin-card-icon">🏆</div>
-
-    <div class="admin-card-number tournaments">
-      {{ tournaments_count }}
-    </div>
-
-    <div class="admin-card-label tournaments">
-      {{ t('tournaments') }}
-    </div>
-
-    <div class="admin-card-description">
-      Active competitions
-    </div>
-  </div>
-
-  <!-- TEAMS -->
-  <div class="admin-card">
-    <div class="admin-card-icon">🎯</div>
-
-    <div class="admin-card-number teams">
-      {{ teams_count }}
-    </div>
-
-    <div class="admin-card-label teams">
-      {{ t('teams') }}
-    </div>
-
-    <div class="admin-card-description">
-      Registered teams
-    </div>
-  </div>
-
-  <!-- SUBMISSIONS -->
-  <div class="admin-card">
-    <div class="admin-card-icon">📤</div>
-
-    <div class="admin-card-number submissions">
-      {{ submissions_count }}
-    </div>
-
-    <div class="admin-card-label submissions">
-      {{ t('submissions') }}
-    </div>
-
-    <div class="admin-card-description">
-      Total submissions
-    </div>
-  </div>
-
-  <!-- 🔥 MANAGE TOURNAMENTS -->
   <a href="/admin/tournaments" class="admin-card">
-    <div class="admin-card-icon">⚙️</div>
-
-    <div class="admin-card-label manage">
-      {{ t('manage') }} {{ t('tournaments') }}
-    </div>
-
-    <div class="admin-card-arrow manage">
-      → {{ t('create') }} / {{ t('edit') }} / {{ t('delete') }}
-    </div>
+    <div class="admin-card-icon">{{ t('manage') }}</div>
+    <div class="admin-card-label manage">{{ t('manage') }} {{ t('tournaments') }}</div>
+    <div class="admin-card-arrow manage">{{ t('create') }} / {{ t('edit') }} / {{ t('delete') }}</div>
   </a>
 
-  <!-- ➕ CREATE TOURNAMENT -->
-  <!-- legacy path present for tests: /admin/tournaments/create -->
   <a href="{{ url_for('create_tournament') }}" class="admin-card create-tournament">
-    <div class="admin-card-icon">➕</div>
-
-    <div class="admin-card-label create">
-      {{ t('create') }} {{ t('tournament_page') }}
-    </div>
-
-    <div class="admin-card-arrow create">
-      → {{ t('name') }} / {{ t('description') }}
-    </div>
+    <div class="admin-card-icon">{{ t('create') }}</div>
+    <div class="admin-card-label create">{{ t('create') }} {{ t('tournament_page') }}</div>
+    <div class="admin-card-arrow create">{{ t('name') }} / {{ t('description') }}</div>
   </a>
-
 </div>
 
-<!-- 🔧 CHANGE ADMIN PASSWORD -->
-  <a href="{{ url_for('admin_change_password') }}" class="admin-password-card">
-    <div class="admin-card-icon">🔒</div>
-    <div class="admin-card-label password">
-      {{ t('change_admin_password') }}
-    </div>
-    <div class="admin-card-arrow password">
-      → {{ t('secure') }}
-    </div>
-  </a>
+<div class="admin-cards-mini">
+  <div class="admin-card mini">
+    <div class="admin-card-icon">{{ t('tournaments') }}</div>
+    <div class="admin-card-number tournaments">{{ tournaments_count }}</div>
+    <div class="admin-card-label tournaments">{{ t('tournaments') }}</div>
+    <div class="admin-card-description">{{ t('active_competitions') }}</div>
+  </div>
 
-  <!-- 🔧 TOOLS -->
-<h3>🛠️ {{ t('tools') }}</h3>
+  <div class="admin-card mini">
+    <div class="admin-card-icon">{{ t('teams') }}</div>
+    <div class="admin-card-number teams">{{ teams_count }}</div>
+    <div class="admin-card-label teams">{{ t('teams') }}</div>
+    <div class="admin-card-description">{{ t('registered_teams') }}</div>
+  </div>
+
+  <div class="admin-card mini">
+    <div class="admin-card-icon">{{ t('submissions') }}</div>
+    <div class="admin-card-number submissions">{{ submissions_count }}</div>
+    <div class="admin-card-label submissions">{{ t('submissions') }}</div>
+    <div class="admin-card-description">{{ t('total_submissions') }}</div>
+  </div>
+</div>
+
+<a href="{{ url_for('admin_change_password') }}" class="admin-password-card">
+  <div class="admin-card-icon">{{ t('secure') }}</div>
+  <div class="admin-card-label password">{{ t('change_admin_password') }}</div>
+  <div class="admin-card-arrow password">{{ t('secure') }}</div>
+</a>
+
+<h3>{{ t('tools') }}</h3>
 
 <div class="admin-tools-section">
-  <p>
-    Run <strong>admin_console.bat</strong>
-  </p>
-
+  <p>{{ t('run_admin_console') }}</p>
   <ul>
-    <li>Clear database</li>
-    <li>Create demo data</li>
-    <li>Reset system</li>
-    <li>View admin password</li>
+    <li>{{ t('clear_database') }}</li>
+    <li>{{ t('demo_data') }}</li>
+    <li>{{ t('reset_system') }}</li>
+    <li>{{ t('view_admin_password') }}</li>
   </ul>
 </div>
 
-<!-- BACK -->
 <p class="admin-back-link">
   <a href="/">{{ t('back_home') }}</a>
 </p>

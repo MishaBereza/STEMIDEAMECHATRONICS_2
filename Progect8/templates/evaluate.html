@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h3>Evaluate submission #{{ s.id }}</h3>
-  <p><strong>Team:</strong> {{ s.team.name }}</p>
-  <p><strong>Repo:</strong> <a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></p>
-  <p><strong>Description:</strong> {{ s.description or 'No description' }}</p>
+  <h3>{{ t('evaluate_submission') }} #{{ s.id }}</h3>
+  <p><strong>{{ t('team') }}:</strong> {{ s.team.name }}</p>
+  <p><strong>{{ t('repo') }}:</strong> <a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></p>
+  <p><strong>{{ t('description') }}:</strong> {{ s.description or t('no_description') }}</p>
 
   <form method="post" id="evaluation-form" novalidate>
     <table border="1" style="border-collapse: collapse;">
       <tr>
-        <th>Criteria</th>
-        <th>Score (0-10)</th>
+        <th>{{ t('criteria') }}</th>
+        <th>{{ t('score_range') }}</th>
       </tr>
       {% for i in range(1, 11) %}
         <tr>
-          <td>Criterion {{ i }}</td>
+          <td>{{ t('criterion') }} {{ i }}</td>
           <td style="padding: 8px; min-width: 180px;">
             <input
               name="score{{ i }}"
@@ -28,7 +28,7 @@
               style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
             >
             <div class="score-error" id="score{{ i }}-error" style="color: #c62828; font-size: 12px; margin-top: 4px; display: none;">
-              Enter a number from 0 to 10 using no more than 2 digits.
+              {{ t('enter_number_0_10') }}
             </div>
           </td>
         </tr>
@@ -36,7 +36,7 @@
     </table>
     <br>
     <label>{{ t('comment') }}: <textarea name="comment"></textarea></label><br>
-    <button type="submit">Save Score</button>
+    <button type="submit">{{ t('save_score') }}</button>
   </form>
 
   <script>

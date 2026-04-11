@@ -3,34 +3,31 @@
   <link rel="stylesheet" href="/static/css/admin.css">
 {% endblock %}
 {% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('create') }} {{ t('tournament_page') }}</h2>
 
-<h2 class="page-title">➕ {{ t('create') }} {{ t('tournament_page') }}</h2>
+  <div class="admin-form-wrapper">
+    <form method="post" class="admin-form">
+      <div class="form-group">
+        <label for="name">{{ t('name') }}</label>
+        <input type="text" id="name" name="name" required>
+      </div>
 
-<form method="post" class="admin-form">
+      <div class="form-group">
+        <label for="description">{{ t('description') }}</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+      </div>
 
-  <div class="form-group">
-    <label for="name"><b>{{ t('name') }}</b></label>
-    <input type="text" id="name" name="name" required>
+      <div class="form-group">
+        <label for="max_teams">Max Teams</label>
+        <input type="number" id="max_teams" name="max_teams">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">{{ t('create') }}</button>
+        <a href="{{ url_for('admin_tournaments') }}" class="secondary-btn">{{ t('back_to_admin') }}</a>
+      </div>
+    </form>
   </div>
-
-  <div class="form-group">
-    <label for="description"><b>{{ t('description') }}</b></label>
-    <textarea id="description" name="description" rows="4"></textarea>
-  </div>
-
-  <div class="form-group">
-    <label for="max_teams"><b>Max Teams</b></label>
-    <input type="number" id="max_teams" name="max_teams">
-  </div>
-
-  <div class="form-actions">
-    <button type="submit" class="submit-btn create-btn">
-      🚀 {{ t('create') }}
-    </button>
-  </div>
-
-</form>
-
-</form>
-
+</div>
 {% endblock %}

@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
   <div class="login-container">
-    <h2 class="login-title">User Login</h2>
+    <h2 class="login-title">{{ t('user_login_title') }}</h2>
 
     <div class="login-form-container">
-      <p class="login-description">Enter your email to log in to an existing account.</p>
+      <p class="login-description">{{ t('user_login_description') }}</p>
 
       <form method="post">
-        <label for="email">Email</label><br>
+        <label for="email">{{ t('email') }}</label><br>
         <input
           type="email"
           id="email"
@@ -15,7 +15,7 @@
           required
           style="width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box;"
         >
-        <button type="submit" style="width: 100%; margin-top: 25px;">Login</button>
+        <button type="submit" style="width: 100%; margin-top: 25px;">{{ t('login') }}</button>
       </form>
     </div>
   </div>

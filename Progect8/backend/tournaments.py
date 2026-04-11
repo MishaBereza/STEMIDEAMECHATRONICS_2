@@ -1,12 +1,28 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, session
+from sqlalchemy import or_
 
 from .app_helpers import get_current_user
 from .models import Team, Tournament
+from .translations import get_text
+
+
+def _t(key, **kwargs):
+    return get_text(key, session.get('language', 'en'), **kwargs)
 
 
 def index():
     tournaments = Tournament.query.all()
-    return render_template('index.html', tournaments=tournaments)
+    registration_tournaments_count = Tournament.query.filter(
+        or_(
+            Tournament.status.ilike('%register%'),
+            Tournament.status.ilike('%registration%')
+        )
+    ).count()
+    return render_template(
+        'index.html',
+        tournaments=tournaments,
+        registration_tournaments_count=registration_tournaments_count
+    )
 
 
 def tournament_page(tid):
@@ -26,7 +42,7 @@ def tournament_page(tid):
 def leaderboard(tid):
     t = Tournament.query.get_or_404(tid)
     if t.status.lower() not in ['finished', 'completed', 'closed']:
-        flash('Leaderboard is only available for completed tournaments.', 'warning')
+        flash(_t('leaderboard_only_finished'), 'warning')
         return redirect(url_for('tournament_page', tid=tid))
 
     teams = Team.query.filter_by(tournament_id=t.id).all()

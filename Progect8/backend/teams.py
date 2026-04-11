@@ -1,101 +1,93 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import Tournament, Team, User, Round, Submission, Evaluation, db
 from .app_helpers import get_current_user
+from .translations import get_text
 
-# ---------------- TEAM ----------------
+
+def _t(key, **kwargs):
+    return get_text(key, session.get('language', 'en'), **kwargs)
+
+
 def register_team(tid):
     t = Tournament.query.get_or_404(tid)
 
     if request.method == 'POST':
         name = request.form['name'].strip()
         captain_email = request.form['captain_email'].strip().lower()
-        member_emails = [e.strip().lower() for e in request.form.get('members','').split(',') if e.strip()]
+        member_emails = [e.strip().lower() for e in request.form.get('members', '').split(',') if e.strip()]
 
-        # ensure captain exists
         captain = User.query.filter_by(email=captain_email).first()
         if not captain:
-            flash('Captain must be a registered user', 'warning')
+            flash(_t('captain_registered_required'), 'warning')
             return redirect(url_for('register_team', tid=tid))
 
-        # prevent captain or any member from already being in another team in this tournament
         existing = Team.query.filter_by(tournament_id=t.id).all()
         for team in existing:
             if team.captain_id == captain.id:
-                flash('Captain already leads another team in this tournament', 'warning')
+                flash(_t('captain_already_leads'), 'warning')
                 return redirect(url_for('register_team', tid=tid))
             for u in team.members:
                 if u.email == captain_email or u.email in member_emails:
-                    flash('One of the users is already in a team for this tournament', 'warning')
+                    flash(_t('user_already_in_team'), 'warning')
                     return redirect(url_for('register_team', tid=tid))
 
-        # check member emails exist and no duplicates
         unique_emails = set(member_emails)
         if len(unique_emails) != len(member_emails):
-            flash('Member emails must not repeat', 'warning')
+            flash(_t('member_emails_unique'), 'warning')
             return redirect(url_for('register_team', tid=tid))
 
         members = []
         for email in member_emails:
             if email == captain_email:
-                flash('Captain should not be listed as a member', 'warning')
+                flash(_t('captain_not_member'), 'warning')
                 return redirect(url_for('register_team', tid=tid))
             u = User.query.filter_by(email=email).first()
             if not u:
-                flash(f"Member {email} is not a registered user", 'warning')
+                flash(_t('member_not_registered', email=email), 'warning')
                 return redirect(url_for('register_team', tid=tid))
             members.append(u)
 
-        team = Team(
-            name=name,
-            captain_id=captain.id,
-            tournament_id=t.id
-        )
+        team = Team(name=name, captain_id=captain.id, tournament_id=t.id)
         db.session.add(team)
         db.session.commit()
         for u in members:
             team.members.append(u)
         db.session.commit()
 
-        # remember team in session if current user
         cur = get_current_user()
         if cur and cur.id == captain.id:
             session['team_id'] = team.id
 
-        flash('Team registered', 'success')
+        flash(_t('team_registered'), 'success')
         return redirect(url_for('tournament_page', tid=tid))
 
     return render_template('register_team.html', t_obj=t)
 
-# ---------------- TEAM VIEW & SUBMISSION ----------------
+
 def team_page(teamid):
     team = Team.query.get_or_404(teamid)
     t = db.session.get(Tournament, team.tournament_id)
     user = get_current_user()
     is_finished = bool(t and t.status.lower() in ('finished', 'completed', 'closed'))
 
-    # determine membership (captain + members) with email fallback
     is_member = False
     if user:
         if user.id == team.captain_id or user in team.members:
             is_member = True
+        elif team.captain and team.captain.email.lower() == user.email.lower():
+            is_member = True
         else:
-            # also check by email in case relationship not populated
-            if team.captain and team.captain.email.lower() == user.email.lower():
-                is_member = True
-            else:
-                for m in team.members:
-                    if m.email.lower() == user.email.lower():
-                        is_member = True
-                        break
+            for m in team.members:
+                if m.email.lower() == user.email.lower():
+                    is_member = True
+                    break
     can_edit = (is_member or session.get('admin'))
     can_submit = user and (user.id == team.captain_id or session.get('admin'))
     message = None
 
     def sync_team_submission_record():
-        """Mirror captain/team submission data into Submission for jury evaluation."""
         if not t or not team.repo_url:
             return
-
         latest_round = Round.query.filter_by(tournament_id=t.id).order_by(Round.level.desc(), Round.id.desc()).first()
         round_id = latest_round.id if latest_round else None
         submission_query = Submission.query.filter_by(team_id=team.id)
@@ -111,26 +103,21 @@ def team_page(teamid):
         submission.demo_url = team.live_url
         submission.description = team.comments
 
-    # if tournament has finished and team hasn't submitted yet (status blank/None), auto-mark submitted
     if is_finished and team.submission_status in (None, '', 'None'):
         team.submission_status = 'Submitted'
         db.session.commit()
 
-    # allow save/submit until tournament is finished
     if request.method == 'POST' and can_edit and t and not is_finished:
-        repo = request.form.get('repo_url','').strip()
-        live = request.form.get('live_url','').strip()
-        members_emails = [e.strip().lower() for e in request.form.get('members','').split(',') if e.strip()]
+        repo = request.form.get('repo_url', '').strip()
+        live = request.form.get('live_url', '').strip()
+        members_emails = [e.strip().lower() for e in request.form.get('members', '').split(',') if e.strip()]
         if not repo:
-            message = 'GitHub repo URL is required'
+            message = _t('github_repo_required')
         else:
             team.repo_url = repo
             team.live_url = live
-            team.comments = request.form.get('comments','')
-            # update members list if captain editing
+            team.comments = request.form.get('comments', '')
             if can_submit:
-                # rebuild membership from emails
-                # first clear existing
                 team.members = []
                 for email in members_emails:
                     if email == team.captain.email.lower():
@@ -145,13 +132,12 @@ def team_page(teamid):
                     team.submitted_at = datetime.utcnow()
                     sync_team_submission_record()
                 else:
-                    flash('Only the captain can submit', 'warning')
+                    flash(_t('only_captain_submit'), 'warning')
             db.session.commit()
-            # message depends on whether action was save or attempt to send
             if request.form.get('action') == 'save':
-                message = 'Saved'
+                message = _t('saved')
             elif request.form.get('action') == 'send' and can_submit:
-                message = 'Submitted'
+                message = _t('submitted')
 
     evaluation_rows = []
     if is_finished:

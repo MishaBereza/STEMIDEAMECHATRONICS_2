@@ -1,41 +1,68 @@
 {% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
 {% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('teams_for_title') }} {{ tournament.name }}</h2>
 
-<h2>👥 Teams for {{ tournament.name }}</h2>
-
-<table border="1" cellpadding="8">
-  <tr><th>Name</th><th>Captain</th><th>Members</th><th>Repo</th><th>Live</th><th>Comments</th><th>Status</th><th>Actions</th></tr>
-  {% for team in teams %}
-    <tr>
-      <td>{{ team.name }}</td>
-      <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
-      <td>
-        {% for m in team.members.all() %}
-          {{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}
-        {% else %}
-          —
+  <div class="table-shell">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>{{ t('name') }}</th>
+          <th>{{ t('captain') }}</th>
+          <th>{{ t('members') }}</th>
+          <th>{{ t('repo') }}</th>
+          <th>{{ t('live') }}</th>
+          <th>{{ t('comments') }}</th>
+          <th>{{ t('status') }}</th>
+          <th>{{ t('actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for team in teams %}
+          <tr>
+            <td>{{ team.name }}</td>
+            <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
+            <td>
+              {% for m in team.members.all() %}
+                {{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}
+              {% else %}
+                -
+              {% endfor %}
+            </td>
+            <td>{{ team.repo_url or '-' }}</td>
+            <td>{{ team.live_url or '-' }}</td>
+            <td>{{ team.comments or '-' }}</td>
+            <td>
+              {% set team_status = (team.submission_status or 'None')|lower %}
+              <span class="status-pill {{ team_status if team_status in ['pending', 'accepted', 'rejected', 'returned'] else 'default' }}">
+                {{ t(team_status) if team_status in ['pending', 'accepted', 'rejected', 'returned'] else (team.submission_status or '-') }}
+              </span>
+            </td>
+            <td>
+              <div class="table-actions">
+                {% if team.submission_status == 'Pending' %}
+                  <form method="post" action="/admin/team/{{ team.id }}/decide" class="table-actions">
+                    <button name="decision" value="accept" class="inline-btn">{{ t('accepted') }}</button>
+                    <button name="decision" value="reject" class="inline-btn">{{ t('rejected') }}</button>
+                    <button name="decision" value="return" class="inline-btn">{{ t('returned') }}</button>
+                  </form>
+                {% endif %}
+                <form method="post" action="/admin/team/{{ team.id }}/delete" class="inline-form">
+                  <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
+                </form>
+              </div>
+            </td>
+          </tr>
         {% endfor %}
-      </td>
-      <td>{{ team.repo_url or '-' }}</td>
-      <td>{{ team.live_url or '-' }}</td>
-      <td>{{ team.comments or '-' }}</td>
-      <td>{{ team.submission_status or '-' }}</td>
-      <td>
-        {% if team.submission_status == 'Pending' %}
-          <form method="post" action="/admin/team/{{ team.id }}/decide" style="display:inline;">
-            <button name="decision" value="accept">✅ Accept</button>
-            <button name="decision" value="reject">❌ Reject</button>
-            <button name="decision" value="return">↩️ Return</button>
-          </form>
-        {% endif %}
-        <form method="post" action="/admin/team/{{ team.id }}/delete" style="display:inline; margin-left:5px;">
-          <button onclick="return confirm('Delete team?')">🗑️</button>
-        </form>
-      </td>
-    </tr>
-  {% endfor %}
-</table>
+      </tbody>
+    </table>
+  </div>
 
-<p style="margin-top:20px;"><a href="/admin/tournaments">← Back to tournaments</a></p>
-
+  <div class="back-link">
+    <a href="/admin/tournaments">{{ t('back') }}</a>
+  </div>
+</div>
 {% endblock %}

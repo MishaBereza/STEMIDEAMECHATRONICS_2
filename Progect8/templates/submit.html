@@ -1,37 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h3>{{ t('submit') }} for {{r.title}}</h3>
+  <h3>{{ t('submit_for') }} {{ r.title }}</h3>
 
   {% if not status_ok %}
-    <p style="color:#666;">Submissions are not open for this tournament.</p>
+    <p style="color:#666;">{{ t('submissions_not_open_for_tournament') }}</p>
   {% elif not teams %}
-    <p style="color:#c00;">You are not a member of any team in this tournament.</p>
+    <p style="color:#c00;">{{ t('not_member_any_team') }}</p>
   {% else %}
     <form method="post">
       {% if current_user %}
         <input type="hidden" name="submitter_email" value="{{ current_user.email }}">
       {% else %}
-        <label>Submitter email (registered user)<br>
+        <label>{{ t('submitter_email_registered_user') }}<br>
           <input name="submitter_email" type="email" required>
         </label><br>
       {% endif %}
-      <label>{{ t('teams') }}: 
+      <label>{{ t('teams') }}:
         <select name="team_id">
           {% for team in teams %}
-            <option value="{{team.id}}">{{team.name}}</option>
+            <option value="{{ team.id }}">{{ team.name }}</option>
           {% endfor %}
         </select>
       </label><br>
 
-      <label><b>GitHub repo URL *</b><br>
+      <label><b>{{ t('github_repo_url') }} *</b><br>
         <input name="repo_url" type="url" required>
       </label><br>
 
-      <label>Demo URL (optional)<br>
+      <label>{{ t('demo_url_optional') }}<br>
         <input name="demo_url" type="url">
       </label><br>
 
-      <label>{{ t('description') }} (optional)<br>
+      <label>{{ t('description_optional') }}<br>
         <textarea name="description"></textarea>
       </label><br>
 

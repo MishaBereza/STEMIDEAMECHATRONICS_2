@@ -1,9 +1,12 @@
-from flask import render_template, request, redirect, url_for, flash
-from .models import db, User, Tournament, Team, Round, Submission, Evaluation
-from functools import wraps
-from .app_helpers import admin_required
+from flask import render_template, request, redirect, url_for, flash, session
+from .models import db, User, Tournament, Team, Round, Submission
+from .translations import get_text
 
-# ---------------- ADMIN DASHBOARD ----------------
+
+def _t(key, **kwargs):
+    return get_text(key, session.get('language', 'en'), **kwargs)
+
+
 def admin_dashboard():
     return render_template(
         'admin_dashboard.html',
@@ -13,20 +16,21 @@ def admin_dashboard():
         submissions_count=Submission.query.count()
     )
 
-# ---------------- ADMIN USERS ----------------
+
 def admin_users():
     users = User.query.all()
-    return render_template('admin_users.html', users=users, search="")
+    search = request.args.get('search', '').strip()
+    if search:
+        users = User.query.filter(User.email.ilike(f'%{search}%')).all()
+    return render_template('admin_users.html', users=users, search=search)
 
-# DELETE USER
+
 def admin_delete_user(uid):
     u = User.query.get_or_404(uid)
-    # prevent removing admin accounts
     if u.role == 'admin':
-        flash('Cannot delete admin user', 'warning')
+        flash(_t('cannot_delete_admin_user'), 'warning')
         return redirect('/admin/users')
 
-    # delete any teams where the user is captain, but keep the other users themselves
     captain_teams = Team.query.filter_by(captain_id=u.id).all()
     for team in captain_teams:
         try:
@@ -46,7 +50,6 @@ def admin_delete_user(uid):
 
         db.session.delete(team)
 
-    # remove from any membership associations
     for team in list(u.teams):
         try:
             if hasattr(team.members, 'remove'):
@@ -57,29 +60,26 @@ def admin_delete_user(uid):
 
     db.session.delete(u)
     db.session.commit()
-
-    flash('User deleted', 'success')
+    flash(_t('user_deleted'), 'success')
     return redirect('/admin/users')
 
-# CHANGE USER ROLE
+
 def change_user_role(uid):
     u = User.query.get_or_404(uid)
     new_role = request.form.get('role')
     if new_role in ['team', 'jury', 'admin']:
         u.role = new_role
         db.session.commit()
-        flash('User role updated', 'success')
+        flash(_t('user_role_updated'), 'success')
     else:
-        flash('Invalid role', 'warning')
+        flash(_t('invalid_role'), 'warning')
     return redirect('/admin/users')
 
-# ---------------- USER PROFILE ----------------
+
 def user_profile(uid):
     u = User.query.get_or_404(uid)
     teams_captain = Team.query.filter_by(captain_id=u.id).all()
-    # u.teams comes from backref, usually a list
     teams_member = list(u.teams)
-    # collect tournaments the user participates in and separate past (finished) ones
     participating = []
     past = []
     seen = set()
@@ -88,39 +88,35 @@ def user_profile(uid):
         if not t or t.id in seen:
             continue
         seen.add(t.id)
-        # treat status 'Finished' as past; otherwise as current/participating
         if getattr(t, 'status', '').lower() == 'finished':
             past.append(t)
         else:
             participating.append(t)
 
-    return render_template('profile.html', user=u, teams_captain=teams_captain, teams_member=teams_member,
-                           participating=participating, past=past)
+    return render_template('profile.html', user=u, teams_captain=teams_captain, teams_member=teams_member, participating=participating, past=past)
 
-# ---------------- ADMIN TOURNAMENTS ----------------
+
 def admin_tournaments():
     tournaments = Tournament.query.all()
     return render_template('admin_tournaments.html', tournaments=tournaments)
 
-# backward-compatible redirect: some pages/linking use the plural path
+
 def admin_tournaments_create_redirect():
     return redirect(url_for('create_tournament'))
 
-# SHOW TEAMS FOR TOURNAMENT
+
 def admin_tournament_teams(tid):
     t = Tournament.query.get_or_404(tid)
     teams = Team.query.filter_by(tournament_id=t.id).all()
     return render_template('admin_teams.html', tournament=t, teams=teams)
 
-# DELETE TEAM
+
 def admin_delete_team(teamid):
     team = Team.query.get_or_404(teamid)
 
-    # remove member associations
     try:
         members = team.members.all()
     except Exception:
-        # if not dynamic, it may be a list
         members = list(team.members)
     for u in members:
         try:
@@ -128,7 +124,6 @@ def admin_delete_team(teamid):
         except Exception:
             pass
 
-    # delete submissions and their evaluations
     for s in team.submissions:
         for ev in s.evaluations:
             db.session.delete(ev)
@@ -137,10 +132,10 @@ def admin_delete_team(teamid):
     db.session.delete(team)
     db.session.commit()
 
-    flash('Team deleted', 'success')
+    flash(_t('team_deleted'), 'success')
     return redirect(url_for('admin_tournament_teams', tid=team.tournament_id))
 
-# ADMIN decision on pending submission
+
 def admin_team_decide(teamid):
     team = Team.query.get_or_404(teamid)
     action = request.form.get('decision')
@@ -150,48 +145,42 @@ def admin_team_decide(teamid):
         team.submission_status = 'Rejected'
     elif action == 'return':
         team.submission_status = 'Returned'
-    from .models import db
     db.session.commit()
-    flash(f"Team {action}", 'success')
+    flash(_t(f'team_action_{action}'), 'success')
     return redirect(url_for('admin_tournament_teams', tid=team.tournament_id))
+
 
 def create_tournament():
     if request.method == 'POST':
         t = Tournament(
             name=request.form['name'],
-            description=request.form.get('description',''),
+            description=request.form.get('description', ''),
             max_teams=int(request.form.get('max_teams')) if request.form.get('max_teams') else None,
-            status="Draft"
+            status='Draft'
         )
-
-        from .models import db
         db.session.add(t)
         db.session.commit()
-
-        flash('Tournament created', 'success')
+        flash(_t('tournament_created'), 'success')
         return redirect('/admin/tournaments')
 
     return render_template('admin_create_tournament.html')
 
-# EDIT
+
 def edit_tournament(tid):
     t = Tournament.query.get_or_404(tid)
 
     if request.method == 'POST':
         t.name = request.form['name']
-        t.description = request.form.get('description','')
+        t.description = request.form.get('description', '')
         t.max_teams = int(request.form.get('max_teams')) if request.form.get('max_teams') else None
         t.status = request.form.get('status', t.status)
-
-        from .models import db
         db.session.commit()
-
-        flash('Tournament updated', 'success')
+        flash(_t('tournament_updated'), 'success')
         return redirect('/admin/tournaments')
 
     return render_template('admin_edit_tournament.html', tournament=t)
 
-# DELETE
+
 def delete_tournament(tid):
     t = Tournament.query.get_or_404(tid)
 
@@ -203,8 +192,6 @@ def delete_tournament(tid):
         db.session.delete(r)
 
     for team in Team.query.filter_by(tournament_id=t.id):
-        # clear membership links first (dynamic relationship returns query)
-        # `.members` is a dynamic AppenderQuery, so we iterate and remove users one by one
         for u in team.members.all():
             team.members.remove(u)
         for s in team.submissions:
@@ -216,5 +203,5 @@ def delete_tournament(tid):
     db.session.delete(t)
     db.session.commit()
 
-    flash('Tournament deleted', 'success')
+    flash(_t('tournament_deleted'), 'success')
     return redirect('/admin/tournaments')

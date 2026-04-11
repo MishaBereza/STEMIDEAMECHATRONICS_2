@@ -1,71 +1,61 @@
 {% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/interface.css">
+{% endblock %}
 {% block content %}
-  <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Лідерборд: {{ tournament.name }}</h2>
+  <div class="leaderboard-shell">
+    <section class="surface-card leaderboard-card">
+      <h2>{{ t('leaderboard') }}: {{ tournament.name }}</h2>
 
-  {% if team_scores %}
-    <div style="max-width: 800px; margin: 0 auto;">
-      {% set has_evaluations = false %}
-      {% for team,score,status in team_scores %}
-        {% if score > 0 %}
-          {% set has_evaluations = true %}
+      {% if team_scores %}
+        {% set has_evaluations = false %}
+        {% for team, score, status in team_scores %}
+          {% if score > 0 %}
+            {% set has_evaluations = true %}
+          {% endif %}
+        {% endfor %}
+
+        {% if not has_evaluations %}
+          <div class="leaderboard-warning">
+            <h4>{{ t('evaluation_not_finished') }}</h4>
+            <p>{{ t('jury_not_scored_teams') }}</p>
+          </div>
         {% endif %}
-      {% endfor %}
 
-      {% if not has_evaluations %}
-        <div style="text-align: center; padding: 30px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; margin-bottom: 20px;">
-          <h4 style="color: #856404; margin: 0;">Оцінювання ще не завершено</h4>
-          <p style="color: #856404; margin: 5px 0;">Журі ще не оцінили команди. Лідерборд буде оновлено після оцінювання.</p>
+        <div class="data-table-wrap">
+          <table class="data-table leaderboard-table">
+            <thead>
+              <tr>
+                <th>{{ t('place') }}</th>
+                <th>{{ t('team') }}</th>
+                <th>{{ t('average_score') }}</th>
+                <th>{{ t('status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for team, score, status in team_scores %}
+                <tr>
+                  <td class="leaderboard-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
+                    {{ loop.index }}
+                  </td>
+                  <td>{{ team.name }}</td>
+                  <td class="leaderboard-score">{{ "{:.2f}".format(score) }}</td>
+                  <td class="leaderboard-status">
+                    <span class="status-chip {% if status == 'passed_next_round' %}accepted{% elif status == 'not_passed' %}rejected{% else %}pending{% endif %}">
+                      {{ t(status) }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+
+        <p class="muted-text">{{ t('updated_finished_tournament') }}: {{ tournament.name }}</p>
+      {% else %}
+        <p class="muted-text">{{ t('no_teams_to_display') }}</p>
+        <p class="muted-text">{{ t('no_scores_or_running') }}</p>
       {% endif %}
-
-      <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
-        <thead>
-          <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-            <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 18px;">Місце</th>
-            <th style="padding: 15px; text-align: left; font-weight: bold; font-size: 18px;">Команда</th>
-            <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 18px;">Середній бал</th>
-            <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 18px;">Статус</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for team,score,status in team_scores %}
-            <tr style="background-color: {% if loop.index % 2 == 0 %}#f8f9fa{% else %}#ffffff{% endif %}; border-bottom: 1px solid #dee2e6;">
-              <td style="padding: 15px; text-align: center; font-size: 16px; font-weight: bold; color: {% if loop.index == 1 %}#ffd700{% elif loop.index == 2 %}#c0c0c0{% elif loop.index == 3 %}#cd7f32{% else %}#666{% endif %};">{{ loop.index }}</td>
-              <td style="padding: 15px; font-size: 16px;">{{ team.name }}</td>
-              <td style="padding: 15px; text-align: center; font-size: 16px; font-weight: bold;">{{ "{:.2f}".format(score) }}</td>
-              <td style="padding: 15px; text-align: center;">
-                <span style="padding: 5px 10px; border-radius: 20px; font-size: 14px; font-weight: bold;
-                     {% if status == 'passed_next_round' %}
-                       background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
-                     {% elif status == 'not_passed' %}
-                       background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
-                     {% elif status == 'reviewed' %}
-                       background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;
-                     {% else %}
-                       background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7;
-                     {% endif %}">
-                  {% if status == 'reviewed' %}
-                    Оцінено
-                  {% elif status == 'under_review' %}
-                    Оцінюється
-                  {% else %}
-                    {{ t(status) }}
-                  {% endif %}
-                </span>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div style="text-align: center; margin-top: 30px;">
-      <p style="font-size: 14px; color: #666;">Оновлено: {{ tournament.name }} - завершений турнір</p>
-    </div>
-  {% else %}
-    <div style="text-align: center; padding: 50px;">
-      <h3 style="color: #666;">Немає команд для відображення</h3>
-      <p>Можливо, ще не було оцінок або турнір ще триває.</p>
-    </div>
-  {% endif %}
+    </section>
+  </div>
 {% endblock %}
