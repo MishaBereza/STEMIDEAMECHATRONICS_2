@@ -1,9 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import db, User
+from .models import db, User, Settings
 from .translations import get_text
 import os
-
-ADMIN_PASSWORD_FILE = os.path.join(os.path.dirname(__file__), '..', 'admin_password.txt')
 
 
 def _t(key, **kwargs):
@@ -11,12 +9,13 @@ def _t(key, **kwargs):
 
 
 def get_or_create_admin_password():
-    if os.path.exists(ADMIN_PASSWORD_FILE):
-        with open(ADMIN_PASSWORD_FILE, 'r', encoding='utf-8') as f:
-            return f.read().strip()
+    setting = Settings.query.filter_by(key='admin_password').first()
+    if setting:
+        return setting.value
     default_pwd = 'admin123'
-    with open(ADMIN_PASSWORD_FILE, 'w', encoding='utf-8') as f:
-        f.write(default_pwd)
+    setting = Settings(key='admin_password', value=default_pwd)
+    db.session.add(setting)
+    db.session.commit()
     return default_pwd
 
 
@@ -25,8 +24,13 @@ def load_admin_password():
 
 
 def save_admin_password(new_password):
-    with open(ADMIN_PASSWORD_FILE, 'w', encoding='utf-8') as f:
-        f.write(new_password)
+    setting = Settings.query.filter_by(key='admin_password').first()
+    if setting:
+        setting.value = new_password
+    else:
+        setting = Settings(key='admin_password', value=new_password)
+        db.session.add(setting)
+    db.session.commit()
 
 
 def register_user():
@@ -131,12 +135,20 @@ def jury_login():
 
 
 def jury_evaluate():
-    if 'jury_id' not in session:
+    if 'jury_id' not in session and 'admin' not in session:
         return redirect('/jury/login')
-    jury = db.session.get(User, session['jury_id'])
-    if not jury or jury.role != 'jury':
-        session.pop('jury_id', None)
-        return redirect('/jury/login')
+    
+    if 'jury_id' in session:
+        jury = db.session.get(User, session['jury_id'])
+        if not jury or jury.role not in ['jury', 'admin']:
+            session.pop('jury_id', None)
+            return redirect('/jury/login')
+    else:
+        # Admin access
+        jury = get_current_user()
+        if not jury or jury.role != 'admin':
+            session.pop('admin', None)
+            return redirect('/admin')
 
     from sqlalchemy import or_
     from .models import Submission, Evaluation, Team, Tournament, Round
@@ -260,12 +272,20 @@ def jury_logout():
 
 
 def jury_part2():
-    if 'jury_id' not in session:
+    if 'jury_id' not in session and 'admin' not in session:
         return redirect('/jury/login')
-    jury = db.session.get(User, session['jury_id'])
-    if not jury or jury.role != 'jury':
-        session.pop('jury_id', None)
-        return redirect('/jury/login')
+    
+    if 'jury_id' in session:
+        jury = db.session.get(User, session['jury_id'])
+        if not jury or jury.role not in ['jury', 'admin']:
+            session.pop('jury_id', None)
+            return redirect('/jury/login')
+    else:
+        # Admin access
+        jury = get_current_user()
+        if not jury or jury.role != 'admin':
+            session.pop('admin', None)
+            return redirect('/admin')
     return redirect('/jury/evaluate')
 
 

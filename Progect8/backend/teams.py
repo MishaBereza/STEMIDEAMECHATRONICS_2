@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import Tournament, Team, User, Round, Submission, Evaluation, db
 from .app_helpers import get_current_user
+from .submissions import PASSING_SCORE
 from .translations import get_text
 
 
@@ -211,4 +212,70 @@ def edit_team_members(teamid):
         team=team,
         tournament=t,
         message=message
+    )
+
+
+def team_round_results(teamid, rid):
+    team = Team.query.get_or_404(teamid)
+    round_item = Round.query.get_or_404(rid)
+
+    if round_item.tournament_id != team.tournament_id:
+        flash(_t('invalid_team_selection'), 'warning')
+        return redirect(url_for('tournament_page', tid=team.tournament_id))
+
+    tournament = db.session.get(Tournament, team.tournament_id)
+    user = get_current_user()
+
+    is_member = False
+    if user:
+        if user.id == team.captain_id or user in team.members:
+            is_member = True
+        elif team.captain and team.captain.email.lower() == user.email.lower():
+            is_member = True
+        else:
+            for member in team.members:
+                if member.email.lower() == user.email.lower():
+                    is_member = True
+                    break
+
+    if not is_member and not session.get('admin'):
+        flash(_t('not_allowed_submit_for_team'), 'warning')
+        return redirect(url_for('tournament_page', tid=team.tournament_id))
+
+    if round_item.status != 'Closed' and not session.get('admin'):
+        flash(_t('round_not_active_for_submission'), 'warning')
+        return redirect(url_for('tournament_page', tid=team.tournament_id))
+
+    submissions = Submission.query.filter_by(team_id=team.id, round_id=round_item.id).order_by(Submission.id.desc()).all()
+    evaluation_rows = []
+    totals = []
+
+    for submission in submissions:
+        submission_evaluations = Evaluation.query.filter_by(submission_id=submission.id).order_by(Evaluation.id.asc()).all()
+        for evaluation in submission_evaluations:
+            jury = db.session.get(User, evaluation.jury_id)
+            scores = [
+                evaluation.score1, evaluation.score2, evaluation.score3, evaluation.score4, evaluation.score5,
+                evaluation.score6, evaluation.score7, evaluation.score8, evaluation.score9, evaluation.score10
+            ]
+            total = evaluation.total()
+            if total > 0:
+                totals.append(total)
+            evaluation_rows.append({
+                'submission': submission,
+                'jury': jury,
+                'evaluation': evaluation,
+                'scores': scores,
+                'total': total,
+            })
+
+    average_score = sum(totals) / len(totals) if totals else 0
+
+    return render_template(
+        'team_round_results.html',
+        team=team,
+        tournament=tournament,
+        round_item=round_item,
+        evaluation_rows=evaluation_rows,
+        average_score=average_score
     )

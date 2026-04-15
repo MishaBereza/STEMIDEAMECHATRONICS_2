@@ -19,18 +19,17 @@
       </div>
 
       <div class="form-group">
-        <label for="max_teams">Max Teams</label>
+        <label for="max_teams">{{ t('max_teams') }}</label>
         <input type="number" id="max_teams" name="max_teams" value="{{ tournament.max_teams or '' }}">
       </div>
 
       <div class="form-group">
         <label for="status">{{ t('status') }}</label>
         <select id="status" name="status">
-          <option value="Draft" {% if tournament.status == 'Draft' %}selected{% endif %}>Draft</option>
-          <option value="Registration" {% if tournament.status == 'Registration' %}selected{% endif %}>Registration</option>
-          <option value="Running" {% if tournament.status == 'Running' %}selected{% endif %}>Running</option>
-          <option value="Submission" {% if tournament.status == 'Submission' %}selected{% endif %}>Submission</option>
-          <option value="Finished" {% if tournament.status == 'Finished' %}selected{% endif %}>Finished</option>
+          <option value="Draft" {% if tournament.status == 'Draft' %}selected{% endif %}>{{ t('draft') }}</option>
+          <option value="Registration" {% if tournament.status == 'Registration' %}selected{% endif %}>{{ t('registration') }}</option>
+          <option value="Running" {% if tournament.status == 'Running' %}selected{% endif %}>{{ t('running') }}</option>
+          <option value="Finished" {% if tournament.status == 'Finished' %}selected{% endif %}>{{ t('finished') }}</option>
         </select>
       </div>
 

@@ -12,9 +12,9 @@
 - `SECRET_KEY` з ENV або `dev-secret`
 
 ### Адмін пароль
-- `ADMIN_PASSWORD_FILE = 'admin_password.txt'`
-- `get_or_create_admin_password()` -> читає файл або записує `admin123`
-- `save_admin_password(new_password)` -> оновлює файл
+- Зберігається в базі даних у таблиці `Settings` з ключем `admin_password`
+- `get_or_create_admin_password()` -> читає з БД або створює запис з `admin123`
+- `save_admin_password(new_password)` -> оновлює запис у БД
 
 ### Перевірка прав
 - `admin_required` декоратор (перевірка `session['admin']`)

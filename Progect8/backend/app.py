@@ -74,9 +74,9 @@ def set_language(lang):
 
 from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
 from .tournaments import index, tournament_page, leaderboard
-from .teams import register_team, team_page, edit_team_members
+from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
-from .admin import admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, delete_tournament, change_user_role
+from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round
 
 # Register routes
 app.add_url_rule('/', 'index', index, methods=['GET'])
@@ -90,6 +90,7 @@ app.add_url_rule('/leaderboard/<int:tid>', 'leaderboard', leaderboard, methods=[
 app.add_url_rule('/admin', 'admin_panel', admin_panel, methods=['GET', 'POST'])
 app.add_url_rule('/admin/logout', 'admin_logout', admin_logout, methods=['GET'])
 app.add_url_rule('/team/<int:teamid>', 'team_page', team_page, methods=['GET', 'POST'])
+app.add_url_rule('/team/<int:teamid>/round/<int:rid>/results', 'team_round_results', team_round_results, methods=['GET'])
 app.add_url_rule('/edit_team_members/<int:teamid>', 'edit_team_members', edit_team_members, methods=['GET', 'POST'])
 app.add_url_rule('/admin/dashboard', 'admin_dashboard', admin_dashboard, methods=['GET'])
 app.add_url_rule('/admin/change_password', 'admin_change_password', admin_change_password, methods=['GET', 'POST'])
@@ -105,7 +106,13 @@ app.add_url_rule('/admin/team/<int:teamid>/delete', 'admin_delete_team', admin_d
 app.add_url_rule('/admin/team/<int:teamid>/decide', 'admin_team_decide', admin_team_decide, methods=['POST'])
 app.add_url_rule('/admin/tournament/create', 'create_tournament', create_tournament, methods=['GET', 'POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/edit', 'edit_tournament', edit_tournament, methods=['GET', 'POST'])
+app.add_url_rule('/admin/tournament/<int:tid>/status', 'update_tournament_status', update_tournament_status, methods=['POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/delete', 'delete_tournament', delete_tournament, methods=['POST'])
+app.add_url_rule('/admin/tournament/<int:tid>/rounds', 'admin_tournament_rounds', admin_tournament_rounds, methods=['GET'])
+app.add_url_rule('/admin/tournament/<int:tid>/rounds/new', 'create_round', create_round, methods=['GET', 'POST'])
+app.add_url_rule('/admin/round/<int:rid>/start', 'admin_round_start', admin_round_start, methods=['POST'])
+app.add_url_rule('/admin/round/<int:rid>/close', 'admin_round_close', admin_round_close, methods=['POST'])
+app.add_url_rule('/admin/round/<int:rid>/delete', 'delete_round', delete_round, methods=['POST'])
 app.add_url_rule('/jury/login', 'jury_login', jury_login, methods=['GET', 'POST'])
 app.add_url_rule('/jury/evaluate', 'jury_evaluate', jury_evaluate, methods=['GET'])
 app.add_url_rule('/evaluate/<int:sid>', 'evaluate_submission', evaluate_submission, methods=['GET', 'POST'])

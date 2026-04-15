@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
+{% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('manage_rounds_for') }} {{ tournament.name }}</h2>
+
+  <div class="form-actions">
+    <a href="{{ url_for('create_round', tid=tournament.id) }}" class="submit-btn">{{ t('create_round') }}</a>
+    <a href="{{ url_for('admin_tournaments') }}" class="secondary-btn">{{ t('back') }}</a>
+  </div>
+
+  <div class="table-shell">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>{{ t('level') }}</th>
+          <th>{{ t('title') }}</th>
+          <th>{{ t('description') }}</th>
+          <th>{{ t('status') }}</th>
+          <th>{{ t('actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for round in rounds %}
+          <tr>
+            <td>{{ round.level }}</td>
+            <td>{{ round.title }}</td>
+            <td>{{ round.description or '-' }}</td>
+            <td><span class="status-pill {{ round.status|lower }}">{{ round.status }}</span></td>
+            <td>
+              <div class="table-actions">
+                {% if round.status == 'Draft' %}
+                  <form method="post" action="{{ url_for('admin_round_start', rid=round.id) }}" class="inline-form">
+                    <button type="submit" class="submit-btn">{{ t('start_round') }}</button>
+                  </form>
+                {% elif round.status == 'Active' %}
+                  <form method="post" action="{{ url_for('admin_round_close', rid=round.id) }}" class="inline-form">
+                    <button type="submit" class="danger-btn">{{ t('close_round') }}</button>
+                  </form>
+                {% else %}
+                  <span class="admin-section-note">{{ t('no_actions') }}</span>
+                {% endif %}
+                <form method="post" action="{{ url_for('delete_round', rid=round.id) }}" class="inline-form">
+                  <button type="submit" class="danger-btn" onclick="return confirm('{{ t('delete') }}?')">{{ t('delete') }}</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5" class="empty-row">{{ t('no_rounds_created') }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

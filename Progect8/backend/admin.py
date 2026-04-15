@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Tournament, Team, Round, Submission
 from .translations import get_text
@@ -111,6 +113,12 @@ def admin_tournament_teams(tid):
     return render_template('admin_teams.html', tournament=t, teams=teams)
 
 
+def admin_tournament_rounds(tid):
+    t = Tournament.query.get_or_404(tid)
+    rounds = Round.query.filter_by(tournament_id=t.id).order_by(Round.level.asc(), Round.id.asc()).all()
+    return render_template('round_editor.html', tournament=t, rounds=rounds)
+
+
 def admin_delete_team(teamid):
     team = Team.query.get_or_404(teamid)
 
@@ -160,6 +168,17 @@ def create_tournament():
         )
         db.session.add(t)
         db.session.commit()
+
+        first_round = Round(
+            tournament_id=t.id,
+            title='Round 1',
+            description='',
+            level=1,
+            status='Draft'
+        )
+        db.session.add(first_round)
+        db.session.commit()
+
         flash(_t('tournament_created'), 'success')
         return redirect('/admin/tournaments')
 
@@ -179,6 +198,20 @@ def edit_tournament(tid):
         return redirect('/admin/tournaments')
 
     return render_template('admin_edit_tournament.html', tournament=t)
+
+
+def update_tournament_status(tid):
+    t = Tournament.query.get_or_404(tid)
+    new_status = request.form.get('status', '').strip()
+
+    if new_status not in ['Registration', 'Running', 'Finished']:
+        flash(_t('invalid_status'), 'warning')
+        return redirect('/admin/tournaments')
+
+    t.status = new_status
+    db.session.commit()
+    flash(_t('tournament_updated'), 'success')
+    return redirect('/admin/tournaments')
 
 
 def delete_tournament(tid):
@@ -205,3 +238,81 @@ def delete_tournament(tid):
 
     flash(_t('tournament_deleted'), 'success')
     return redirect('/admin/tournaments')
+
+
+def create_round(tid):
+    tournament = Tournament.query.get_or_404(tid)
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        level_raw = request.form.get('level', '').strip()
+
+        if not title:
+            flash(_t('round_title_required'), 'warning')
+            return render_template('admin_create_round.html', tournament=tournament)
+
+        level = int(level_raw) if level_raw else 1
+
+        new_round = Round(
+            title=title,
+            description=description,
+            level=level,
+            tournament_id=tournament.id,
+            status='Draft'
+        )
+
+        db.session.add(new_round)
+        db.session.commit()
+
+        flash(_t('round_created', title=title), 'success')
+        return redirect(url_for('admin_tournament_rounds', tid=tournament.id))
+
+    return render_template('admin_create_round.html', tournament=tournament)
+
+
+def admin_round_start(rid):
+    round_item = Round.query.get_or_404(rid)
+
+    if round_item.status == 'Draft':
+        round_item.status = 'Active'
+        round_item.start_at = datetime.utcnow()
+        db.session.commit()
+        flash(_t('round_started', level=round_item.level), 'success')
+    elif round_item.status == 'Active':
+        flash(_t('round_already_active'), 'info')
+    else:
+        flash(_t('round_cannot_start', status=round_item.status), 'warning')
+
+    return redirect(url_for('admin_tournament_rounds', tid=round_item.tournament_id))
+
+
+def admin_round_close(rid):
+    round_item = Round.query.get_or_404(rid)
+
+    if round_item.status == 'Active':
+        round_item.status = 'Closed'
+        round_item.end_at = datetime.utcnow()
+        db.session.commit()
+        flash(_t('round_closed', level=round_item.level), 'success')
+    else:
+        flash(_t('round_not_active'), 'warning')
+
+    return redirect(url_for('admin_tournament_rounds', tid=round_item.tournament_id))
+
+
+def delete_round(rid):
+    round_item = Round.query.get_or_404(rid)
+    tournament_id = round_item.tournament_id
+
+    submissions = Submission.query.filter_by(round_id=round_item.id).all()
+    for submission in submissions:
+        for evaluation in submission.evaluations:
+            db.session.delete(evaluation)
+        db.session.delete(submission)
+
+    db.session.delete(round_item)
+    db.session.commit()
+
+    flash(_t('round_deleted'), 'success')
+    return redirect(url_for('admin_tournament_rounds', tid=tournament_id))

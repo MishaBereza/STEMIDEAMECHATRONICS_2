@@ -22,8 +22,21 @@
             <td><span class="status-pill default">{{ t_item.status }}</span></td>
             <td>
               <div class="table-actions">
+                <form method="post" action="{{ url_for('update_tournament_status', tid=t_item.id) }}" class="inline-form">
+                  <input type="hidden" name="status" value="Registration">
+                  <button type="submit" class="inline-btn quick-status-btn quick-status-registration">{{ t('registration') }}</button>
+                </form>
+                <form method="post" action="{{ url_for('update_tournament_status', tid=t_item.id) }}" class="inline-form">
+                  <input type="hidden" name="status" value="Running">
+                  <button type="submit" class="inline-btn quick-status-btn quick-status-running">{{ t('running') }}</button>
+                </form>
+                <form method="post" action="{{ url_for('update_tournament_status', tid=t_item.id) }}" class="inline-form">
+                  <input type="hidden" name="status" value="Finished">
+                  <button type="submit" class="inline-btn quick-status-btn quick-status-finished">{{ t('finished') }}</button>
+                </form>
                 <a href="{{ url_for('edit_tournament', tid=t_item.id) }}" class="inline-btn">{{ t('edit') }}</a>
                 <a href="{{ url_for('admin_tournament_teams', tid=t_item.id) }}" class="inline-btn">{{ t('teams') }}</a>
+                <a href="{{ url_for('admin_tournament_rounds', tid=t_item.id) }}" class="inline-btn">{{ t('rounds') }}</a>
                 <form method="post" action="{{ url_for('delete_tournament', tid=t_item.id) }}" class="inline-form">
                   <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
                 </form>

@@ -6,13 +6,14 @@
   {% set current = get_current_user() %}
   <h3>{{ t('rounds') }}</h3>
   <ul>
-    {% for r in tournament.rounds %}
+    {% for entry in round_entries %}
+      {% set r = entry.round %}
       <li>{{ r.title }} - {{ t('level') }} {{ r.level }} - {{ r.status }}
-        {% if tournament.status in ['Submission','Running'] and ((current and myteam) or session.get('admin')) %}
+        {% if entry.can_submit %}
           - <a href="/round/{{ r.id }}/submit">{{ t('submit') }}</a>
         {% endif %}
-        {% if tournament.status.lower() in ['finished', 'completed', 'closed'] %}
-          - <a href="/leaderboard/{{ tournament.id }}">{{ t('leaderboard') }}</a>
+        {% if entry.can_view_results %}
+          - <a href="{{ url_for('team_round_results', teamid=myteam.id, rid=r.id) }}">{{ t('results') }}</a>
         {% endif %}
       </li>
     {% else %}
@@ -22,7 +23,8 @@
   {% if current %}
     {% if myteam %}
       <div style="margin:20px 0;">
-        <strong>{{ t('your_team') }}:</strong> <a href="/team/{{ myteam.id }}">{{ myteam.name }}</a>
+        <strong>{{ t('your_team') }}:</strong>
+        <span>{{ myteam.name }}</span>
       </div>
     {% else %}
       {% if tournament.status == 'Registration' %}

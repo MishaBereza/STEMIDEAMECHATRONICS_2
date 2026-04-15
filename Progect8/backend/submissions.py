@@ -1,11 +1,19 @@
+from datetime import datetime
+
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import Round, Tournament, Team, Submission, User, Evaluation, db
 from .app_helpers import get_current_user
 from .translations import get_text
 
+PASSING_SCORE = 50
+
 
 def _t(key, **kwargs):
     return get_text(key, session.get('language', 'en'), **kwargs)
+
+
+def get_round_access_state(team, round_item):
+    return True, None
 
 
 def submit_solution(rid):
@@ -20,13 +28,19 @@ def submit_solution(rid):
         if user:
             for team in Team.query.filter_by(tournament_id=r.tournament_id).all():
                 if team.captain_id == user.id or user in team.members:
-                    teams.append(team)
+                    allowed, _ = get_round_access_state(team, r)
+                    if allowed:
+                        teams.append(team)
 
-    status_ok = t and t.status.lower() in ('submission', 'running')
+    status_ok = t and t.status.lower() in ('submission', 'running') and r.status.lower() == 'active'
 
     if request.method == 'POST':
-        if not status_ok:
+        if not t or t.status.lower() not in ('submission', 'running'):
             flash(_t('submissions_not_open'), 'warning')
+            return redirect(url_for('tournament_page', tid=r.tournament_id))
+
+        if r.status.lower() != 'active':
+            flash(_t('round_not_active_for_submission'), 'warning')
             return redirect(url_for('tournament_page', tid=r.tournament_id))
 
         submitter_email = request.form.get('submitter_email', '').strip().lower()
@@ -65,18 +79,36 @@ def submit_solution(rid):
             flash(_t('not_allowed_submit_for_team'), 'warning')
             return redirect(url_for('submit_solution', rid=rid))
 
+        if not is_admin:
+            can_access_round, reason_key = get_round_access_state(team_obj, r)
+            if not can_access_round:
+                flash(_t(reason_key), 'warning')
+                return redirect(url_for('tournament_page', tid=r.tournament_id))
+
         repo = request.form.get('repo_url', '').strip()
         if not repo:
             flash(_t('github_repo_required'), 'warning')
         else:
-            submission = Submission(
+            submission = Submission.query.filter_by(
                 team_id=sel_team_id,
-                round_id=r.id,
-                repo_url=repo,
-                demo_url=request.form.get('demo_url', '').strip(),
-                description=request.form.get('description', '').strip()
-            )
-            db.session.add(submission)
+                round_id=r.id
+            ).order_by(Submission.id.asc()).first()
+
+            if submission:
+                for evaluation in list(submission.evaluations):
+                    db.session.delete(evaluation)
+            else:
+                submission = Submission(
+                    team_id=sel_team_id,
+                    round_id=r.id,
+                )
+                db.session.add(submission)
+
+            submission.repo_url = repo
+            submission.demo_url = request.form.get('demo_url', '').strip()
+            submission.description = request.form.get('description', '').strip()
+            submission.submitted_at = datetime.utcnow()
+
             db.session.commit()
             flash(_t('submitted'), 'success')
             return redirect(url_for('tournament_page', tid=r.tournament_id))
@@ -85,15 +117,23 @@ def submit_solution(rid):
 
 
 def evaluate_submission(sid):
-    if 'jury_id' not in session:
+    if 'jury_id' not in session and 'admin' not in session:
         flash(_t('please_login_as_jury'), 'warning')
         return redirect('/jury/login')
 
-    jury = db.session.get(User, session['jury_id'])
-    if not jury or jury.role != 'jury':
-        session.pop('jury_id', None)
-        flash(_t('invalid_jury_session'), 'danger')
-        return redirect('/jury/login')
+    if 'jury_id' in session:
+        jury = db.session.get(User, session['jury_id'])
+        if not jury or jury.role not in ['jury', 'admin']:
+            session.pop('jury_id', None)
+            flash(_t('invalid_jury_session'), 'danger')
+            return redirect('/jury/login')
+    else:
+        # Admin access
+        jury = get_current_user()
+        if not jury or jury.role != 'admin':
+            session.pop('admin', None)
+            flash(_t('invalid_admin_session'), 'danger')
+            return redirect('/admin')
 
     s = Submission.query.get_or_404(sid)
 
@@ -114,7 +154,8 @@ def evaluate_submission(sid):
             except ValueError:
                 flash(_t('score_number_range', field=field_name), 'warning')
                 return render_template('evaluate.html', s=s)
-            if score_value < 0 or score_value > 10:
+            min_score = 1 if field_name == 'score1' else 0
+            if score_value < min_score or score_value > 10:
                 flash(_t('score_between_range', field=field_name), 'warning')
                 return render_template('evaluate.html', s=s)
             parsed_scores[field_name] = score_value

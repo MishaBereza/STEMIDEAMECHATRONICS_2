@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/interface.css">
+{% endblock %}
+{% block content %}
+<div class="content-shell">
+  <section class="surface-card">
+    <h2>Результати: {{ round_item.title }}</h2>
+    <div class="info-grid">
+      <div class="info-line"><strong>{{ t('team') }}:</strong> {{ team.name }}</div>
+      <div class="info-line"><strong>{{ t('tournament_page') }}:</strong> {{ tournament.name }}</div>
+      <div class="info-line"><strong>{{ t('status') }}:</strong> {{ round_item.status }}</div>
+      <div class="info-line"><strong>{{ t('average_score') }}:</strong> {{ '%.2f'|format(average_score) }}</div>
+    </div>
+  </section>
+
+  <section class="surface-card">
+    <h3>{{ t('jury_evaluations') }}</h3>
+    {% if evaluation_rows %}
+      <div class="stack-list">
+        {% for row in evaluation_rows %}
+          <article class="evaluation-card">
+            <div class="evaluation-meta">
+              <div><strong>{{ t('submission_id') }}:</strong> #{{ row.submission.id }}</div>
+              {% if row.submission.repo_url %}
+                <div><strong>{{ t('repo') }}:</strong> <a href="{{ row.submission.repo_url }}" target="_blank">{{ row.submission.repo_url }}</a></div>
+              {% endif %}
+              <div>
+                <strong>{{ t('jury_short') }}:</strong>
+                {% if row.jury %}
+                  {{ row.jury.first_name }} {{ row.jury.last_name }} ({{ row.jury.email }})
+                {% else %}
+                  {{ t('unknown_jury_member') }}
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="data-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('criterion') }}</th>
+                    <th>{{ t('score') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for score in row.scores %}
+                    <tr>
+                      <td>{{ t('criterion') }} {{ loop.index }}</td>
+                      <td>{{ score if score is not none else '-' }}</td>
+                    </tr>
+                  {% endfor %}
+                  <tr>
+                    <td><strong>{{ t('total') }}</strong></td>
+                    <td><strong>{{ row.total }}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="comment-box">
+              <strong>{{ t('comment_from_jury') }}:</strong>
+              <div>{{ row.evaluation.comment if row.evaluation.comment else t('no_comment_provided') }}</div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted-text">{{ t('no_submissions') }}</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -9,7 +9,6 @@
 - `utils.py` — helper-функції (adaptive difficulty).
 - `translations.py` — i18n словники та `get_text`.
 - `demo_setup.py` — генерація початкових демо-даних.
-- `admin_password.txt` — файл пароля адміна (при першому запуску створюється автоматично).
 - `README.md` — швидкий старт.
 - `requirements.txt` — залежності.
 - `start.bat`/`start.ps1` - скрипти запуску.

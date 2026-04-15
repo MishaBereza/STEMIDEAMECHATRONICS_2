@@ -9,7 +9,7 @@
 
       {% if team_scores %}
         {% set has_evaluations = false %}
-        {% for team, score, status in team_scores %}
+        {% for team, score in team_scores %}
           {% if score > 0 %}
             {% set has_evaluations = true %}
           {% endif %}
@@ -28,23 +28,17 @@
               <tr>
                 <th>{{ t('place') }}</th>
                 <th>{{ t('team') }}</th>
-                <th>{{ t('average_score') }}</th>
-                <th>{{ t('status') }}</th>
+                <th>{{ t('total') }}</th>
               </tr>
             </thead>
             <tbody>
-              {% for team, score, status in team_scores %}
+              {% for team, score in team_scores %}
                 <tr>
                   <td class="leaderboard-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
                     {{ loop.index }}
                   </td>
                   <td>{{ team.name }}</td>
                   <td class="leaderboard-score">{{ "{:.2f}".format(score) }}</td>
-                  <td class="leaderboard-status">
-                    <span class="status-chip {% if status == 'passed_next_round' %}accepted{% elif status == 'not_passed' %}rejected{% else %}pending{% endif %}">
-                      {{ t(status) }}
-                    </span>
-                  </td>
                 </tr>
               {% endfor %}
             </tbody>

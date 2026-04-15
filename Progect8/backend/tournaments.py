@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, session
 from sqlalchemy import or_
 
 from .app_helpers import get_current_user
-from .models import Team, Tournament
+from .models import Team, Tournament, Round
 from .translations import get_text
 
 
@@ -36,7 +36,29 @@ def tournament_page(tid):
                 if team.tournament_id == t.id:
                     myteam = team
                     break
-    return render_template('tournament.html', tournament=t, myteam=myteam)
+    rounds = sorted(t.rounds, key=lambda item: (item.level, item.id))
+    round_entries = []
+
+    for round_item in rounds:
+        can_submit = False
+
+        if session.get('admin'):
+            can_submit = t.status in ['Submission', 'Running'] and round_item.status == 'Active'
+        elif user and myteam:
+            can_submit = t.status in ['Submission', 'Running'] and round_item.status == 'Active'
+
+        round_entries.append({
+            'round': round_item,
+            'can_submit': can_submit,
+            'can_view_results': bool(myteam and round_item.status == 'Closed'),
+        })
+
+    return render_template(
+        'tournament.html',
+        tournament=t,
+        myteam=myteam,
+        round_entries=round_entries
+    )
 
 
 def leaderboard(tid):
@@ -56,16 +78,8 @@ def leaderboard(tid):
                 if total > 0:
                     evaluation_totals.append(total)
 
-        avg = sum(evaluation_totals) / len(evaluation_totals) if evaluation_totals else 0
-
-        if not evaluation_totals:
-            status_key = 'under_review'
-        elif avg > 50:
-            status_key = 'passed_next_round'
-        else:
-            status_key = 'not_passed'
-
-        team_scores.append((team, avg, status_key))
+        total_score = sum(evaluation_totals) if evaluation_totals else 0
+        team_scores.append((team, total_score))
 
     team_scores.sort(key=lambda item: item[1], reverse=True)
     return render_template('leaderboard.html', tournament=t, team_scores=team_scores)

@@ -80,30 +80,159 @@
   cursor: pointer;
 }
 
-.submit-btn {
+.admin-page .submit-btn,
+.admin-page .submit-btn:visited,
+.admin-page .submit-btn:hover,
+.admin-page .submit-btn:focus,
+.admin-page .submit-btn:active,
+.admin-page a.submit-btn,
+.admin-page a.submit-btn:visited,
+.admin-page a.submit-btn:hover,
+.admin-page a.submit-btn:focus,
+.admin-page a.submit-btn:active {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+.admin-page .secondary-btn,
+.admin-page .secondary-btn:visited,
+.admin-page .secondary-btn:hover,
+.admin-page .secondary-btn:focus,
+.admin-page .secondary-btn:active,
+.admin-page a.secondary-btn,
+.admin-page a.secondary-btn:visited,
+.admin-page a.secondary-btn:hover,
+.admin-page a.secondary-btn:focus,
+.admin-page a.secondary-btn:active {
+  color: #222222 !important;
+  text-decoration: none;
+}
+
+.admin-page .inline-btn,
+.admin-page .inline-btn:visited,
+.admin-page .inline-btn:hover,
+.admin-page .inline-btn:focus,
+.admin-page .inline-btn:active,
+.admin-page a.inline-btn,
+.admin-page a.inline-btn:visited,
+.admin-page a.inline-btn:hover,
+.admin-page a.inline-btn:focus,
+.admin-page a.inline-btn:active {
+  color: #333333 !important;
+  text-decoration: none;
+}
+
+.admin-page .danger-btn,
+.admin-page .danger-btn:visited,
+.admin-page .danger-btn:hover,
+.admin-page .danger-btn:focus,
+.admin-page .danger-btn:active,
+.admin-page a.danger-btn,
+.admin-page a.danger-btn:visited,
+.admin-page a.danger-btn:hover,
+.admin-page a.danger-btn:focus,
+.admin-page a.danger-btn:active {
+  color: #7a0000 !important;
+  text-decoration: none;
+}
+
+.submit-btn,
+.submit-btn:visited {
   background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
   color: #ffffff;
 }
 
-.secondary-btn {
+.secondary-btn,
+.secondary-btn:visited {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 165, 0, 0.3);
   color: #333333;
 }
 
-.danger-btn {
+.danger-btn,
+.danger-btn:visited {
   background: rgba(255, 99, 71, 0.1);
   border: 1px solid rgba(255, 99, 71, 0.3);
   color: #8b0000;
 }
 
-.inline-btn {
+.inline-btn,
+.inline-btn:visited {
   min-height: 34px;
   padding: 0 14px;
   font-size: 0.88rem;
   background: rgba(255, 255, 255, 0.9);
   color: #333333;
   border: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.admin-page .quick-status-btn,
+.admin-page .quick-status-btn:visited,
+.admin-page .quick-status-btn:hover,
+.admin-page .quick-status-btn:focus,
+.admin-page .quick-status-btn:active {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.quick-status-registration,
+.quick-status-registration:visited {
+  background: rgba(255, 215, 0, 0.14);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #8f6b00 !important;
+}
+
+.quick-status-running,
+.quick-status-running:visited {
+  background: rgba(50, 205, 50, 0.14);
+  border: 1px solid rgba(50, 205, 50, 0.4);
+  color: #006400 !important;
+}
+
+.quick-status-finished,
+.quick-status-finished:visited {
+  background: rgba(71, 215, 255, 0.14);
+  border: 1px solid rgba(71, 215, 255, 0.4);
+  color: #005f78 !important;
+}
+
+.quick-status-registration:hover,
+.quick-status-registration:focus,
+.quick-status-registration:active {
+  color: #7a5a00 !important;
+}
+
+.quick-status-running:hover,
+.quick-status-running:focus,
+.quick-status-running:active {
+  color: #005200 !important;
+}
+
+.quick-status-finished:hover,
+.quick-status-finished:focus,
+.quick-status-finished:active {
+  color: #004f64 !important;
+}
+
+.submit-btn:hover,
+.submit-btn:focus,
+.submit-btn:active {
+  color: #ffffff;
+}
+
+.secondary-btn:hover,
+.secondary-btn:focus,
+.secondary-btn:active,
+.inline-btn:hover,
+.inline-btn:focus,
+.inline-btn:active {
+  color: #222222;
+}
+
+.danger-btn:hover,
+.danger-btn:focus,
+.danger-btn:active {
+  color: #7a0000;
 }
 
 .submit-btn:hover,
@@ -248,23 +377,38 @@
   color: #b8860b;
 }
 
+.status-pill.draft {
+  background: rgba(160, 160, 160, 0.14);
+  color: #575757;
+}
+
+.status-pill.active {
+  background: rgba(50, 205, 50, 0.1);
+  color: #006400;
+}
+
+.status-pill.closed {
+  background: rgba(255, 99, 71, 0.1);
+  color: #8b0000;
+}
+
 .status-pill.accepted {
   background: rgba(92, 255, 179, 0.12);
-  color: #cffff0;
+  color: #0f5c2d;
 }
 
 .status-pill.rejected {
   background: rgba(255, 114, 114, 0.14);
-  color: #ffd0d0;
+  color: #8b0000;
 }
 
 .status-pill.returned {
   background: rgba(71, 215, 255, 0.14);
-  color: #bff4ff;
+  color: #005f78;
 }
 
 .admin-section-note {
-  color: #9cb0cb;
+  color: #5f6f82;
 }
 
 @media (max-width: 720px) {

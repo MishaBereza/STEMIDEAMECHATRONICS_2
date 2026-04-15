@@ -19,7 +19,7 @@
               name="score{{ i }}"
               id="score{{ i }}"
               type="number"
-              min="0"
+              min="{{ 1 if i == 1 else 0 }}"
               max="10"
               step="1"
               inputmode="numeric"
@@ -28,7 +28,7 @@
               style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
             >
             <div class="score-error" id="score{{ i }}-error" style="color: #e65100; font-size: 12px; margin-top: 4px; display: none;">
-              {{ t('enter_number_0_10') }}
+              {{ 'Введіть число від 1 до 10.' if i == 1 else t('enter_number_0_10') }}
             </div>
           </td>
         </tr>
@@ -47,6 +47,7 @@
       function validateInput(input) {
         const error = document.getElementById(input.id + '-error');
         const raw = input.value.trim();
+        const min = input.id === 'score1' ? 1 : 0;
         let isValid = true;
 
         if (raw.length > 2) {
@@ -57,7 +58,7 @@
           isValid = false;
         } else {
           const value = Number(input.value);
-          if (!Number.isFinite(value) || value < 0 || value > 10) {
+          if (!Number.isFinite(value) || value < min || value > 10) {
             isValid = false;
           }
         }

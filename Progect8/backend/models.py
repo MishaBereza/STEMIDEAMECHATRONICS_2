@@ -130,3 +130,9 @@ class Evaluation(db.Model):
         if not parts:
             parts = [p for p in (self.score_tech, self.score_func, self.score_ui) if p is not None]
         return sum(parts) if parts else 0
+
+
+class Settings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=False)
