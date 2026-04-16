@@ -8,6 +8,17 @@
     <h2>{{ t('jury_evaluation_panel') }}</h2>
     <p class="muted-text">{{ t('welcome') }}, {{ current_user.name if current_user else t('jury_short') }}!</p>
 
+    {% if tournament and tournament.evaluation_criteria %}
+      <div style="background: #f0f7ff; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 4px solid #2196F3;">
+        <h4 style="margin-top: 0;">{{ t('evaluation_criteria') }}:</h4>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          {% for criterion in tournament.evaluation_criteria|sort(attribute='order') %}
+            <li>{{ criterion.name or 'Kriteria ' + loop.index|string }} (max {{ criterion.max_points }} {{ t('points') }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
     {% if message_key %}
       <p><span class="status-chip pending">{{ t(message_key) }}</span></p>
     {% else %}
@@ -29,6 +40,7 @@
               <thead>
                 <tr>
                   <th>{{ t('team') }}</th>
+                  <th>{{ t('tournament') }}</th>
                   <th>{{ t('repo') }}</th>
                   <th>{{ t('status') }}</th>
                   <th>{{ t('actions') }}</th>
@@ -38,6 +50,7 @@
                 {% for s, evaluation in pending_evaluations %}
                   <tr>
                     <td>{{ s.team.name }}</td>
+                    <td>{{ s.team.tournament.name }}</td>
                     <td><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
                     <td><span class="status-chip pending">{{ t('not_reviewed') }}</span></td>
                     <td><a href="/evaluate/{{ s.id }}" class="action-btn">{{ t('evaluate') }}</a></td>
@@ -58,6 +71,7 @@
               <thead>
                 <tr>
                   <th>{{ t('team') }}</th>
+                  <th>{{ t('tournament') }}</th>
                   <th>{{ t('repo') }}</th>
                   <th>{{ t('status') }}</th>
                   <th>{{ t('actions') }}</th>
@@ -67,6 +81,7 @@
                 {% for s, evaluation in reviewed_evaluations %}
                   <tr>
                     <td>{{ s.team.name }}</td>
+                    <td>{{ s.team.tournament.name }}</td>
                     <td><a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></td>
                     <td><span class="status-chip reviewed">{{ t('reviewed') }} ({{ evaluation.total() }})</span></td>
                     <td><a href="/evaluate/{{ s.id }}" class="action-btn success">{{ t('view') }}</a></td>

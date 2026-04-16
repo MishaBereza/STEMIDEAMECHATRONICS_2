@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Round, Tournament, Team, Submission, User, Evaluation, db
+from .models import Round, Tournament, Team, Submission, User, Evaluation, EvaluationCriteria, EvaluationScore, db
 from .app_helpers import get_current_user
 from .translations import get_text
 
@@ -136,56 +136,58 @@ def evaluate_submission(sid):
             return redirect('/admin')
 
     s = Submission.query.get_or_404(sid)
+    tournament = db.session.get(Tournament, s.round.tournament_id) if s.round else None
+    criteria = []
+    if tournament:
+        criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()
+
+    if not criteria:
+        if request.method == 'POST':
+            flash(_t('no_criteria_configured'), 'warning')
+        return render_template('evaluate.html', s=s, criteria=criteria)
 
     if request.method == 'POST':
-        raw_scores = {f'score{i}': request.form.get(f'score{i}', '').strip() for i in range(1, 11)}
         comment = request.form.get('comment', '').strip()
         parsed_scores = {}
-
-        for field_name, raw_value in raw_scores.items():
+        for criterion in criteria:
+            raw_value = request.form.get(f'criteria_score_{criterion.id}', '').strip()
             if not raw_value:
-                flash(_t('score_required', field=field_name), 'warning')
-                return render_template('evaluate.html', s=s)
-            if len(raw_value) > 2:
-                flash(_t('score_two_digits', field=field_name), 'warning')
-                return render_template('evaluate.html', s=s)
+                flash(_t('score_required', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                return render_template('evaluate.html', s=s, criteria=criteria)
+            if len(raw_value) > 4:
+                flash(_t('score_two_digits', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                return render_template('evaluate.html', s=s, criteria=criteria)
             try:
                 score_value = float(raw_value)
             except ValueError:
-                flash(_t('score_number_range', field=field_name), 'warning')
-                return render_template('evaluate.html', s=s)
-            min_score = 1 if field_name == 'score1' else 0
-            if score_value < min_score or score_value > 10:
-                flash(_t('score_between_range', field=field_name), 'warning')
-                return render_template('evaluate.html', s=s)
-            parsed_scores[field_name] = score_value
-
-        total_score = sum(parsed_scores.values())
+                flash(_t('score_number_range', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                return render_template('evaluate.html', s=s, criteria=criteria)
+            if score_value < 0 or score_value > criterion.max_points:
+                flash(_t('score_between_range', field=f"{criterion.name or 'Criterion'} (0-{criterion.max_points})"), 'warning')
+                return render_template('evaluate.html', s=s, criteria=criteria)
+            parsed_scores[criterion.id] = score_value
 
         evaluation = Evaluation(
             submission_id=s.id,
             jury_id=jury.id,
-            score1=parsed_scores['score1'],
-            score2=parsed_scores['score2'],
-            score3=parsed_scores['score3'],
-            score4=parsed_scores['score4'],
-            score5=parsed_scores['score5'],
-            score6=parsed_scores['score6'],
-            score7=parsed_scores['score7'],
-            score8=parsed_scores['score8'],
-            score9=parsed_scores['score9'],
-            score10=parsed_scores['score10'],
-            score_tech=total_score,
             comment=comment
         )
+
+        for criteria_id, score in parsed_scores.items():
+            score_entry = EvaluationScore(
+                criteria_id=criteria_id,
+                score=score
+            )
+            evaluation.criterion_scores.append(score_entry)
+
         db.session.add(evaluation)
         try:
             db.session.commit()
         except Exception:
             db.session.rollback()
             flash(_t('failed_save_evaluation'), 'danger')
-            return render_template('evaluate.html', s=s)
+            return render_template('evaluate.html', s=s, criteria=criteria)
         flash(_t('evaluation_saved'), 'success')
         return redirect(url_for('jury_evaluate'))
 
-    return render_template('evaluate.html', s=s)
+    return render_template('evaluate.html', s=s, criteria=criteria)

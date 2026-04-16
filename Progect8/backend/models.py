@@ -119,8 +119,17 @@ class Evaluation(db.Model):
     score_ui = db.Column(db.Float)
 
     comment = db.Column(db.Text)
+    
+    # Relationship for criterion-based scores
+    criterion_scores = db.relationship('EvaluationScore', backref='evaluation', lazy=True, cascade='all, delete-orphan')
 
     def total(self):
+        # First try to get total from criterion scores
+        criterion_total = sum([cs.score for cs in self.criterion_scores if cs.score is not None])
+        if criterion_total > 0:
+            return criterion_total
+        
+        # Fallback to old scoring system
         parts = [
             p for p in (
                 self.score1, self.score2, self.score3, self.score4, self.score5,
@@ -130,6 +139,26 @@ class Evaluation(db.Model):
         if not parts:
             parts = [p for p in (self.score_tech, self.score_func, self.score_ui) if p is not None]
         return sum(parts) if parts else 0
+
+
+class EvaluationScore(db.Model):
+    """Score for a single evaluation criterion"""
+    id = db.Column(db.Integer, primary_key=True)
+    evaluation_id = db.Column(db.Integer, db.ForeignKey('evaluation.id'), nullable=False)
+    criteria_id = db.Column(db.Integer, db.ForeignKey('evaluation_criteria.id'), nullable=False)
+    
+    criteria = db.relationship('EvaluationCriteria', lazy=True)
+    score = db.Column(db.Float, nullable=False, default=0)
+
+
+class EvaluationCriteria(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
+    tournament = db.relationship('Tournament', backref='evaluation_criteria', lazy=True)
+    
+    name = db.Column(db.String(200))
+    max_points = db.Column(db.Integer, default=10)
+    order = db.Column(db.Integer, default=0)
 
 
 class Settings(db.Model):

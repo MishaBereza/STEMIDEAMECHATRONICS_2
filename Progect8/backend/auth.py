@@ -23,6 +23,11 @@ def load_admin_password():
     return get_or_create_admin_password()
 
 
+def get_current_user():
+    """Get the current admin user from the database"""
+    return User.query.filter_by(role='admin').first()
+
+
 def save_admin_password(new_password):
     setting = Settings.query.filter_by(key='admin_password').first()
     if setting:
@@ -154,20 +159,21 @@ def jury_evaluate():
     from .models import Submission, Evaluation, Team, Tournament, Round
     from datetime import datetime
 
-    def sync_team_submissions(tournament):
-        if not tournament:
+    def sync_team_submissions(tournaments):
+        if not tournaments:
             return
 
-        latest_round = Round.query.filter_by(tournament_id=tournament.id).order_by(Round.level.desc(), Round.id.desc()).first()
-        round_id = latest_round.id if latest_round else None
         dirty = False
+        tournament_ids = [t.id for t in tournaments]
         teams_with_work = Team.query.filter(
-            Team.tournament_id == tournament.id,
+            Team.tournament_id.in_(tournament_ids),
             Team.repo_url.isnot(None),
             Team.repo_url != ''
         ).all()
 
         for team in teams_with_work:
+            latest_round = Round.query.filter_by(tournament_id=team.tournament_id).order_by(Round.level.desc(), Round.id.desc()).first()
+            round_id = latest_round.id if latest_round else None
             submission_query = Submission.query.filter_by(team_id=team.id)
             if round_id is None:
                 submission = submission_query.filter(Submission.round_id.is_(None)).first()
@@ -212,6 +218,7 @@ def jury_evaluate():
     ).order_by(Tournament.id.desc()).all()
 
     tournament = None
+    active_tournament_ids = []
     for ct in candidate_tournaments:
         has_submission = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id == ct.id).first()
         has_team_submit = Team.query.filter(
@@ -220,22 +227,23 @@ def jury_evaluate():
             Team.repo_url != ''
         ).first()
         if has_submission or has_team_submit:
-            tournament = ct
-            break
+            active_tournament_ids.append(ct.id)
+            if not tournament:
+                tournament = ct
 
     if not tournament and candidate_tournaments:
         tournament = candidate_tournaments[0]
 
-    if not tournament:
+    if not candidate_tournaments:
         return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=None, teams=[], message_key='no_active_tournament')
 
-    sync_team_submissions(tournament)
+    sync_team_submissions(candidate_tournaments)
 
     now = datetime.utcnow()
-    finished_round = Round.query.filter(Round.tournament_id == tournament.id, Round.end_at <= now).first()
-    submissions = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id == tournament.id).all()
+    finished_round = Round.query.filter(Round.tournament_id.in_([t.id for t in candidate_tournaments]), Round.end_at <= now).first()
+    submissions = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id.in_([t.id for t in candidate_tournaments])).all()
     team_level_submissions = Team.query.filter(
-        Team.tournament_id == tournament.id,
+        Team.tournament_id.in_([t.id for t in candidate_tournaments]),
         Team.repo_url.isnot(None),
         Team.repo_url != ''
     ).all()
@@ -243,7 +251,7 @@ def jury_evaluate():
     if not finished_round and not submissions and not team_level_submissions and tournament.status.lower() not in ('finished', 'completed', 'closed'):
         return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=tournament, teams=[], message_key='evaluation_not_started')
 
-    teams = Team.query.filter_by(tournament_id=tournament.id).all()
+    teams = Team.query.filter(Team.tournament_id.in_([t.id for t in candidate_tournaments])).all()
     pending_evaluations = []
     reviewed_evaluations = []
     for s in submissions:

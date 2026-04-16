@@ -37,6 +37,7 @@
                 <a href="{{ url_for('edit_tournament', tid=t_item.id) }}" class="inline-btn">{{ t('edit') }}</a>
                 <a href="{{ url_for('admin_tournament_teams', tid=t_item.id) }}" class="inline-btn">{{ t('teams') }}</a>
                 <a href="{{ url_for('admin_tournament_rounds', tid=t_item.id) }}" class="inline-btn">{{ t('rounds') }}</a>
+                <a href="{{ url_for('admin_tournament_evaluation_settings', tid=t_item.id) }}" class="inline-btn">{{ t('jury_settings') }}</a>
                 <form method="post" action="{{ url_for('delete_tournament', tid=t_item.id) }}" class="inline-form">
                   <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
                 </form>

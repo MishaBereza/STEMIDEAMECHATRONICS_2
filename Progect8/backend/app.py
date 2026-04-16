@@ -76,7 +76,7 @@ from .auth import register_user, user_login, user_logout, admin_panel, admin_log
 from .tournaments import index, tournament_page, leaderboard
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
-from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round
+from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round, admin_tournament_evaluation_settings
 
 # Register routes
 app.add_url_rule('/', 'index', index, methods=['GET'])
@@ -113,6 +113,7 @@ app.add_url_rule('/admin/tournament/<int:tid>/rounds/new', 'create_round', creat
 app.add_url_rule('/admin/round/<int:rid>/start', 'admin_round_start', admin_round_start, methods=['POST'])
 app.add_url_rule('/admin/round/<int:rid>/close', 'admin_round_close', admin_round_close, methods=['POST'])
 app.add_url_rule('/admin/round/<int:rid>/delete', 'delete_round', delete_round, methods=['POST'])
+app.add_url_rule('/admin/tournament/<int:tid>/evaluation-settings', 'admin_tournament_evaluation_settings', admin_tournament_evaluation_settings, methods=['GET', 'POST'])
 app.add_url_rule('/jury/login', 'jury_login', jury_login, methods=['GET', 'POST'])
 app.add_url_rule('/jury/evaluate', 'jury_evaluate', jury_evaluate, methods=['GET'])
 app.add_url_rule('/evaluate/<int:sid>', 'evaluate_submission', evaluate_submission, methods=['GET', 'POST'])

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import db, User, Tournament, Team, Round, Submission
+from .models import db, User, Tournament, Team, Round, Submission, EvaluationCriteria
 from .translations import get_text
 
 
@@ -316,3 +316,55 @@ def delete_round(rid):
 
     flash(_t('round_deleted'), 'success')
     return redirect(url_for('admin_tournament_rounds', tid=tournament_id))
+
+
+def admin_tournament_evaluation_settings(tid):
+    tournament = Tournament.query.get_or_404(tid)
+
+    if request.method == 'POST':
+        # Get criteria data from form
+        criteria_ids = request.form.getlist('criteria_id[]')
+        criteria_names = request.form.getlist('criteria_name[]')
+        criteria_points = request.form.getlist('criteria_points[]')
+        
+        # Delete criteria that are marked for deletion
+        delete_ids = request.form.getlist('delete_criteria[]')
+        for cid in delete_ids:
+            c = EvaluationCriteria.query.get(cid)
+            if c and c.tournament_id == tournament.id:
+                db.session.delete(c)
+        
+        # Update existing criteria
+        for i, cid in enumerate(criteria_ids):
+            if cid and cid.isdigit():
+                c = EvaluationCriteria.query.get(int(cid))
+                if c and c.tournament_id == tournament.id:
+                    c.name = criteria_names[i].strip() if i < len(criteria_names) else ''
+                    c.max_points = int(criteria_points[i]) if i < len(criteria_points) and criteria_points[i].isdigit() else 10
+                    c.order = i
+        
+        # Add new criteria
+        new_count = request.form.get('new_criteria_count', '0')
+        if new_count.isdigit():
+            for i in range(int(new_count)):
+                name = request.form.get(f'new_criteria_name_{i}', '').strip()
+                points_str = request.form.get(f'new_criteria_points_{i}', '10')
+                points = int(points_str) if points_str.isdigit() else 10
+                
+                if name or i == 0:  # Allow empty name for first criterion
+                    new_criteria = EvaluationCriteria(
+                        tournament_id=tournament.id,
+                        name=name,
+                        max_points=points,
+                        order=len(criteria_ids) + i
+                    )
+                    db.session.add(new_criteria)
+
+        db.session.commit()
+        flash(_t('evaluation_settings_saved'), 'success')
+        return redirect(url_for('admin_tournament_evaluation_settings', tid=tournament.id))
+
+    # Get existing criteria
+    criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()
+    return render_template('admin_evaluation_settings.html', tournament=tournament, criteria=criteria)
+

@@ -3,6 +3,7 @@
   <h3>{{ t('evaluate_submission') }} #{{ s.id }}</h3>
   <p><strong>{{ t('team') }}:</strong> {{ s.team.name }}</p>
   <p><strong>{{ t('repo') }}:</strong> <a href="{{ s.repo_url }}" target="_blank">{{ s.repo_url }}</a></p>
+  {% if s.demo_url %}<p><strong>{{ t('live') }}:</strong> <a href="{{ s.demo_url }}" target="_blank">{{ s.demo_url }}</a></p>{% endif %}
   <p><strong>{{ t('description') }}:</strong> {{ s.description or t('no_description') }}</p>
 
   <form method="post" id="evaluation-form" novalidate>
@@ -11,32 +12,42 @@
         <th>{{ t('criteria') }}</th>
         <th>{{ t('score_range') }}</th>
       </tr>
-      {% for i in range(1, 11) %}
+      {% if criteria %}
+        {% for criterion in criteria %}
+          <tr>
+            <td>{{ criterion.name or 'Criterion ' + loop.index|string }}</td>
+            <td style="padding: 8px; min-width: 180px;">
+              <input
+                name="criteria_score_{{ criterion.id }}"
+                id="criteria_score_{{ criterion.id }}"
+                type="number"
+                min="0"
+                max="{{ criterion.max_points }}"
+                step="0.1"
+                inputmode="decimal"
+                required
+                style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
+                placeholder="0-{{ criterion.max_points }}"
+              >
+              <div class="score-error" id="criteria_score_{{ criterion.id }}-error" style="color: #e65100; font-size: 12px; margin-top: 4px; display: none;">
+                {{ t('enter_number_0_10') }}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
         <tr>
-          <td>{{ t('criterion') }} {{ i }}</td>
-          <td style="padding: 8px; min-width: 180px;">
-            <input
-              name="score{{ i }}"
-              id="score{{ i }}"
-              type="number"
-              min="{{ 1 if i == 1 else 0 }}"
-              max="10"
-              step="1"
-              inputmode="numeric"
-              required
-              maxlength="2"
-              style="width: 90px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;"
-            >
-            <div class="score-error" id="score{{ i }}-error" style="color: #e65100; font-size: 12px; margin-top: 4px; display: none;">
-              {{ 'Введіть число від 1 до 10.' if i == 1 else t('enter_number_0_10') }}
-            </div>
+          <td colspan="2" style="padding: 16px; text-align: center; background: #fff4e5; color: #7a4f01;">
+            {{ t('no_criteria_configured') }}
           </td>
         </tr>
-      {% endfor %}
+      {% endif %}
     </table>
     <br>
-    <label>{{ t('comment') }}: <textarea name="comment"></textarea></label><br>
-    <button type="submit" class="submit-btn">{{ t('save_score') }}</button>
+    <label>{{ t('comment') }}: <textarea name="comment" style="width: 100%; min-height: 100px;"></textarea></label><br>
+    {% if criteria %}
+      <button type="submit" class="submit-btn">{{ t('save_score') }}</button>
+    {% endif %}
   </form>
 
   <script>
@@ -47,30 +58,28 @@
       function validateInput(input) {
         const error = document.getElementById(input.id + '-error');
         const raw = input.value.trim();
-        const min = input.id === 'score1' ? 1 : 0;
+        const max = parseFloat(input.getAttribute('max')) || 10;
+        const min = parseFloat(input.getAttribute('min')) || 0;
         let isValid = true;
-
-        if (raw.length > 2) {
-          input.value = raw.slice(0, 2);
-        }
 
         if (raw === '') {
           isValid = false;
         } else {
           const value = Number(input.value);
-          if (!Number.isFinite(value) || value < min || value > 10) {
+          if (!Number.isFinite(value) || value < min || value > max) {
             isValid = false;
           }
         }
 
         input.style.borderColor = isValid ? '#ccc' : '#c62828';
-        error.style.display = isValid ? 'none' : 'block';
+        if (error) {
+          error.style.display = isValid ? 'none' : 'block';
+        }
         return isValid;
       }
 
       inputs.forEach((input) => {
         input.addEventListener('input', function () {
-          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2);
           validateInput(this);
         });
 

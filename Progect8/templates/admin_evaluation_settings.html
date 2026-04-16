@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <style>
+    .evaluation-criteria-container {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .criteria-item {
+      background: #f5f5f5;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #007bff;
+    }
+
+    .criteria-item.new {
+      border-left-color: #28a745;
+      background: #f0fff4;
+    }
+
+    .criteria-item.delete {
+      opacity: 0.6;
+      border-left-color: #dc3545;
+    }
+
+    .criteria-row {
+      display: grid;
+      grid-template-columns: 1fr 150px 50px auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .criteria-row input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .criteria-row input[type="number"] {
+      text-align: center;
+    }
+
+    .btn-remove {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-remove:hover {
+      background: #c82333;
+    }
+
+    .btn-add {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .btn-add:hover {
+      background: #218838;
+    }
+
+    .form-actions {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .submit-btn, .secondary-btn {
+      padding: 10px 25px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .submit-btn {
+      background: #007bff;
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background: #0056b3;
+    }
+
+    .secondary-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .secondary-btn:hover {
+      background: #545b62;
+    }
+
+    .page-title {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .info-text {
+      background: #e7f3ff;
+      padding: 10px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      border-left: 4px solid #2196F3;
+      color: #333;
+    }
+
+    .label-inline {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('jury_evaluation_settings') }} - {{ tournament.name }}</h2>
+
+  <div class="info-text">
+    {{ t('jury_criteria_help_text') }}
+  </div>
+
+  <form method="POST" class="evaluation-criteria-container">
+    <div id="criteria-list">
+      {% if criteria %}
+        {% for criterion in criteria %}
+          <div class="criteria-item existing-criteria" data-id="{{ criterion.id }}">
+            <div class="criteria-row">
+              <div>
+                <div class="label-inline">{{ t('criteria_name') }}</div>
+                <input type="text" name="criteria_name[]" value="{{ criterion.name or '' }}" placeholder="{{ t('enter_criteria_name') }}">
+              </div>
+              <div>
+                <div class="label-inline">{{ t('max_points') }}</div>
+                <input type="number" name="criteria_points[]" value="{{ criterion.max_points or 10 }}" min="1" max="100">
+              </div>
+              <div>
+                <input type="hidden" name="criteria_id[]" value="{{ criterion.id }}">
+                <input type="hidden" name="delete_criteria[]" value="" class="delete-input">
+                <button type="button" class="btn-remove" onclick="markForDelete(this);">{{ t('remove') }}</button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="criteria-item new">
+          <div class="criteria-row">
+            <div>
+              <div class="label-inline">{{ t('criteria_name') }}</div>
+              <input type="text" name="new_criteria_name_0" value="" placeholder="{{ t('enter_criteria_name') }}">
+            </div>
+            <div>
+              <div class="label-inline">{{ t('max_points') }}</div>
+              <input type="number" name="new_criteria_points_0" value="10" min="1" max="100">
+            </div>
+            <div>
+              <button type="button" class="btn-remove" onclick="this.closest('.criteria-item').remove();">{{ t('remove') }}</button>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="button" class="btn-add" onclick="addCriteria()">+ {{ t('add_criterion') }}</button>
+
+    <input type="hidden" name="new_criteria_count" id="new_criteria_count" value="{% if criteria %}0{% else %}1{% endif %}">
+    <div class="form-actions">
+      <button type="submit" class="submit-btn">{{ t('save_settings') }}</button>
+      <a href="{{ url_for('admin_tournaments') }}" class="secondary-btn">{{ t('cancel') }}</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  let newCriteriaCount = {% if criteria %}0{% else %}1{% endif %};
+
+  function markForDelete(button) {
+    const item = button.closest('.criteria-item');
+    item.classList.add('delete');
+    const deleteInput = item.querySelector('.delete-input');
+    if (deleteInput) {
+      deleteInput.value = item.dataset.id || '1';
+    }
+  }
+
+  function addCriteria() {
+    const criteriaList = document.getElementById('criteria-list');
+    const newDiv = document.createElement('div');
+    newDiv.className = 'criteria-item new';
+    newDiv.innerHTML = `
+      <div class="criteria-row">
+        <div>
+          <div class="label-inline">{{ t('criteria_name') }}</div>
+          <input type="text" name="new_criteria_name_${newCriteriaCount}" value="" placeholder="{{ t('enter_criteria_name') }}">
+        </div>
+        <div>
+          <div class="label-inline">{{ t('max_points') }}</div>
+          <input type="number" name="new_criteria_points_${newCriteriaCount}" value="10" min="1" max="100">
+        </div>
+        <div>
+          <button type="button" class="btn-remove" onclick="this.closest('.criteria-item').remove();">{{ t('remove') }}</button>
+        </div>
+      </div>
+    `;
+    criteriaList.appendChild(newDiv);
+    newCriteriaCount++;
+    document.getElementById('new_criteria_count').value = newCriteriaCount;
+  }
+</script>
+{% endblock %}
