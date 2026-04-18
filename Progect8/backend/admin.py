@@ -233,6 +233,10 @@ def delete_tournament(tid):
             db.session.delete(s)
         db.session.delete(team)
 
+    # Delete evaluation criteria associated with the tournament
+    for criteria in EvaluationCriteria.query.filter_by(tournament_id=t.id):
+        db.session.delete(criteria)
+
     db.session.delete(t)
     db.session.commit()
 

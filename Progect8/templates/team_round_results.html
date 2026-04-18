@@ -40,18 +40,21 @@
                 <thead>
                   <tr>
                     <th>{{ t('criterion') }}</th>
+                    <th>{{ t('score_range') }}</th>
                     <th>{{ t('score') }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for score in row.scores %}
+                  {% for score_entry in row.scores %}
                     <tr>
-                      <td>{{ t('criterion') }} {{ loop.index }}</td>
-                      <td>{{ score if score is not none else '-' }}</td>
+                      <td>{{ score_entry.criterion.name or 'Criterion ' + loop.index|string }}</td>
+                      <td>0-{{ score_entry.criterion.max_points }}</td>
+                      <td>{{ score_entry.score if score_entry.score is not none else '-' }}</td>
                     </tr>
                   {% endfor %}
                   <tr>
                     <td><strong>{{ t('total') }}</strong></td>
+                    <td></td>
                     <td><strong>{{ row.total }}</strong></td>
                   </tr>
                 </tbody>

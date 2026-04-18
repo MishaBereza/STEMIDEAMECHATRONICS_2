@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from .models import Tournament, Team, User, Round, Submission, Evaluation, db
+from .models import Tournament, Team, User, Round, Submission, Evaluation, EvaluationCriteria, EvaluationScore, db
 from .app_helpers import get_current_user
 from .submissions import PASSING_SCORE
 from .translations import get_text
@@ -246,6 +246,9 @@ def team_round_results(teamid, rid):
         flash(_t('round_not_active_for_submission'), 'warning')
         return redirect(url_for('tournament_page', tid=team.tournament_id))
 
+    # Get evaluation criteria for this tournament
+    criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()
+    
     submissions = Submission.query.filter_by(team_id=team.id, round_id=round_item.id).order_by(Submission.id.desc()).all()
     evaluation_rows = []
     totals = []
@@ -254,10 +257,20 @@ def team_round_results(teamid, rid):
         submission_evaluations = Evaluation.query.filter_by(submission_id=submission.id).order_by(Evaluation.id.asc()).all()
         for evaluation in submission_evaluations:
             jury = db.session.get(User, evaluation.jury_id)
-            scores = [
-                evaluation.score1, evaluation.score2, evaluation.score3, evaluation.score4, evaluation.score5,
-                evaluation.score6, evaluation.score7, evaluation.score8, evaluation.score9, evaluation.score10
-            ]
+            
+            # Build criterion scores map
+            criterion_scores = {}
+            for score_entry in evaluation.criterion_scores:
+                criterion_scores[score_entry.criteria_id] = score_entry.score
+            
+            # Create scores list matching criteria order
+            scores = []
+            for criterion in criteria:
+                scores.append({
+                    'criterion': criterion,
+                    'score': criterion_scores.get(criterion.id)
+                })
+            
             total = evaluation.total()
             if total > 0:
                 totals.append(total)
@@ -277,5 +290,6 @@ def team_round_results(teamid, rid):
         tournament=tournament,
         round_item=round_item,
         evaluation_rows=evaluation_rows,
-        average_score=average_score
+        average_score=average_score,
+        criteria=criteria
     )
