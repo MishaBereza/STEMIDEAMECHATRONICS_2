@@ -28,7 +28,7 @@
             <td>{{ round.level }}</td>
             <td>{{ round.title }}</td>
             <td>{{ round.description or '-' }}</td>
-            <td><span class="status-pill {{ round.status|lower }}">{{ round.status }}</span></td>
+            <td><span class="status-pill {{ round.status|lower }}">{{ translate_value(round.status) }}</span></td>
             <td>
               <div class="table-actions">
                 {% if round.status == 'Draft' %}

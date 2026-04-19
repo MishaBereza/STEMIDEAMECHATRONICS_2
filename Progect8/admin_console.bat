@@ -55,9 +55,10 @@ echo 5. Change admin password
 echo 6. List jury/admin users
 echo 7. Set user status
 echo 8. Emergency stop server
-echo 9. Exit
+echo 9. Change user password
+echo 10. Exit
 echo.
-set /p choice="Select option (1-9): "
+set /p choice="Select option (1-10): "
 
 if "%choice%"=="1" goto clear_db
 if "%choice%"=="2" goto demo_data
@@ -67,7 +68,8 @@ if "%choice%"=="5" goto change_password
 if "%choice%"=="6" goto list_users
 if "%choice%"=="7" goto set_status
 if "%choice%"=="8" goto emergency_stop
-if "%choice%"=="9" exit /b 0
+if "%choice%"=="9" goto change_user_password
+if "%choice%"=="10" exit /b 0
 echo Invalid choice
 timeout /t 2 >nul
 goto menu
@@ -180,6 +182,20 @@ echo.
 echo Emergency stop: shutting down run.py server...
 if exist "%VENV_PY%" (
     powershell -NoLogo -NoProfile -Command "try { $p=Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'run\.py' }; if ($p) { $p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }; Write-Output 'Server stopped.' } else { Write-Output 'Server process not found.' } } catch { Write-Output 'Failed to stop server.'; exit 1 }"
+) else (
+    echo Virtual environment not found. Run start.bat first.
+)
+echo.
+pause
+goto menu
+
+:change_user_password
+echo.
+set /p target_email="Enter user email: "
+set /p admin_confirm_password="Enter admin password to confirm: "
+set /p new_user_password="Enter new password for user: "
+if exist "%VENV_PY%" (
+    call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; from backend.auth import load_admin_password; app.app_context().push(); admin_ok = ('%admin_confirm_password%' == load_admin_password()); user = User.query.filter_by(email='%target_email%').first() if admin_ok else None; print('Invalid admin password' if not admin_ok else ('User not found' if not user else 'User password changed successfully')); user and user.set_password('%new_user_password%'); user and db.session.commit() if admin_ok and user else None"
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )

@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -10,6 +11,9 @@ class User(db.Model):
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False, default='')
+    phone_country_code = db.Column(db.String(10), nullable=False, default='+380')
+    phone_number = db.Column(db.String(30), nullable=False, default='')
     age = db.Column(db.Integer)
     bio = db.Column(db.Text)
     role = db.Column(db.String(30), default='team')
@@ -17,6 +21,18 @@ class User(db.Model):
     @property
     def name(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def phone_display(self):
+        if self.phone_country_code and self.phone_number:
+            return f"{self.phone_country_code} {self.phone_number}"
+        return self.phone_number or ''
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return bool(self.password_hash) and check_password_hash(self.password_hash, password)
 
 
 class Tournament(db.Model):

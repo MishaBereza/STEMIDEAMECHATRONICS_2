@@ -5,11 +5,11 @@
 {% block content %}
 <div class="content-shell">
   <section class="surface-card">
-    <h2>Результати: {{ round_item.title }}</h2>
+    <h2>{{ t('results') }}: {{ round_item.title }}</h2>
     <div class="info-grid">
       <div class="info-line"><strong>{{ t('team') }}:</strong> {{ team.name }}</div>
       <div class="info-line"><strong>{{ t('tournament_page') }}:</strong> {{ tournament.name }}</div>
-      <div class="info-line"><strong>{{ t('status') }}:</strong> {{ round_item.status }}</div>
+      <div class="info-line"><strong>{{ t('status') }}:</strong> {{ translate_value(round_item.status) }}</div>
       <div class="info-line"><strong>{{ t('average_score') }}:</strong> {{ '%.2f'|format(average_score) }}</div>
     </div>
   </section>
@@ -47,7 +47,7 @@
                 <tbody>
                   {% for score_entry in row.scores %}
                     <tr>
-                      <td>{{ score_entry.criterion.name or 'Criterion ' + loop.index|string }}</td>
+                      <td>{{ score_entry.criterion.name or (t('criterion') + ' ' + loop.index|string) }}</td>
                       <td>0-{{ score_entry.criterion.max_points }}</td>
                       <td>{{ score_entry.score if score_entry.score is not none else '-' }}</td>
                     </tr>

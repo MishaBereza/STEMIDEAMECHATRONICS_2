@@ -15,7 +15,7 @@
       {% if criteria %}
         {% for criterion in criteria %}
           <tr>
-            <td>{{ criterion.name or 'Criterion ' + loop.index|string }}</td>
+            <td>{{ criterion.name or (t('criterion') + ' ' + loop.index|string) }}</td>
             <td style="padding: 8px; min-width: 180px;">
               <input
                 name="criteria_score_{{ criterion.id }}"

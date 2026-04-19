@@ -8,7 +8,7 @@
 
   <div class="search-panel">
     <form method="get" class="search-form">
-      <input type="text" name="search" placeholder="{{ t('search_by_email') }}" value="{{ search }}">
+      <input type="text" name="search" placeholder="{{ t('search_users_placeholder') }}" value="{{ search }}">
       <button type="submit" class="submit-btn">{{ t('search') }}</button>
       {% if search %}
         <a href="/admin/users" class="secondary-btn">{{ t('clear') }}</a>
@@ -25,6 +25,7 @@
         <tr>
           <th>{{ t('name') }}</th>
           <th>{{ t('email') }}</th>
+          <th>{{ t('phone') }}</th>
           <th>{{ t('age') }}</th>
           <th>{{ t('current_role') }}</th>
           <th>{{ t('change_role') }}</th>
@@ -36,6 +37,7 @@
           <tr>
             <td><strong><a href="/user/{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</a></strong></td>
             <td><a href="/user/{{ user.id }}">{{ user.email }}</a></td>
+            <td>{{ user.phone_display or '-' }}</td>
             <td>{{ user.age or '-' }}</td>
             <td>
               <span class="status-pill {{ user.role if user.role in ['admin', 'jury', 'team'] else 'default' }}">
@@ -66,7 +68,7 @@
           </tr>
         {% else %}
           <tr>
-            <td colspan="6" class="empty-row">
+            <td colspan="7" class="empty-row">
               {% if search %}{{ t('no_users_found') }} "{{ search }}"{% else %}{{ t('no_users_found') }}{% endif %}
             </td>
           </tr>

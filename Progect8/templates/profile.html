@@ -13,6 +13,13 @@
       <div style="font-size: 16px; font-weight: 600;">{{ user.email }}</div>
     </div>
 
+    {% if user.phone_display %}
+      <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+        <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('phone') }}</div>
+        <div style="font-size: 16px; font-weight: 600;">{{ user.phone_display }}</div>
+      </div>
+    {% endif %}
+
     {% if user.age %}
       <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
         <div style="font-size: 14px; color: #666; margin-bottom: 5px;">{{ t('age') }}</div>
@@ -51,6 +58,13 @@
     <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
     <p style="font-size: 12px; color: #555; margin-top: 6px;">{{ t('use_email_switch') }}</p>
   </div>
+
+  {% if get_current_user() and get_current_user().id == user.id %}
+    <div style="margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px;">
+      <a href="/profile/change-password" style="display: inline-block; padding: 12px 20px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_user_password') }}</a>
+      <a href="/profile/change-phone" style="display: inline-block; padding: 12px 20px; background: #666; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_phone_number') }}</a>
+    </div>
+  {% endif %}
 
   {% if get_current_user() and get_current_user().role in ['jury', 'admin'] %}
     <div style="margin-top: 20px;">
@@ -103,7 +117,7 @@
     {% if participating %}
       <ul>
         {% for tour in participating %}
-          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a></li>
+          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a></li>
         {% endfor %}
       </ul>
     {% else %}
@@ -115,7 +129,7 @@
       <ul>
         {% for tour in past %}
           <li>
-            <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ tour.status }}</a>
+            <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a>
             <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
           </li>
         {% endfor %}

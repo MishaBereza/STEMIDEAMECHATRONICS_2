@@ -17,12 +17,36 @@ def inject_user():
 
 def translation():
     lang = session.get('language', 'en')
+    value_key_map = {
+        'draft': 'draft',
+        'active': 'active',
+        'closed': 'closed',
+        'registration': 'registration',
+        'submission': 'submission',
+        'running': 'running',
+        'finished': 'finished',
+        'pending': 'pending',
+        'accepted': 'accepted',
+        'rejected': 'rejected',
+        'returned': 'returned',
+        'submitted': 'submitted',
+        'admin': 'admin_short',
+        'jury': 'jury_short',
+        'team': 'team',
+    }
 
     def t(key, **kwargs):
         return get_text(key, lang, **kwargs)
 
+    def translate_value(value):
+        if value is None:
+            return value
+        key = value_key_map.get(str(value).strip().lower())
+        return get_text(key, lang) if key else value
+
     return {
         't': t,
+        'translate_value': translate_value,
         'lang': lang,
         'supported_languages': list(TRANSLATIONS.keys())
     }

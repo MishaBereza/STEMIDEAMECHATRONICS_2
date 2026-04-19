@@ -2,10 +2,26 @@ from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
 from .translations import get_text
 import os
+import re
 
 
 def _t(key, **kwargs):
     return get_text(key, session.get('language', 'en'), **kwargs)
+
+
+PHONE_COUNTRY_CODES = ['+380', '+39', '+49', '+33', '+44', '+1', '+34', '+48']
+
+
+def _normalize_phone_number(value):
+    return re.sub(r'\D+', '', value or '')
+
+
+def _get_phone_form_data():
+    country_code = request.form.get('phone_country_code', '+380').strip()
+    phone_number = _normalize_phone_number(request.form.get('phone_number', '').strip())
+    if country_code not in PHONE_COUNTRY_CODES:
+        country_code = '+380'
+    return country_code, phone_number
 
 
 def get_or_create_admin_password():
@@ -45,6 +61,19 @@ def register_user():
         email = request.form['email'].strip().lower()
         age = request.form.get('age')
         bio = request.form.get('bio', '')
+        password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        phone_country_code, phone_number = _get_phone_form_data()
+
+        if not password:
+            flash(_t('password_empty'), 'warning')
+            return redirect('/register')
+        if password != confirm_password:
+            flash(_t('passwords_do_not_match'), 'warning')
+            return redirect('/register')
+        if not phone_number:
+            flash(_t('phone_required'), 'warning')
+            return redirect('/register')
 
         if User.query.filter_by(email=email).first():
             flash(_t('user_email_exists'), 'warning')
@@ -59,8 +88,11 @@ def register_user():
             email=email,
             age=int(age) if age else None,
             bio=bio,
+            phone_country_code=phone_country_code,
+            phone_number=phone_number,
             role='team'
         )
+        user.set_password(password)
 
         db.session.add(user)
         db.session.commit()
@@ -69,19 +101,26 @@ def register_user():
         flash(_t('registered_successfully'), 'success')
         return redirect('/')
 
-    return render_template('register.html')
+    return render_template('register.html', phone_country_codes=PHONE_COUNTRY_CODES, default_phone_country_code='+380')
 
 
 def user_login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
         if not email:
             flash(_t('email_required'), 'warning')
+            return redirect(url_for('user_login'))
+        if not password:
+            flash(_t('password_empty'), 'warning')
             return redirect(url_for('user_login'))
 
         user = User.query.filter_by(email=email).first()
         if not user:
             flash(_t('user_not_found'), 'danger')
+            return redirect(url_for('user_login'))
+        if not user.check_password(password):
+            flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_login'))
 
         session['user_id'] = user.id
@@ -300,12 +339,19 @@ def jury_part2():
 def profile_switch():
     if request.method == 'POST':
         email = request.form.get('switch_email', '').strip().lower()
+        password = request.form.get('password', '').strip()
         if not email:
             flash(_t('email_required'), 'warning')
+            return redirect(url_for('profile_switch'))
+        if not password:
+            flash(_t('password_empty'), 'warning')
             return redirect(url_for('profile_switch'))
         target = User.query.filter_by(email=email).first()
         if not target:
             flash(_t('user_not_found'), 'danger')
+            return redirect(url_for('profile_switch'))
+        if not target.check_password(password):
+            flash(_t('invalid_password'), 'danger')
             return redirect(url_for('profile_switch'))
 
         session['user_id'] = target.id
@@ -313,3 +359,81 @@ def profile_switch():
         return redirect(url_for('user_profile', uid=target.id))
 
     return render_template('profile_switch.html')
+
+
+def user_change_password():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash(_t('please_login_first'), 'warning')
+        return redirect(url_for('user_login'))
+
+    user = db.session.get(User, user_id)
+    if not user:
+        session.pop('user_id', None)
+        flash(_t('user_not_found'), 'danger')
+        return redirect(url_for('user_login'))
+
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '').strip()
+        new_password = request.form.get('new_password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+
+        if not current_password:
+            flash(_t('current_password_required'), 'warning')
+            return redirect(url_for('user_change_password'))
+        if not user.check_password(current_password):
+            flash(_t('invalid_password'), 'danger')
+            return redirect(url_for('user_change_password'))
+        if not new_password:
+            flash(_t('password_empty'), 'warning')
+            return redirect(url_for('user_change_password'))
+        if new_password != confirm_password:
+            flash(_t('passwords_do_not_match'), 'warning')
+            return redirect(url_for('user_change_password'))
+
+        user.set_password(new_password)
+        db.session.commit()
+        flash(_t('user_password_changed'), 'success')
+        return redirect(url_for('user_profile', uid=user.id))
+
+    return render_template('change_user_password.html')
+
+
+def user_change_phone():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash(_t('please_login_first'), 'warning')
+        return redirect(url_for('user_login'))
+
+    user = db.session.get(User, user_id)
+    if not user:
+        session.pop('user_id', None)
+        flash(_t('user_not_found'), 'danger')
+        return redirect(url_for('user_login'))
+
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '').strip()
+        phone_country_code, phone_number = _get_phone_form_data()
+
+        if not current_password:
+            flash(_t('current_password_required'), 'warning')
+            return redirect(url_for('user_change_phone'))
+        if not user.check_password(current_password):
+            flash(_t('invalid_password'), 'danger')
+            return redirect(url_for('user_change_phone'))
+        if not phone_number:
+            flash(_t('phone_required'), 'warning')
+            return redirect(url_for('user_change_phone'))
+
+        user.phone_country_code = phone_country_code
+        user.phone_number = phone_number
+        db.session.commit()
+        flash(_t('phone_updated_successfully'), 'success')
+        return redirect(url_for('user_profile', uid=user.id))
+
+    return render_template(
+        'change_user_phone.html',
+        phone_country_codes=PHONE_COUNTRY_CODES,
+        default_phone_country_code=user.phone_country_code or '+380',
+        current_phone_number=user.phone_number or ''
+    )

@@ -10,6 +10,29 @@
   --success: #32cd32;
   --warning: #ffd700;
   --danger: #ff6347;
+  --font-ui: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-display: var(--font-ui);
+  --font-body: var(--font-ui);
+}
+
+html[lang="uk"] {
+  --font-display: "Rutenia", "Literata", Georgia, serif;
+  --font-body: "Rutenia", "Literata", Georgia, serif;
+}
+
+html[lang="it"] {
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Cormorant Garamond", Georgia, serif;
+}
+
+html[lang="de"] {
+  --font-display: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+}
+
+html[lang="fr"] {
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Literata", Georgia, serif;
 }
 
 * {
@@ -23,7 +46,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(255, 165, 0, 0.1), transparent 28%),
@@ -90,6 +113,7 @@ a {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #333333;
+  font-family: var(--font-display);
 }
 
 .topbar-links {
@@ -175,6 +199,36 @@ a {
 .container > form,
 .container > table {
   color: var(--text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.page-title,
+.hero-title,
+.hero-panel-title,
+.tournament-name {
+  font-family: var(--font-display);
+}
+
+body,
+p,
+li,
+label,
+input,
+textarea,
+select,
+button,
+a,
+th,
+td,
+.flash-message,
+.status-chip,
+.status-pill {
+  font-family: var(--font-body);
 }
 
 .container a:not(.primary-button):not(.secondary-button):not(.panel-link):not(.brand-mark) {

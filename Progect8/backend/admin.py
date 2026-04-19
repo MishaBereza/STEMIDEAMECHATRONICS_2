@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Tournament, Team, Round, Submission, EvaluationCriteria
 from .translations import get_text
+from sqlalchemy import or_
 
 
 def _t(key, **kwargs):
@@ -23,7 +24,22 @@ def admin_users():
     users = User.query.all()
     search = request.args.get('search', '').strip()
     if search:
-        users = User.query.filter(User.email.ilike(f'%{search}%')).all()
+        search_digits = ''.join(ch for ch in search if ch.isdigit())
+        full_name = User.first_name + ' ' + User.last_name
+        full_phone = User.phone_country_code + User.phone_number
+        full_phone_spaced = User.phone_country_code + ' ' + User.phone_number
+        filters = [
+            User.email.ilike(f'%{search}%'),
+            User.first_name.ilike(f'%{search}%'),
+            User.last_name.ilike(f'%{search}%'),
+            full_name.ilike(f'%{search}%'),
+            User.phone_country_code.ilike(f'%{search}%'),
+            full_phone.ilike(f'%{search}%'),
+            full_phone_spaced.ilike(f'%{search}%')
+        ]
+        if search_digits:
+            filters.append(User.phone_number.ilike(f'%{search_digits}%'))
+        users = User.query.filter(or_(*filters)).all()
     return render_template('admin_users.html', users=users, search=search)
 
 
@@ -371,4 +387,3 @@ def admin_tournament_evaluation_settings(tid):
     # Get existing criteria
     criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()
     return render_template('admin_evaluation_settings.html', tournament=tournament, criteria=criteria)
-

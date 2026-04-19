@@ -11,7 +11,7 @@
   </h2>
 
   <p class="register-description">
-    Fill in the form below to create your account
+    {{ t('fill_form_create_account') }}
   </p>
 
   <form method="post" class="register-form">
@@ -27,6 +27,31 @@
     <!-- EMAIL -->
     <label>{{ t('email') }} *</label>
     <input type="email" name="email" required>
+
+    <!-- PHONE -->
+    <label>{{ t('phone') }} *</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <select name="phone_country_code" style="max-width: 120px;">
+        {% for code in phone_country_codes %}
+          <option value="{{ code }}" {% if code == default_phone_country_code %}selected{% endif %}>{{ code }}</option>
+        {% endfor %}
+      </select>
+      <input type="tel" name="phone_number" inputmode="numeric" required placeholder="{{ t('phone_number') }}">
+    </div>
+
+    <!-- PASSWORD -->
+    <label>{{ t('password') }} *</label>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <input type="password" name="password" id="register-password" required style="margin-bottom: 0;">
+      <button type="button" class="password-toggle" data-target="register-password" aria-label="Toggle password visibility">👁</button>
+    </div>
+
+    <!-- CONFIRM PASSWORD -->
+    <label>{{ t('confirm_password') }} *</label>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <input type="password" name="confirm_password" id="register-confirm-password" required style="margin-bottom: 0;">
+      <button type="button" class="password-toggle" data-target="register-confirm-password" aria-label="Toggle password visibility">👁</button>
+    </div>
 
     <!-- AGE -->
     <label>{{ t('age') }}</label>
@@ -50,5 +75,22 @@
   </form>
 
 </div>
+
+<script>
+  (function () {
+    const toggles = document.querySelectorAll('.password-toggle');
+    toggles.forEach((toggle) => {
+      toggle.addEventListener('click', function () {
+        const input = document.getElementById(this.dataset.target);
+        if (!input) {
+          return;
+        }
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? '🙈' : '👁';
+      });
+    });
+  })();
+</script>
 
 {% endblock %}

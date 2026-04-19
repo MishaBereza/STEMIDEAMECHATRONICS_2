@@ -12,6 +12,10 @@ def _t(key, **kwargs):
     return get_text(key, session.get('language', 'en'), **kwargs)
 
 
+def _criterion_label(criterion):
+    return criterion.name or f"{_t('criterion')} {criterion.id}"
+
+
 def get_round_access_state(team, round_item):
     return True, None
 
@@ -152,18 +156,18 @@ def evaluate_submission(sid):
         for criterion in criteria:
             raw_value = request.form.get(f'criteria_score_{criterion.id}', '').strip()
             if not raw_value:
-                flash(_t('score_required', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                flash(_t('score_required', field=_criterion_label(criterion)), 'warning')
                 return render_template('evaluate.html', s=s, criteria=criteria)
             if len(raw_value) > 4:
-                flash(_t('score_two_digits', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                flash(_t('score_two_digits', field=_criterion_label(criterion)), 'warning')
                 return render_template('evaluate.html', s=s, criteria=criteria)
             try:
                 score_value = float(raw_value)
             except ValueError:
-                flash(_t('score_number_range', field=criterion.name or f'Criterion {criterion.id}'), 'warning')
+                flash(_t('score_number_range', field=_criterion_label(criterion)), 'warning')
                 return render_template('evaluate.html', s=s, criteria=criteria)
             if score_value < 0 or score_value > criterion.max_points:
-                flash(_t('score_between_range', field=f"{criterion.name or 'Criterion'} (0-{criterion.max_points})"), 'warning')
+                flash(_t('score_between_range', field=f"{criterion.name or _t('criterion')} (0-{criterion.max_points})"), 'warning')
                 return render_template('evaluate.html', s=s, criteria=criteria)
             parsed_scores[criterion.id] = score_value
 

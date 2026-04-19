@@ -19,7 +19,7 @@
         {% for t_item in tournaments %}
           <tr>
             <td>{{ t_item.name }}</td>
-            <td><span class="status-pill default">{{ t_item.status }}</span></td>
+            <td><span class="status-pill default">{{ translate_value(t_item.status) }}</span></td>
             <td>
               <div class="table-actions">
                 <form method="post" action="{{ url_for('update_tournament_status', tid=t_item.id) }}" class="inline-form">

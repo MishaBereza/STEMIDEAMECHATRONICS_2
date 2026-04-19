@@ -13,7 +13,7 @@
         <h4 style="margin-top: 0;">{{ t('evaluation_criteria') }}:</h4>
         <ul style="margin: 10px 0; padding-left: 20px;">
           {% for criterion in tournament.evaluation_criteria|sort(attribute='order') %}
-            <li>{{ criterion.name or 'Kriteria ' + loop.index|string }} (max {{ criterion.max_points }} {{ t('points') }})</li>
+            <li>{{ criterion.name or (t('criterion') + ' ' + loop.index|string) }} ({{ t('max_points') }}: {{ criterion.max_points }} {{ t('points') }})</li>
           {% endfor %}
         </ul>
       </div>

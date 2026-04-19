@@ -52,9 +52,25 @@ def migrate_evaluation_table():
 
     db.session.commit()
 
+
+def migrate_user_table():
+    inspector = inspect(db.engine)
+    if 'user' not in inspector.get_table_names():
+        return
+
+    existing_columns = {column['name'] for column in inspector.get_columns('user')}
+    if 'password_hash' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT ''"))
+    if 'phone_country_code' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN phone_country_code VARCHAR(10) NOT NULL DEFAULT '+380'"))
+    if 'phone_number' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN phone_number VARCHAR(30) NOT NULL DEFAULT ''"))
+    db.session.commit()
+
 with app.app_context():
     # Create tables during app setup because Flask 3.x removed before_first_request.
     db.create_all()
+    migrate_user_table()
     migrate_evaluation_table()
 
 @app.context_processor
@@ -72,7 +88,7 @@ def set_language(lang):
         session['language'] = lang
     return redirect(request.referrer or url_for('index'))
 
-from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch
+from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch, user_change_password, user_change_phone
 from .tournaments import index, tournament_page, leaderboard
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
@@ -95,6 +111,8 @@ app.add_url_rule('/edit_team_members/<int:teamid>', 'edit_team_members', edit_te
 app.add_url_rule('/admin/dashboard', 'admin_dashboard', admin_dashboard, methods=['GET'])
 app.add_url_rule('/admin/change_password', 'admin_change_password', admin_change_password, methods=['GET', 'POST'])
 app.add_url_rule('/profile/switch', 'profile_switch', profile_switch, methods=['GET', 'POST'])
+app.add_url_rule('/profile/change-password', 'user_change_password', user_change_password, methods=['GET', 'POST'])
+app.add_url_rule('/profile/change-phone', 'user_change_phone', user_change_phone, methods=['GET', 'POST'])
 app.add_url_rule('/admin/users', 'admin_users', admin_users, methods=['GET'])
 app.add_url_rule('/admin/user/<int:uid>/delete', 'admin_delete_user', admin_delete_user, methods=['POST'])
 app.add_url_rule('/admin/user/<int:uid>/change-role', 'change_user_role', change_user_role, methods=['POST'])

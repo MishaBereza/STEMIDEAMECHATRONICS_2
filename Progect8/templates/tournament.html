@@ -2,13 +2,13 @@
 {% block content %}
   <h2>{{ tournament.name }}</h2>
   <p>{{ tournament.description }}</p>
-  <p>{{ t('status') }}: {{ tournament.status }}</p>
+  <p>{{ t('status') }}: {{ translate_value(tournament.status) }}</p>
   {% set current = get_current_user() %}
   <h3>{{ t('rounds') }}</h3>
   <ul>
     {% for entry in round_entries %}
       {% set r = entry.round %}
-      <li>{{ r.title }} - {{ t('level') }} {{ r.level }} - {{ r.status }}
+      <li>{{ r.title }} - {{ t('level') }} {{ r.level }} - {{ translate_value(r.status) }}
         {% if entry.can_submit %}
           - <a href="/round/{{ r.id }}/submit">{{ t('submit') }}</a>
         {% endif %}

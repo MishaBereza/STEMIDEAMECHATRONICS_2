@@ -5,8 +5,31 @@
 
   <form method="post" action="/profile/switch">
     <label>{{ t('email') }}: <input type="email" name="switch_email" required style="width: 300px; padding: 8px;"></label>
+    <label style="margin-top: 12px;">{{ t('password') }}:</label>
+    <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+      <input type="password" id="switch-password" name="password" required style="width: 300px; padding: 8px;">
+      <button type="button" class="password-toggle" data-target="switch-password" aria-label="Toggle password visibility">👁</button>
+    </div>
     <button type="submit" style="padding: 8px 16px; margin-left: 6px; background: #ffa500; color: white; border: none; border-radius: 4px;">{{ t('switch') }}</button>
   </form>
 
   <p style="margin-top: 20px;"><a href="/user/{{ get_current_user().id if get_current_user() else 0 }}">{{ t('back_to_profile') }}</a></p>
+
+  <script>
+    (function () {
+      const toggle = document.querySelector('.password-toggle');
+      if (!toggle) {
+        return;
+      }
+      toggle.addEventListener('click', function () {
+        const input = document.getElementById(this.dataset.target);
+        if (!input) {
+          return;
+        }
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? '🙈' : '👁';
+      });
+    })();
+  </script>
 {% endblock %}

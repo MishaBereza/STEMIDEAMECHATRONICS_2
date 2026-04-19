@@ -21,14 +21,22 @@ def test_user_registration_uniqueness():
     with app.test_request_context('/register', method='POST', data={
         'first_name': 'John',
         'last_name': 'Doe',
-        'email': 'john@example.com'
+        'email': 'john@example.com',
+        'phone_country_code': '+380',
+        'phone_number': '501112233',
+        'password': 'secret123',
+        'confirm_password': 'secret123'
     }):
         register_user()
     # second with same name should be rejected
     with app.test_request_context('/register', method='POST', data={
         'first_name': 'John',
         'last_name': 'Doe',
-        'email': 'john2@example.com'
+        'email': 'john2@example.com',
+        'phone_country_code': '+380',
+        'phone_number': '501112234',
+        'password': 'secret123',
+        'confirm_password': 'secret123'
     }):
         register_user()
     with app.app_context():
@@ -43,7 +51,9 @@ def test_team_registration_requires_registered():
         db.session.add(t)
         db.session.commit()
         u1 = User(first_name='A', last_name='B', email='a@x.com')
+        u1.set_password('secret123')
         u2 = User(first_name='C', last_name='D', email='c@x.com')
+        u2.set_password('secret123')
         db.session.add_all([u1, u2])
         db.session.commit()
         tid = t.id
@@ -84,3 +94,24 @@ def test_profile_page_lists_teams():
             html = user_profile(u.id)
         assert 'TeamOne' in html
         assert 'Teams as Captain' in html
+
+
+def test_profile_switch_requires_correct_password():
+    client = app.test_client()
+    with app.app_context():
+        user = User(first_name='Switch', last_name='User', email='switch@test.com', role='team')
+        user.set_password('secret123')
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    response = client.post('/profile/switch', data={
+        'switch_email': 'switch@test.com',
+        'password': 'secret123'
+    }, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(f'/user/{user_id}')
+
+    with client.session_transaction() as sess:
+        assert sess['user_id'] == user_id
