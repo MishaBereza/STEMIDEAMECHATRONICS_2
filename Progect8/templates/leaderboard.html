@@ -1,6 +1,156 @@
 {% extends 'base.html' %}
 {% block head %}
   <link rel="stylesheet" href="/static/css/interface.css">
+  <style>
+    .team-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .team-details-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #0066cc;
+      font-size: 18px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .team-details-btn:hover {
+      background-color: #f0f0f0;
+      color: #0052a3;
+    }
+
+    .team-details-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close-btn:hover {
+      color: #333;
+    }
+
+    .team-details-group {
+      margin-bottom: 20px;
+    }
+
+    .team-details-group label {
+      font-weight: bold;
+      color: #666;
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .team-details-group p {
+      margin: 0;
+      color: #333;
+      word-break: break-word;
+    }
+
+    .team-members-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .team-members-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .team-members-list li:last-child {
+      border-bottom: none;
+    }
+
+    .team-members-list strong {
+      color: #333;
+    }
+
+    .team-members-list .role {
+      color: #999;
+      font-size: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+  </style>
 {% endblock %}
 {% block content %}
   <div class="leaderboard-shell">
@@ -37,7 +187,14 @@
                   <td class="leaderboard-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
                     {{ loop.index }}
                   </td>
-                  <td>{{ team.name }}</td>
+                  <td>
+                    <div class="team-name-cell">
+                      <span>{{ team.name }}</span>
+                      <button class="team-details-btn" onclick="openTeamDetails({{ team.id }})" title="View team details">
+                        ℹ️
+                      </button>
+                    </div>
+                  </td>
                   <td class="leaderboard-score">{{ "{:.2f}".format(score) }}</td>
                 </tr>
               {% endfor %}
@@ -52,4 +209,167 @@
       {% endif %}
     </section>
   </div>
+
+  <!-- Team Details Modal -->
+  <div class="modal-overlay" id="teamDetailsModal" onclick="closeTeamDetailsModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modalTeamName"></h2>
+        <button class="modal-close-btn" onclick="closeTeamDetailsModal()">×</button>
+      </div>
+      <div id="modalBody">
+        <div class="loading">{{ t('loading') }}...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openTeamDetails(teamId) {
+      const modal = document.getElementById('teamDetailsModal');
+      const modalBody = document.getElementById('modalBody');
+      const modalTeamName = document.getElementById('modalTeamName');
+
+      // Show loading state
+      modalBody.innerHTML = '<div class="loading">{{ t("loading") }}...</div>';
+      modal.classList.add('active');
+
+      // Fetch team details
+      fetch(`/api/team/${teamId}/details`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load team details');
+          }
+          return response.json();
+        })
+        .then(data => {
+          modalTeamName.textContent = data.team_name;
+
+          // Build HTML for team details
+          let html = '';
+
+          // Repository URL
+          if (data.repo_url) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('repository') }}</label>
+                <p><a href="${escapeHtml(data.repo_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(data.repo_url)}</a></p>
+              </div>
+            `;
+          }
+
+          // Live URL
+          if (data.live_url) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('live_url') }}</label>
+                <p><a href="${escapeHtml(data.live_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(data.live_url)}</a></p>
+              </div>
+            `;
+          }
+
+          // Comments
+          if (data.comments) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('comments') }}</label>
+                <p>${escapeHtml(data.comments)}</p>
+              </div>
+            `;
+          }
+
+          // Submission Status
+          if (data.submission_status) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('status') }}</label>
+                <p>${escapeHtml(data.submission_status)}</p>
+              </div>
+            `;
+          }
+
+          // Submitted At
+          if (data.submitted_at) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('submitted_at') }}</label>
+                <p>${escapeHtml(data.submitted_at)}</p>
+              </div>
+            `;
+          }
+
+          // Captain
+          if (data.captain) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('captain') }}</label>
+                <p><strong>${escapeHtml(data.captain.name)}</strong></p>
+                <p>${escapeHtml(data.captain.email)}</p>
+              </div>
+            `;
+          }
+
+          // Team Members
+          if (data.members && data.members.length > 0) {
+            html += `
+              <div class="team-details-group">
+                <label>{{ t('members') }}</label>
+                <ul class="team-members-list">
+            `;
+            data.members.forEach(member => {
+              html += `
+                <li>
+                  <strong>${escapeHtml(member.name)}</strong>
+                  <br />
+                  <span class="role">${escapeHtml(member.email)}</span>
+                </li>
+              `;
+            });
+            html += `
+                </ul>
+              </div>
+            `;
+          }
+
+          // If no details to show
+          if (!html) {
+            html = '<p class="muted-text">{{ t("no_details_available") }}</p>';
+          }
+
+          modalBody.innerHTML = html;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          modalBody.innerHTML = `<div class="error-message">{{ t('error_loading_details') }}</div>`;
+        });
+    }
+
+    function closeTeamDetailsModal(event) {
+      // If event exists and target is the modal overlay itself (not the content)
+      if (event && event.target.id !== 'teamDetailsModal') {
+        return;
+      }
+      const modal = document.getElementById('teamDetailsModal');
+      modal.classList.remove('active');
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeTeamDetailsModal();
+      }
+    });
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+  </script>
 {% endblock %}

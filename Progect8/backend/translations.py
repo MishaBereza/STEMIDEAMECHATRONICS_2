@@ -303,6 +303,12 @@ TRANSLATIONS = {
         'change_phone_number': 'Change Phone Number',
         'user_password_changed': 'Password changed successfully',
         'phone_updated_successfully': 'Phone number updated successfully',
+        'loading': 'Loading',
+        'repository': 'Repository',
+        'live_url': 'Live URL',
+        'submitted_at': 'Submitted At',
+        'error_loading_details': 'Error loading team details',
+        'no_details_available': 'No team details available',
     },
     'it': {
         'home': 'Home',
@@ -596,6 +602,12 @@ TRANSLATIONS = {
         'invalid_admin_session': 'Sessione admin non valida',
         'no_permission': 'Non hai il permesso per eseguire questa azione',
         'password': 'Password',
+        'loading': 'Caricamento',
+        'repository': 'Repository',
+        'live_url': 'URL Demo',
+        'submitted_at': 'Inviato il',
+        'error_loading_details': 'Errore nel caricamento dei dettagli della squadra',
+        'no_details_available': 'Nessun dettaglio della squadra disponibile',
     },
     'de': {
         'home': 'Startseite',
@@ -889,6 +901,12 @@ TRANSLATIONS = {
         'invalid_admin_session': 'Ungültige Admin-Sitzung',
         'no_permission': 'Du hast keine Berechtigung für diese Aktion',
         'password': 'Passwort',
+        'loading': 'Lädt',
+        'repository': 'Repository',
+        'live_url': 'Demo-URL',
+        'submitted_at': 'Eingereicht am',
+        'error_loading_details': 'Fehler beim Laden der Teamdetails',
+        'no_details_available': 'Keine Teamdetails verfügbar',
     },
     'fr': {
         'home': 'Accueil',
@@ -1486,6 +1504,12 @@ TRANSLATIONS = {
         'change_phone_number': 'Змінити номер телефону',
         'user_password_changed': 'Пароль успішно змінено',
         'phone_updated_successfully': 'Номер телефону успішно оновлено',
+        'loading': 'Завантаження',
+        'repository': 'Репозиторій',
+        'live_url': 'Посилання на демо',
+        'submitted_at': 'Надіслано',
+        'error_loading_details': 'Помилка завантаження деталей команди',
+        'no_details_available': 'Нема деталей про команду',
     }
 }
 

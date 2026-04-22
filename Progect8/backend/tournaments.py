@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, session
+from flask import render_template, flash, redirect, url_for, session, jsonify
 from sqlalchemy import or_
 
 from .app_helpers import get_current_user
@@ -83,3 +83,41 @@ def leaderboard(tid):
 
     team_scores.sort(key=lambda item: item[1], reverse=True)
     return render_template('leaderboard.html', tournament=t, team_scores=team_scores)
+
+
+def get_team_details(team_id):
+    """API endpoint to get team details for modal display"""
+    team = Team.query.get_or_404(team_id)
+
+    # Prepare captain info
+    captain_info = None
+    if team.captain:
+        captain_info = {
+            'name': team.captain.name,
+            'email': team.captain.email,
+        }
+
+    # Prepare members info
+    members_info = []
+    for member in team.members:
+        members_info.append({
+            'name': member.name,
+            'email': member.email,
+        })
+
+    # Format submitted_at date if it exists
+    submitted_at_str = None
+    if team.submitted_at:
+        submitted_at_str = team.submitted_at.strftime('%Y-%m-%d %H:%M:%S')
+
+    return jsonify({
+        'team_id': team.id,
+        'team_name': team.name,
+        'captain': captain_info,
+        'members': members_info,
+        'repo_url': team.repo_url,
+        'live_url': team.live_url,
+        'comments': team.comments,
+        'submission_status': team.submission_status,
+        'submitted_at': submitted_at_str,
+    })
