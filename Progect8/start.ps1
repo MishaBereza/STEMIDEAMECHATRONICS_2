@@ -91,6 +91,15 @@ Write-Host "Installing dependencies..." -ForegroundColor Yellow
 & $venvPython -m pip install --upgrade pip
 & $venvPython -m pip install -r requirements.txt
 
+Write-Host ""
+Write-Host "Verifying export libraries..." -ForegroundColor Yellow
+& $venvPython -c "import reportlab; import openpyxl; print('OK')" 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "WARNING: Export libraries not installed properly." -ForegroundColor Yellow
+    Write-Host "Installing export libraries: reportlab and openpyxl..." -ForegroundColor Yellow
+    & $venvPython -m pip install reportlab openpyxl
+}
+
 if (-not (Test-Path "run.py")) {
     Write-Host "ERROR: run.py not found." -ForegroundColor Red
     Read-Host "Press Enter to exit"

@@ -88,6 +88,20 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo.
+echo Verifying export libraries...
+call "%VENV_PY%" -c "import reportlab; import openpyxl; print('OK')" >nul 2>&1
+if errorlevel 1 (
+    echo WARNING: Export libraries not installed properly.
+    echo Installing export libraries: reportlab and openpyxl...
+    call "%VENV_PY%" -m pip install reportlab openpyxl
+    if errorlevel 1 (
+        echo ERROR: Failed to install export libraries.
+        pause
+        exit /b 1
+    )
+)
+
 if not exist "run.py" (
     echo ERROR: run.py not found.
     pause
