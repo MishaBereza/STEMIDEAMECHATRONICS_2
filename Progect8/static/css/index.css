@@ -1,6 +1,6 @@
 .hero-section {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.95fr);
+  grid-template-columns: 1fr;
   gap: 28px;
   align-items: stretch;
   padding-top: 18px;
