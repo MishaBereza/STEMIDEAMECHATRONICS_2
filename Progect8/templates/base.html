@@ -53,5 +53,35 @@
         {% block content %}{% endblock %}
       </div>
     </div>
+
+    <!-- Simple auto-refresh based on data changes -->
+    <script>
+      // Get initial status
+      let lastUpdate = null;
+      
+      function checkForUpdates() {
+        fetch('/api/status')
+          .then(r => r.json())
+          .then(data => {
+            if (lastUpdate === null) {
+              // First time - just store the timestamp
+              lastUpdate = data.last_update;
+              console.log('Initial timestamp:', lastUpdate);
+            } else if (data.last_update !== lastUpdate) {
+              // Data has changed - refresh page
+              console.log('Data updated! Refreshing page...');
+              lastUpdate = data.last_update;
+              location.reload();
+            }
+          })
+          .catch(e => console.log('Status check failed:', e));
+      }
+      
+      // Check every 5 seconds
+      setInterval(checkForUpdates, 5000);
+      
+      // Check immediately on page load
+      checkForUpdates();
+    </script>
   </body>
 </html>

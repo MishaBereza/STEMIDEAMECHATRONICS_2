@@ -79,6 +79,8 @@ def admin_delete_user(uid):
     db.session.delete(u)
     db.session.commit()
     flash(_t('user_deleted'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect('/admin/users')
 
 
@@ -89,6 +91,8 @@ def change_user_role(uid):
         u.role = new_role
         db.session.commit()
         flash(_t('user_role_updated'), 'success')
+        from .app import trigger_update
+        trigger_update()
     else:
         flash(_t('invalid_role'), 'warning')
     return redirect('/admin/users')
@@ -157,6 +161,8 @@ def admin_delete_team(teamid):
     db.session.commit()
 
     flash(_t('team_deleted'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect(url_for('admin_tournament_teams', tid=team.tournament_id))
 
 
@@ -171,6 +177,8 @@ def admin_team_decide(teamid):
         team.submission_status = 'Returned'
     db.session.commit()
     flash(_t(f'team_action_{action}'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect(url_for('admin_tournament_teams', tid=team.tournament_id))
 
 
@@ -196,6 +204,8 @@ def create_tournament():
         db.session.commit()
 
         flash(_t('tournament_created'), 'success')
+        from .app import trigger_update
+        trigger_update()
         return redirect('/admin/tournaments')
 
     return render_template('admin_create_tournament.html')
@@ -211,6 +221,8 @@ def edit_tournament(tid):
         t.status = request.form.get('status', t.status)
         db.session.commit()
         flash(_t('tournament_updated'), 'success')
+        from .app import trigger_update
+        trigger_update()
         return redirect('/admin/tournaments')
 
     return render_template('admin_edit_tournament.html', tournament=t)
@@ -227,6 +239,8 @@ def update_tournament_status(tid):
     t.status = new_status
     db.session.commit()
     flash(_t('tournament_updated'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect('/admin/tournaments')
 
 
@@ -257,6 +271,8 @@ def delete_tournament(tid):
     db.session.commit()
 
     flash(_t('tournament_deleted'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect('/admin/tournaments')
 
 
@@ -286,6 +302,8 @@ def create_round(tid):
         db.session.commit()
 
         flash(_t('round_created', title=title), 'success')
+        from .app import trigger_update
+        trigger_update()
         return redirect(url_for('admin_tournament_rounds', tid=tournament.id))
 
     return render_template('admin_create_round.html', tournament=tournament)
@@ -299,6 +317,8 @@ def admin_round_start(rid):
         round_item.start_at = datetime.utcnow()
         db.session.commit()
         flash(_t('round_started', level=round_item.level), 'success')
+        from .app import trigger_update
+        trigger_update()
     elif round_item.status == 'Active':
         flash(_t('round_already_active'), 'info')
     else:
@@ -315,6 +335,8 @@ def admin_round_close(rid):
         round_item.end_at = datetime.utcnow()
         db.session.commit()
         flash(_t('round_closed', level=round_item.level), 'success')
+        from .app import trigger_update
+        trigger_update()
     else:
         flash(_t('round_not_active'), 'warning')
 
@@ -335,6 +357,8 @@ def delete_round(rid):
     db.session.commit()
 
     flash(_t('round_deleted'), 'success')
+    from .app import trigger_update
+    trigger_update()
     return redirect(url_for('admin_tournament_rounds', tid=tournament_id))
 
 

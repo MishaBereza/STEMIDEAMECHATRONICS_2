@@ -15,4 +15,4 @@ COPY Progect8/ .
 EXPOSE 5000
 
 # Run application
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "60", "backend.app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "backend.app:app"]

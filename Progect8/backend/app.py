@@ -1,11 +1,15 @@
-from flask import Flask, redirect, url_for, session, request
+from flask import Flask, redirect, url_for, session, request, jsonify
 from .models import db
 from .translations import get_text
 from .app_helpers import get_current_user, inject_user, translation, admin_required
 import os
 from sqlalchemy import inspect, text
+from datetime import datetime
 
 app = Flask(__name__)
+
+# Store last update timestamp for auto-refresh
+last_data_update = {'timestamp': datetime.utcnow()}
 
 # Database configuration - supports both Railway PostgreSQL and local SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -99,6 +103,20 @@ def set_language(lang):
         session['language'] = lang
     return redirect(request.referrer or url_for('index'))
 
+@app.route('/api/status')
+def api_status():
+    """Endpoint for client-side refresh checks"""
+    return jsonify({
+        'status': 'ok',
+        'last_update': last_data_update['timestamp'].isoformat()
+    })
+
+def trigger_update():
+    """Call this when admin makes changes to notify clients"""
+    global last_data_update
+    last_data_update['timestamp'] = datetime.utcnow()
+
+
 from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch, user_change_password, user_change_phone
 from .tournaments import index, tournament_page, leaderboard, get_team_details
 from .teams import register_team, team_page, edit_team_members, team_round_results
@@ -150,6 +168,6 @@ app.add_url_rule('/evaluate/<int:sid>', 'evaluate_submission', evaluate_submissi
 app.add_url_rule('/jury/logout', 'jury_logout', jury_logout, methods=['GET'])
 app.add_url_rule('/jury/part2', 'jury_part2', jury_part2, methods=['GET'])
 
-# ---------------- RUN ----------------
+# ============== RUN ================
 if __name__ == '__main__':
     app.run(debug=True)
