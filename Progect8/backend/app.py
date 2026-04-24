@@ -101,6 +101,8 @@ def set_language(lang):
     from .translations import TRANSLATIONS
     if lang in TRANSLATIONS:
         session['language'] = lang
+    # Store current language for template access
+    session['lang'] = lang
     return redirect(request.referrer or url_for('index'))
 
 @app.route('/api/status')

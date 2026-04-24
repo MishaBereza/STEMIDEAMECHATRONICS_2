@@ -1,39 +1,87 @@
 {% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/tournament.css">
+{% endblock %}
 {% block content %}
-  <h2>{{ tournament.name }}</h2>
-  <p>{{ tournament.description }}</p>
-  <p>{{ t('status') }}: {{ translate_value(tournament.status) }}</p>
   {% set current = get_current_user() %}
-  <h3>{{ t('rounds') }}</h3>
-  <ul>
-    {% for entry in round_entries %}
-      {% set r = entry.round %}
-      <li>{{ r.title }} - {{ t('level') }} {{ r.level }} - {{ translate_value(r.status) }}
-        {% if entry.can_submit %}
-          - <a href="/round/{{ r.id }}/submit">{{ t('submit') }}</a>
-        {% endif %}
-        {% if entry.can_view_results %}
-          - <a href="{{ url_for('team_round_results', teamid=myteam.id, rid=r.id) }}">{{ t('results') }}</a>
-        {% endif %}
-      </li>
-    {% else %}
-      <li>{{ t('attach') }}</li>
-    {% endfor %}
-  </ul>
-  {% if current %}
-    {% if myteam %}
-      <div style="margin:20px 0;">
-        <strong>{{ t('your_team') }}:</strong>
-        <span>{{ myteam.name }}</span>
+  <div class="tournament-page">
+    <section class="tournament-hero">
+      <div class="tournament-hero-copy">
+        <p class="eyebrow">{{ t('tournaments') }}</p>
+        <h2 class="tournament-title">{{ tournament.name }}</h2>
+        <p class="tournament-description">{{ tournament.description or t('attach') }}</p>
       </div>
-    {% else %}
-      {% if tournament.status == 'Registration' %}
-        <h3>{{ t('register_team_btn') }}</h3>
-        <a href="/tournament/{{ tournament.id }}/register">{{ t('register_btn') }}</a>
+      <div class="tournament-status-card">
+        <span class="status-label">{{ t('status') }}</span>
+        <span class="status-chip status-{{ tournament.status|lower }}">{{ translate_value(tournament.status) }}</span>
+      </div>
+    </section>
+
+    <section class="rounds-section">
+      <div class="section-heading">
+        <h3>{{ t('rounds') }}</h3>
+        <p>{{ t('level') }} / {{ t('status') }} / {{ t('actions') }}</p>
+      </div>
+
+      <div class="round-list">
+        {% for entry in round_entries %}
+          {% set r = entry.round %}
+          <article class="round-card">
+            <div class="round-card-top">
+              <div>
+                <p class="round-level">{{ t('level') }} {{ r.level }}</p>
+                <h4>{{ r.title }}</h4>
+              </div>
+              <span class="round-status round-status-{{ r.status|lower }}">{{ translate_value(r.status) }}</span>
+            </div>
+
+            <div class="round-meta">
+              <div class="meta-item">
+                <span class="meta-label">{{ t('status') }}</span>
+                <strong>{{ translate_value(r.status) }}</strong>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">{{ t('level') }}</span>
+                <strong>{{ r.level }}</strong>
+              </div>
+            </div>
+
+            {% if entry.can_submit or entry.can_view_results %}
+              <div class="round-actions">
+                {% if entry.can_submit %}
+                  <a href="/round/{{ r.id }}/submit" class="action-btn primary-action">{{ t('submit') }}</a>
+                {% endif %}
+                {% if entry.can_view_results %}
+                  <a href="{{ url_for('team_round_results', teamid=myteam.id, rid=r.id) }}" class="action-btn secondary-action">{{ t('results') }}</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </article>
+        {% else %}
+          <div class="empty-rounds">{{ t('attach') }}</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="team-panel">
+      {% if current %}
+        {% if myteam %}
+          <div class="team-card">
+            <span class="team-card-label">{{ t('your_team') }}</span>
+            <strong>{{ myteam.name }}</strong>
+          </div>
+        {% elif tournament.status == 'Registration' %}
+          <div class="team-card">
+            <span class="team-card-label">{{ t('register_team_btn') }}</span>
+            <a href="/tournament/{{ tournament.id }}/register" class="action-btn primary-action">{{ t('register_btn') }}</a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="team-card">
+          <span class="team-card-label">{{ t('register_team_btn') }}</span>
+          <a href="/tournament/{{ tournament.id }}/register" class="action-btn primary-action">{{ t('register_btn') }}</a>
+        </div>
       {% endif %}
-    {% endif %}
-  {% else %}
-    <h3>{{ t('register_team_btn') }}</h3>
-    <a href="/tournament/{{ tournament.id }}/register">{{ t('register_btn') }}</a>
-  {% endif %}
+    </section>
+  </div>
 {% endblock %}

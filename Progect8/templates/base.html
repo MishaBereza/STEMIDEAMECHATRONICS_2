@@ -21,16 +21,21 @@
             <a href="/">{{ t('home') }}</a>
             <span class="nav-divider"></span>
             <span class="language-switcher">{{ t('language') }}:</span>
-            <a href="{{ url_for('set_language', lang='en') }}">EN</a>
-            <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
-            <a href="{{ url_for('set_language', lang='it') }}">IT</a>
-            <a href="{{ url_for('set_language', lang='de') }}">DE</a>
-            <a href="{{ url_for('set_language', lang='fr') }}">FR</a>
+            <div class="dropdown topbar-dropdown">
+              <button type="button" class="dropdown-toggle" aria-expanded="false">{{ lang|upper }}</button>
+              <div class="dropdown-menu">
+                <a href="{{ url_for('set_language', lang='en') }}">EN</a>
+                <a href="{{ url_for('set_language', lang='uk') }}">UK</a>
+                <a href="{{ url_for('set_language', lang='it') }}">IT</a>
+                <a href="{{ url_for('set_language', lang='de') }}">DE</a>
+                <a href="{{ url_for('set_language', lang='fr') }}">FR</a>
+              </div>
+            </div>
             {% set _cur = get_current_user() %}
             <span class="nav-divider"></span>
             {% if _cur %}
-              <a href="/user/{{ _cur.id }}" title="{{ t('profile_prefix') }}">{{ t('profile_prefix') }}: {{ _cur.first_name }}</a>
-              <a href="/logout">{{ t('logout') }}</a>
+              <a href="/user/{{ _cur.id }}" class="profile-link" title="{{ t('profile_prefix') }}">{{ t('profile_prefix') }}: {{ _cur.first_name }}</a>
+              <a href="/logout" class="logout-link">{{ t('logout') }}</a>
             {% else %}
               <a href="/login">{{ t('login') }}</a>
               <a href="/register">{{ t('register') }}</a>
@@ -83,5 +88,71 @@
       // Check immediately on page load
       checkForUpdates();
     </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const dropdowns = document.querySelectorAll('.topbar-dropdown');
+
+        function closeDropdown(dropdown) {
+          const toggle = dropdown.querySelector('.dropdown-toggle');
+          dropdown.classList.remove('is-open');
+          if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+          }
+        }
+
+        function openDropdown(dropdown) {
+          const toggle = dropdown.querySelector('.dropdown-toggle');
+          dropdowns.forEach((item) => {
+            if (item !== dropdown) {
+              closeDropdown(item);
+            }
+          });
+          dropdown.classList.add('is-open');
+          if (toggle) {
+            toggle.setAttribute('aria-expanded', 'true');
+          }
+        }
+
+        dropdowns.forEach((dropdown) => {
+          const toggle = dropdown.querySelector('.dropdown-toggle');
+          if (!toggle) {
+            return;
+          }
+
+          toggle.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (dropdown.classList.contains('is-open')) {
+              closeDropdown(dropdown);
+            } else {
+              openDropdown(dropdown);
+            }
+          });
+
+          const menu = dropdown.querySelector('.dropdown-menu');
+          if (menu) {
+            menu.addEventListener('click', function (event) {
+              event.stopPropagation();
+            });
+          }
+        });
+
+        document.addEventListener('click', function (event) {
+          dropdowns.forEach((dropdown) => {
+            if (!dropdown.contains(event.target)) {
+              closeDropdown(dropdown);
+            }
+          });
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape') {
+            dropdowns.forEach(closeDropdown);
+          }
+        });
+      });
+    </script>
+    {% block scripts %}{% endblock %}
   </body>
 </html>
