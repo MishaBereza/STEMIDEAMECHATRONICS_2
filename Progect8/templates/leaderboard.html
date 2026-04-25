@@ -33,7 +33,6 @@
       transform: scale(0.95);
     }
 
-    /* Modal styles */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -150,6 +149,28 @@
       border-radius: 4px;
       margin-bottom: 15px;
     }
+
+    .leaderboard-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin: 0 0 16px;
+    }
+
+    .leaderboard-export-btn {
+      border: 1px solid rgba(255, 165, 0, 0.3);
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      border-radius: 999px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .leaderboard-export-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -172,8 +193,14 @@
           </div>
         {% endif %}
 
+        <div class="leaderboard-toolbar">
+          <button class="leaderboard-export-btn" type="button" onclick="exportTable({{ tournament.id }})">
+            Export CSV
+          </button>
+        </div>
+
         <div class="data-table-wrap">
-          <table class="data-table leaderboard-table">
+          <table class="data-table leaderboard-table" id="leaderboard-table">
             <thead>
               <tr>
                 <th>{{ t('place') }}</th>
@@ -190,9 +217,7 @@
                   <td>
                     <div class="team-name-cell">
                       <span>{{ team.name }}</span>
-                      <button class="team-details-btn" onclick="openTeamDetails({{ team.id }})" title="View team details">
-                        ℹ️
-                      </button>
+                      <button class="team-details-btn" type="button" onclick="openTeamDetails({{ team.id }})" title="View team details">&#9432;</button>
                     </div>
                   </td>
                   <td class="leaderboard-score">{{ "{:.2f}".format(score) }}</td>
@@ -210,12 +235,11 @@
     </section>
   </div>
 
-  <!-- Team Details Modal -->
   <div class="modal-overlay" id="teamDetailsModal" onclick="closeTeamDetailsModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h2 id="modalTeamName"></h2>
-        <button class="modal-close-btn" onclick="closeTeamDetailsModal()">×</button>
+        <button class="modal-close-btn" type="button" onclick="closeTeamDetailsModal()">&times;</button>
       </div>
       <div id="modalBody">
         <div class="loading">{{ t('loading') }}...</div>
@@ -224,16 +248,43 @@
   </div>
 
   <script>
+    function exportTable(tid) {
+      const table = document.getElementById('leaderboard-table');
+      if (!table) {
+        return;
+      }
+
+      const rows = Array.from(table.querySelectorAll('tr'));
+      const csv = rows.map(row => {
+        const cells = Array.from(row.querySelectorAll('th, td'));
+        return cells.map(cell => {
+          const cellClone = cell.cloneNode(true);
+          cellClone.querySelectorAll('button').forEach(button => button.remove());
+          const text = cellClone.innerText.replace(/\s+/g, ' ').trim();
+          return `"${text.replace(/"/g, '""')}"`;
+        }).join(',');
+      }).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const safeName = ({{ tournament.name|tojson }} || `leaderboard-${tid}`).replace(/[^\w\-]+/g, '_');
+
+      link.href = URL.createObjectURL(blob);
+      link.download = `${safeName}_leaderboard.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }
+
     function openTeamDetails(teamId) {
       const modal = document.getElementById('teamDetailsModal');
       const modalBody = document.getElementById('modalBody');
       const modalTeamName = document.getElementById('modalTeamName');
 
-      // Show loading state
       modalBody.innerHTML = '<div class="loading">{{ t("loading") }}...</div>';
       modal.classList.add('active');
 
-      // Fetch team details
       fetch(`/api/team/${teamId}/details`)
         .then(response => {
           if (!response.ok) {
@@ -244,10 +295,8 @@
         .then(data => {
           modalTeamName.textContent = data.team_name;
 
-          // Build HTML for team details
           let html = '';
 
-          // Repository URL
           if (data.repo_url) {
             html += `
               <div class="team-details-group">
@@ -257,7 +306,6 @@
             `;
           }
 
-          // Live URL
           if (data.live_url) {
             html += `
               <div class="team-details-group">
@@ -267,7 +315,6 @@
             `;
           }
 
-          // Comments
           if (data.comments) {
             html += `
               <div class="team-details-group">
@@ -277,7 +324,6 @@
             `;
           }
 
-          // Submission Status
           if (data.submission_status) {
             html += `
               <div class="team-details-group">
@@ -287,7 +333,6 @@
             `;
           }
 
-          // Submitted At
           if (data.submitted_at) {
             html += `
               <div class="team-details-group">
@@ -297,7 +342,6 @@
             `;
           }
 
-          // Captain
           if (data.captain) {
             html += `
               <div class="team-details-group">
@@ -308,7 +352,6 @@
             `;
           }
 
-          // Team Members
           if (data.members && data.members.length > 0) {
             html += `
               <div class="team-details-group">
@@ -330,7 +373,6 @@
             `;
           }
 
-          // If no details to show
           if (!html) {
             html = '<p class="muted-text">{{ t("no_details_available") }}</p>';
           }
@@ -344,7 +386,6 @@
     }
 
     function closeTeamDetailsModal(event) {
-      // If event exists and target is the modal overlay itself (not the content)
       if (event && event.target.id !== 'teamDetailsModal') {
         return;
       }
@@ -352,14 +393,12 @@
       modal.classList.remove('active');
     }
 
-    // Close modal on Escape key
     document.addEventListener('keydown', function(event) {
       if (event.key === 'Escape') {
         closeTeamDetailsModal();
       }
     });
 
-    // Helper function to escape HTML
     function escapeHtml(text) {
       if (!text) return '';
       const map = {

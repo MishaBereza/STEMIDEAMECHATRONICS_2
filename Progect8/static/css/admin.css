@@ -343,11 +343,26 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .admin-table .role-form select {
+  width: auto;
   min-width: 120px;
+  max-width: 100%;
   margin: 0;
+  padding: 8px 36px 8px 12px;
+  min-height: 38px;
+  border-radius: 12px;
+  line-height: 1.2;
+  box-sizing: border-box;
+  flex: 0 1 auto;
+}
+
+.admin-table .role-form .inline-btn {
+  min-height: 38px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .empty-row {
@@ -579,6 +594,15 @@
   .submit-btn,
   .secondary-btn,
   .danger-btn {
+    width: 100%;
+  }
+
+  .admin-table .role-form {
+    align-items: stretch;
+  }
+
+  .admin-table .role-form select,
+  .admin-table .role-form .inline-btn {
     width: 100%;
   }
 }

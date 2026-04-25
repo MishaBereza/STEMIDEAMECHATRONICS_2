@@ -3,26 +3,28 @@
   <link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
 {% block content %}
-  <section class="hero-section">
-    <div class="hero-copy">
-      <div class="eyebrow">{{ t('digital_arena_eyebrow') }}</div>
-      <h1 class="hero-title">{{ t('hero_title') }}</h1>
-      <div class="hero-actions">
-        <a href="/register" class="primary-button">{{ t('register') }}</a>
-        <a href="/login" class="secondary-button">{{ t('login') }}</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-chip">
-          <span class="stat-value">{{ registration_tournaments_count }}</span>
-          <span class="stat-label">{{ t('active_tournaments') }}</span>
+  <div class="hero-stage">
+    <section class="hero-section">
+      <div class="hero-copy">
+        <div class="eyebrow">{{ t('digital_arena_eyebrow') }}</div>
+        <h1 class="hero-title">{{ t('hero_title') }}</h1>
+        <div class="hero-actions">
+          <a href="/register" class="primary-button">{{ t('register') }}</a>
+          <a href="/login" class="secondary-button">{{ t('login') }}</a>
         </div>
-        <div class="stat-chip">
-          <span class="stat-value">01</span>
-          <span class="stat-label">{{ t('unified_platform') }}</span>
+        <div class="hero-stats">
+          <div class="stat-chip">
+            <span class="stat-value">{{ registration_tournaments_count }}</span>
+            <span class="stat-label">{{ t('active_tournaments') }}</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-value">01</span>
+            <span class="stat-label">{{ t('unified_platform') }}</span>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <section class="tournaments-section">
     <div class="section-heading">
