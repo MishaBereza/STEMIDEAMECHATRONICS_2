@@ -39,8 +39,8 @@ def load_admin_password():
     return get_or_create_admin_password()
 
 
-def get_current_user():
-    """Get the current admin user from the database"""
+def get_admin_user():
+    """Get the primary admin user from the database"""
     return User.query.filter_by(role='admin').first()
 
 
@@ -189,7 +189,7 @@ def jury_evaluate():
             return redirect('/jury/login')
     else:
         # Admin access
-        jury = get_current_user()
+        jury = get_admin_user()
         if not jury or jury.role != 'admin':
             session.pop('admin', None)
             return redirect('/admin')
@@ -329,7 +329,7 @@ def jury_part2():
             return redirect('/jury/login')
     else:
         # Admin access
-        jury = get_current_user()
+        jury = get_admin_user()
         if not jury or jury.role != 'admin':
             session.pop('admin', None)
             return redirect('/admin')

@@ -3,63 +3,65 @@
   <link rel="stylesheet" href="/static/css/admin.css">
 {% endblock %}
 {% block content %}
-<div class="admin-page">
+<div class="admin-page wide-page">
   <h2 class="page-title">{{ t('teams_for_title') }} {{ tournament.name }}</h2>
 
   <div class="table-shell">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>{{ t('name') }}</th>
-          <th>{{ t('captain') }}</th>
-          <th>{{ t('members') }}</th>
-          <th>{{ t('repo') }}</th>
-          <th>{{ t('live') }}</th>
-          <th>{{ t('comments') }}</th>
-          <th>{{ t('status') }}</th>
-          <th>{{ t('actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for team in teams %}
+    <div class="table-scroll">
+      <table class="admin-table teams-table">
+        <thead>
           <tr>
-            <td>{{ team.name }}</td>
-            <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
-            <td>
-              {% for m in team.members.all() %}
-                {{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}
-              {% else %}
-                -
-              {% endfor %}
-            </td>
-            <td>{{ team.repo_url or '-' }}</td>
-            <td>{{ team.live_url or '-' }}</td>
-            <td>{{ team.comments or '-' }}</td>
-            <td>
-              {% set team_status = (team.submission_status or 'None')|lower %}
-              <span class="status-pill {{ team_status if team_status in ['pending', 'accepted', 'rejected', 'returned'] else 'default' }}">
-                {{ t(team_status) if team_status in ['pending', 'accepted', 'rejected', 'returned'] else (team.submission_status or '-') }}
-              </span>
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="/edit_team_members/{{ team.id }}" class="inline-btn">{{ t('edit_composition') }}</a>
-                {% if team.submission_status == 'Pending' %}
-                  <form method="post" action="/admin/team/{{ team.id }}/decide" class="table-actions">
-                    <button name="decision" value="accept" class="inline-btn">{{ t('accepted') }}</button>
-                    <button name="decision" value="reject" class="inline-btn">{{ t('rejected') }}</button>
-                    <button name="decision" value="return" class="inline-btn">{{ t('returned') }}</button>
-                  </form>
-                {% endif %}
-                <form method="post" action="/admin/team/{{ team.id }}/delete" class="inline-form">
-                  <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
-                </form>
-              </div>
-            </td>
+            <th>{{ t('name') }}</th>
+            <th>{{ t('captain') }}</th>
+            <th>{{ t('members') }}</th>
+            <th>{{ t('repo') }}</th>
+            <th>{{ t('live') }}</th>
+            <th>{{ t('comments') }}</th>
+            <th>{{ t('status') }}</th>
+            <th>{{ t('actions') }}</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for team in teams %}
+            <tr>
+              <td>{{ team.name }}</td>
+              <td>{{ team.captain.first_name }} {{ team.captain.last_name }} ({{ team.captain.email }})</td>
+              <td>
+                {% for m in team.members.all() %}
+                  {{ m.first_name }} {{ m.last_name }} ({{ m.email }}){% if not loop.last %}, {% endif %}
+                {% else %}
+                  -
+                {% endfor %}
+              </td>
+              <td>{{ team.repo_url or '-' }}</td>
+              <td>{{ team.live_url or '-' }}</td>
+              <td>{{ team.comments or '-' }}</td>
+              <td>
+                {% set team_status = (team.submission_status or 'None')|lower %}
+                <span class="status-pill {{ team_status if team_status in ['pending', 'accepted', 'rejected', 'returned'] else 'default' }}">
+                  {{ t(team_status) if team_status in ['pending', 'accepted', 'rejected', 'returned'] else (team.submission_status or '-') }}
+                </span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <a href="/edit_team_members/{{ team.id }}" class="inline-btn">{{ t('edit_composition') }}</a>
+                  {% if team.submission_status == 'Pending' %}
+                    <form method="post" action="/admin/team/{{ team.id }}/decide" class="table-actions">
+                      <button name="decision" value="accept" class="inline-btn">{{ t('accepted') }}</button>
+                      <button name="decision" value="reject" class="inline-btn">{{ t('rejected') }}</button>
+                      <button name="decision" value="return" class="inline-btn">{{ t('returned') }}</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="/admin/team/{{ team.id }}/delete" class="inline-form">
+                    <button onclick="return confirm('{{ t('delete') }}?')" class="danger-btn">{{ t('delete') }}</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="back-link">

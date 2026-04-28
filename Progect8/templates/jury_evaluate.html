@@ -8,17 +8,6 @@
     <h2>{{ t('jury_evaluation_panel') }}</h2>
     <p class="muted-text">{{ t('welcome') }}, {{ current_user.name if current_user else t('jury_short') }}!</p>
 
-    {% if tournament and tournament.evaluation_criteria %}
-      <div style="background: #f0f7ff; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 4px solid #2196F3;">
-        <h4 style="margin-top: 0;">{{ t('evaluation_criteria') }}:</h4>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-          {% for criterion in tournament.evaluation_criteria|sort(attribute='order') %}
-            <li>{{ criterion.name or (t('criterion') + ' ' + loop.index|string) }} ({{ t('max_points') }}: {{ criterion.max_points }} {{ t('points') }})</li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
-
     {% if message_key %}
       <p><span class="status-chip pending">{{ t(message_key) }}</span></p>
     {% else %}

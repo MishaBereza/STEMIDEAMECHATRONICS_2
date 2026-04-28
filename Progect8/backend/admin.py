@@ -232,7 +232,7 @@ def update_tournament_status(tid):
     t = Tournament.query.get_or_404(tid)
     new_status = request.form.get('status', '').strip()
 
-    if new_status not in ['Registration', 'Running', 'Finished']:
+    if new_status not in ['Draft', 'Registration', 'Running', 'Finished']:
         flash(_t('invalid_status'), 'warning')
         return redirect('/admin/tournaments')
 

@@ -23,6 +23,7 @@
               <td>
                 <form method="post" action="{{ url_for('update_tournament_status', tid=t_item.id) }}" class="status-select-form">
                   <select name="status" class="status-select status-{{ t_item.status|lower }}" aria-label="{{ t('status') }}" onchange="this.form.submit()">
+                    <option value="Draft" {% if t_item.status == 'Draft' %}selected{% endif %}>{{ t('draft') }}</option>
                     <option value="Registration" {% if t_item.status == 'Registration' %}selected{% endif %}>{{ t('registration') }}</option>
                     <option value="Running" {% if t_item.status == 'Running' %}selected{% endif %}>{{ t('running') }}</option>
                     <option value="Finished" {% if t_item.status == 'Finished' %}selected{% endif %}>{{ t('finished') }}</option>

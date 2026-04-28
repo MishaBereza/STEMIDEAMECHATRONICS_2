@@ -1,0 +1,663 @@
+DOCUMENTATION OF THE PROJECT
+Adaptive Tournament System
+
+1. Загальний огляд проєкту
+
+Цей репозиторій містить вебзастосунок на Flask для проведення командних турнірів.
+Система підтримує:
+- реєстрацію та вхід користувачів
+- реєстрацію команд у турнірах
+- подачу робіт по раундах
+- оцінювання журі
+- адміністрування користувачів, турнірів, команд, раундів і налаштувань оцінювання
+- багатомовний інтерфейс через словник перекладів
+
+Основний робочий код застосунку знаходиться в папці `Progect8`.
+
+
+2. Структура репозиторію верхнього рівня
+
+`Progect8/`
+Головна папка застосунку.
+
+`README.md`
+Короткий опис репозиторію та базова інструкція запуску.
+
+`How start.txt`
+Окремий текстовий файл з інструкцією запуску.
+
+`LICENSE`
+Ліцензія проєкту.
+
+`2026-04-04 20-05-53.mkv`
+Відеофайл, імовірно демо або запис роботи, не є частиною коду застосунку.
+
+`PROJECT_DOCUMENTATION.txt`
+Цей зведений файл документації проєкту.
+
+
+3. Основна структура застосунку в Progect8
+
+`backend/`
+Backend-пакет застосунку. Містить ініціалізацію Flask, маршрути, моделі, допоміжну логіку та переклади.
+
+`templates/`
+Jinja2-шаблони HTML для сторінок користувача, адміністратора, журі, профілю та турнірів.
+
+`static/css/`
+Файли стилів CSS, які використовуються шаблонами.
+
+`static/Assets/`
+Статичні зображення та інші ресурси.
+
+`tests/`
+Тести на `pytest` для моделей, авторизації, подачі робіт, адмінських сценаріїв та утиліт.
+
+`docs/`
+Стара документація в форматі Markdown, розбита по модулях.
+
+`run.py`
+Простий файл запуску, який імпортує `backend.app` і стартує Flask у режимі `debug`.
+
+`requirements.txt`
+Список Python-залежностей.
+
+`start.bat`, `start.ps1`
+Локальні скрипти запуску для Windows, які створюють віртуальне оточення, встановлюють залежності та запускають застосунок.
+
+`Dockerfile`
+Файл для збирання контейнера.
+
+`Procfile`, `railway.json`, `runtime.txt`
+Файли для деплою та конфігурації середовища хостингу.
+
+`data.db`
+SQLite-база даних для локальної розробки.
+
+`demo_setup.py`
+Скрипт для демо-налаштування або генерації тестових даних.
+
+`admin_console.bat`, `admin_key.txt`
+Допоміжні файли, пов'язані з адмінською частиною.
+
+`pytest_output.txt`
+Збережений результат запуску тестів.
+
+`PROJECT_STRUCTURE.md`, `README.md`
+Нотатки щодо структури та попередня документація.
+
+
+4. Документація backend-коду
+
+4.1 `backend/app.py`
+
+Центральний файл ініціалізації застосунку.
+Основні обов'язки:
+- створює Flask-застосунок
+- налаштовує підключення до бази даних
+- вказує Flask шляхи до `templates/` та `static/`
+- ініціалізує SQLAlchemy
+- запускає допоміжні функції міграції схеми
+- реєструє всі маршрути з інших backend-модулів
+- надає `/api/status` для перевірки оновлень на клієнті
+- зберігає `last_data_update` для логіки автооновлення після дій адміністратора
+
+Логіка бази даних:
+- якщо є `DATABASE_URL`, використовується вона
+- старий формат `postgres://` автоматично переводиться в `postgresql://`
+- якщо змінної оточення немає, використовується локальна SQLite-база `data.db`
+
+Функції міграції:
+- `migrate_user_table()`
+  Додає поля `password_hash`, `phone_country_code`, `phone_number`, якщо їх ще немає.
+- `migrate_evaluation_table()`
+  Додає колонки оцінювання старого та нового типу, якщо вони відсутні, і за потреби заповнює `score_tech`.
+
+Реєстрація маршрутів у цьому файлі навмисно зроблена тонкою:
+основна логіка запитів знаходиться в `auth.py`, `tournaments.py`, `teams.py`, `submissions.py` та `admin.py`.
+
+
+4.2 `backend/models.py`
+
+Містить усі SQLAlchemy-моделі.
+
+`db`
+Глобальний екземпляр SQLAlchemy.
+
+`User`
+Описує користувача платформи.
+Основні поля:
+- `first_name`, `last_name`, `email`
+- `password_hash`
+- `phone_country_code`, `phone_number`
+- `age`, `bio`
+- `role` зі значеннями на кшталт `admin`, `team`, `jury`
+Основні методи/властивості:
+- `name`: повне ім'я
+- `phone_display`: відформатований номер телефону
+- `set_password(password)`
+- `check_password(password)`
+
+`Tournament`
+Описує турнір.
+Основні поля:
+- `name`
+- `description`
+- `max_teams`
+- `status`
+Зв'язки:
+- `rounds`
+- `teams` через backref з `Team`
+- `evaluation_criteria` через backref з `EvaluationCriteria`
+
+`team_members`
+Проміжна таблиця many-to-many для зв'язку між `Team` і `User`.
+
+`Team`
+Описує команду в межах турніру.
+Основні поля:
+- `name`
+- `captain_id`
+- `tournament_id`
+- поля загальної подачі: `repo_url`, `live_url`, `comments`, `submitted_at`, `submission_status`
+Зв'язки:
+- `captain`
+- `members`
+- `tournament`
+- `submissions`
+
+`Round`
+Описує один раунд турніру.
+Основні поля:
+- `title`
+- `description`
+- `must_have`
+- `start_at`, `end_at`
+- `level`
+- `status`
+Зв'язок:
+- `submissions`
+
+`Submission`
+Описує подану роботу команди в конкретному раунді.
+Основні поля:
+- `team_id`
+- `round_id`
+- `repo_url`
+- `demo_url`
+- `description`
+- `submitted_at`
+Зв'язок:
+- `evaluations`
+
+`Evaluation`
+Описує оцінювання поданої роботи членом журі.
+Підтримує і старий, і новий формат оцінювання.
+Основні поля:
+- `submission_id`
+- `jury_id`
+- старі колонки `score1` ... `score10`
+- групові оцінки `score_tech`, `score_func`, `score_ui`
+- `comment`
+Зв'язок:
+- `criterion_scores`
+Основний метод:
+- `total()`
+  Спочатку рахує суму за критеріями, а якщо їх немає, переходить до старого набору колонок.
+
+`EvaluationScore`
+Зберігає один бал за одним критерієм оцінювання.
+Основні поля:
+- `evaluation_id`
+- `criteria_id`
+- `score`
+
+`EvaluationCriteria`
+Зберігає критерії оцінювання для конкретного турніру.
+Основні поля:
+- `tournament_id`
+- `name`
+- `max_points`
+- `order`
+
+`Settings`
+Проста таблиця ключ-значення для системних налаштувань, наприклад пароля адміністратора.
+
+
+4.3 `backend/app_helpers.py`
+
+Спільні допоміжні функції для Flask-контексту та контролю доступу.
+Функції:
+- `get_current_user()`
+  Читає поточного користувача із сесії.
+- `inject_user()`
+  Робить поточного користувача доступним у шаблонах.
+- `translation()`
+  Передає в шаблони функцію перекладу та мовні параметри.
+- `admin_required(fn)`
+  Декоратор для захисту маршрутів адміністратора.
+
+
+4.4 `backend/auth.py`
+
+Маршрути авторизації та профілю.
+Основні обов'язки:
+- реєстрація користувачів
+- вхід/вихід користувача
+- вхід/вихід адміністратора
+- зміна пароля адміністратора
+- вхід/вихід журі
+- перемикання профілю
+- зміна пароля користувача
+- зміна номера телефону користувача
+
+Основні функції:
+- `register_user()`
+- `user_login()`
+- `user_logout()`
+- `admin_panel()`
+- `admin_logout()`
+- `admin_change_password()`
+- `jury_login()`
+- `jury_evaluate()`
+- `jury_logout()`
+- `jury_part2()`
+- `profile_switch()`
+- `user_change_password()`
+- `user_change_phone()`
+
+Важливі особливості:
+- хешування паролів виконується через методи моделі `User`
+- пароль адміністратора зберігається в таблиці `Settings`
+- нормалізація номера телефону реалізована в межах цього модуля
+
+
+4.5 `backend/tournaments.py`
+
+Логіка перегляду турнірів і публічних сторінок турніру.
+Функції:
+- `index()`
+  Головна сторінка зі списком турнірів.
+- `tournament_page(tid)`
+  Сторінка конкретного турніру.
+- `leaderboard(tid)`
+  Сторінка рейтингу турніру.
+- `get_team_details(team_id)`
+  API-подібний маршрут з деталями команди.
+
+Типові обов'язки:
+- отримання даних про турніри
+- показ раундів і команд
+- формування або підготовка рейтингу
+- зв'язок стану користувача з інтерфейсом турніру
+
+
+4.6 `backend/teams.py`
+
+Логіка керування командами.
+Функції:
+- `register_team(tid)`
+- `team_page(teamid)`
+- `edit_team_members(teamid)`
+- `team_round_results(teamid, rid)`
+
+Обов'язки:
+- створення нової команди в турнірі
+- перевірка правил для капітана та учасників
+- редагування складу команди капітаном
+- показ результатів команди по раундах
+- обробка стану подачі робіт з боку учасників
+
+
+4.7 `backend/submissions.py`
+
+Логіка подачі робіт по раундах та їх оцінювання.
+Функції:
+- `_criterion_label(criterion)`
+- `get_round_access_state(team, round_item)`
+- `submit_solution(rid)`
+- `evaluate_submission(sid)`
+
+Обов'язки:
+- перевірка, чи має команда право подавати роботу в раунді
+- збереження посилань на репозиторій, демо та опису
+- робота форми оцінювання
+- збереження оцінок журі
+- підтримка оцінювання за критеріями
+
+
+4.8 `backend/admin.py`
+
+Логіка адміністративної панелі.
+Функції включають:
+- `admin_dashboard()`
+- `admin_users()`
+- `admin_delete_user(uid)`
+- `change_user_role(uid)`
+- `user_profile(uid)`
+- `admin_tournaments()`
+- `admin_tournaments_create_redirect()`
+- `admin_tournament_teams(tid)`
+- `admin_tournament_rounds(tid)`
+- `admin_delete_team(teamid)`
+- `admin_team_decide(teamid)`
+- `create_tournament()`
+- `edit_tournament(tid)`
+- `update_tournament_status(tid)`
+- `delete_tournament(tid)`
+- `create_round(tid)`
+- `admin_round_start(rid)`
+- `admin_round_close(rid)`
+- `delete_round(rid)`
+- `admin_tournament_evaluation_settings(tid)`
+
+Обов'язки:
+- адмін-дашборд і огляд системи
+- пошук користувачів, видалення та зміна ролей
+- створення, редагування та видалення турнірів
+- рішення щодо команд і поданих робіт
+- керування життєвим циклом раундів
+- налаштування критеріїв оцінювання для кожного турніру
+
+
+4.9 `backend/utils.py`
+
+Допоміжні функції для логіки адаптивної складності.
+Функції:
+- `calculate_average_score(scores)`
+- `adjust_difficulty(current_level, average_score)`
+- `generate_new_round(current_level, scores)`
+
+Цей модуль невеликий, але концептуально важливий:
+саме він містить логіку, через яку проєкт називається adaptive tournament system.
+
+
+4.10 `backend/translations.py`
+
+Містить `TRANSLATIONS` і `get_text()`.
+
+Обов'язки:
+- зберігає всі текстові рядки інтерфейсу
+- забезпечує багатомовність
+- повертає англійський текст, якщо ключ або мова відсутні
+
+У файлі присутні щонайменше такі мови:
+- англійська (`en`)
+- італійська (`it`)
+- українська (`uk`)
+
+
+4.11 `backend/__init__.py`
+
+Службовий файл пакета backend.
+
+
+5. Карта маршрутів за функціональністю
+
+Публічні та користувацькі маршрути:
+- `/`
+- `/register`
+- `/login`
+- `/logout`
+- `/profile/switch`
+- `/profile/change-password`
+- `/profile/change-phone`
+- `/user/<uid>`
+- `/set_language/<lang>`
+
+Маршрути турнірів і команд:
+- `/tournament/<tid>`
+- `/tournament/<tid>/register`
+- `/team/<teamid>`
+- `/edit_team_members/<teamid>`
+- `/team/<teamid>/round/<rid>/results`
+- `/round/<rid>/submit`
+- `/leaderboard/<tid>`
+- `/api/team/<team_id>/details`
+
+Адмінські маршрути:
+- `/admin`
+- `/admin/logout`
+- `/admin/dashboard`
+- `/admin/change_password`
+- `/admin/users`
+- `/admin/user/<uid>/delete`
+- `/admin/user/<uid>/change-role`
+- `/admin/tournaments`
+- `/admin/tournaments/create`
+- `/admin/tournament/create`
+- `/admin/tournament/<tid>/edit`
+- `/admin/tournament/<tid>/status`
+- `/admin/tournament/<tid>/delete`
+- `/admin/tournament/<tid>/teams`
+- `/admin/tournament/<tid>/rounds`
+- `/admin/tournament/<tid>/rounds/new`
+- `/admin/round/<rid>/start`
+- `/admin/round/<rid>/close`
+- `/admin/round/<rid>/delete`
+- `/admin/tournament/<tid>/evaluation-settings`
+- `/admin/team/<teamid>/delete`
+- `/admin/team/<teamid>/decide`
+
+Маршрути журі:
+- `/jury/login`
+- `/jury/evaluate`
+- `/evaluate/<sid>`
+- `/jury/logout`
+- `/jury/part2`
+
+Службовий маршрут:
+- `/api/status`
+
+
+6. Документація шаблонів
+
+Папка `templates/` містить HTML-шар інтерфейсу.
+Файли можна умовно поділити так.
+
+Базовий шаблон:
+- `base.html`
+
+Головні та публічні сторінки:
+- `index.html`
+- `register.html`
+- `user_login.html`
+- `profile.html`
+- `profile_switch.html`
+- `change_user_password.html`
+- `change_user_phone.html`
+
+Сторінки турнірів і команд:
+- `tournament.html`
+- `register_team.html`
+- `team.html`
+- `edit_team_members.html`
+- `submit.html`
+- `team_round_results.html`
+- `leaderboard.html`
+- `round_editor.html`
+
+Сторінки адміністратора:
+- `admin_login.html`
+- `admin_dashboard.html`
+- `admin_users.html`
+- `admin_tournaments.html`
+- `admin_teams.html`
+- `admin_create_tournament.html`
+- `admin_edit_tournament.html`
+- `admin_create_round.html`
+- `admin_change_password.html`
+- `admin_evaluation_settings.html`
+
+Сторінки журі та оцінювання:
+- `jury_login.html`
+- `jury_evaluate.html`
+- `jury_part2.html`
+- `evaluate.html`
+
+Загалом ці шаблони відповідають за:
+- виведення перекладених підписів через translation helper
+- форми реєстрації, подачі робіт та оцінювання
+- CRUD-інтерфейс адміністратора
+- показ ходу турніру та результатів
+
+
+7. Документація статичних файлів
+
+`static/css/main.css`
+Глобальні стилі сайту.
+
+`static/css/index.css`
+Стилі головної сторінки.
+
+`static/css/interface.css`
+Спільні стилі інтерфейсу.
+
+`static/css/register.css`
+Стилі сторінок, пов'язаних із реєстрацією.
+
+`static/css/tournament.css`
+Стилі сторінок турніру.
+
+`static/css/admin.css`
+Стилі адмінського інтерфейсу.
+
+`static/css/admin_dashboard.css`
+Окремі стилі для адмін-дашборду.
+
+`static/Assets/misha_logo.png`
+Статичне зображення.
+
+
+8. Документація тестів
+
+У проєкті є автоматизовані тести в папці `tests/`.
+
+`test_models.py`
+Перевіряє моделі бази даних та зв'язки між ними.
+
+`test_registration.py`
+Перевіряє реєстрацію користувачів, реєстрацію команд та пов'язані сценарії профілю.
+
+`test_user_login.py`
+Перевіряє вхід користувачів і валідацію пароля.
+
+`test_team_submission.py`
+Перевіряє права капітана/учасників на збереження та відправку роботи.
+
+`test_round_submission.py`
+Перевіряє доступність подачі робіт залежно від стану турніру або раунду.
+
+`test_jury_evaluation.py`
+Перевіряє збереження оцінок журі та відхилення некоректних балів.
+
+`test_admin_submission.py`
+Перевіряє сторінки перевірки робіт адміністратором та рішення по подачах.
+
+`test_admin_delete_user_team.py`
+Перевіряє сценарії видалення користувачів і команд адміністратором.
+
+`test_admin_dashboard.py`
+Перевіряє базовий вміст адмін-дашборду.
+
+`test_deletion.py`
+Перевіряє каскадне видалення даних, пов'язаних із турнірами.
+
+`test_utils.py`
+Перевіряє утиліти адаптивного оцінювання.
+
+
+9. Файли запуску та деплою
+
+`run.py`
+Локальний файл запуску в режимі `debug`.
+
+`start.bat`
+Batch-скрипт запуску для Windows.
+Що робить:
+- вимагає Python 3.14
+- створює або пересоздає `.venv`
+- оновлює `pip`
+- встановлює залежності
+- перевіряє `reportlab` і `openpyxl`
+- запускає застосунок на `http://127.0.0.1:5000`
+
+`start.ps1`
+PowerShell-версія запуску з аналогічною логікою.
+
+`Dockerfile`
+Логіка контейнеризації:
+- використовує `python:3.12-slim`
+- копіює `requirements.txt`
+- встановлює залежності
+- копіює вміст `Progect8/`
+- запускає `gunicorn backend.app:app`
+
+`Procfile`
+Файл команди запуску для платформ із Procfile-підходом.
+
+`railway.json`
+Платформозалежна конфігурація деплою.
+
+`runtime.txt`
+Підказка щодо версії рантайму для хостингу.
+
+
+10. Залежності
+
+Основні залежності з `requirements.txt`:
+- Flask
+- Flask-SQLAlchemy
+- SQLAlchemy
+- pytest
+- python-dotenv
+- reportlab
+- openpyxl
+- gunicorn
+- psycopg2-binary
+
+Що це означає:
+- Flask і пов'язаний стек забезпечують вебзастосунок
+- SQLAlchemy відповідає за ORM і доступ до бази даних
+- pytest відповідає за автоматичні тести
+- reportlab та openpyxl, імовірно, використовуються для експорту або генерації звітів
+- gunicorn та psycopg2-binary потрібні для продакшн-запуску, особливо з PostgreSQL
+
+
+11. Короткий опис бізнес-логіки
+
+Основний сценарій роботи системи:
+1. Користувач реєструється та входить у систему.
+2. Користувач створює команду або долучається до неї в межах турніру.
+3. Адміністратор створює турніри й раунди.
+4. Команди подають посилання на репозиторій і демо по раундах.
+5. Журі оцінює подані роботи.
+6. Оцінки можуть впливати на проходження далі та адаптацію складності.
+7. Адміністратор керує результатами, командами, користувачами та параметрами оцінювання.
+
+Ключові доменні ідеї:
+- один застосунок підтримує багато турнірів
+- кожен турнір складається з кількох раундів
+- команди належать певному турніру
+- подачі належать і команді, і раунду
+- оцінювання належать подачам і користувачам із роллю журі
+- для турніру можна налаштувати власні критерії оцінювання
+
+
+12. Важливі примітки щодо поточного стану коду
+
+- У проєкті є і старі Markdown-документи, і новіші зміни в коді, тому код слід вважати головним джерелом правди.
+- Backend уже розбитий на модулі, тому структуру легше підтримувати, ніж у монолітному Flask-файлі.
+- `translations.py` є великим центральним словником і критично важливий для будь-яких змін інтерфейсного тексту.
+- Схема бази частково підтримується власними функціями міграції в `backend/app.py`, а не окремим інструментом на кшталт Alembic.
+- Для локальної розробки використовується SQLite, а на сервері може використовуватись PostgreSQL через `DATABASE_URL`.
+
+
+13. Що ще можна покращити в документації
+
+- Додати окремий довідник по маршрутах із HTTP-методами та відповідними шаблонами.
+- Задокументувати точні зв'язки між маршрутами й HTML-шаблонами.
+- Додати ER-діаграму для моделей бази даних.
+- Окремо оформити інструкцію деплою для Railway і Docker.
+- Додати короткий contributor guide з поясненням, куди вносити зміни в backend, шаблони та стилі.
+
