@@ -135,6 +135,44 @@ a {
   color: #ffa500;
 }
 
+.topbar-links .auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.topbar-links .auth-login {
+  border: 1px solid rgba(255, 140, 0, 0.45);
+  background: rgba(255, 255, 255, 0.72);
+  color: #7a4a00;
+}
+
+.topbar-links .auth-login:hover {
+  border-color: rgba(255, 140, 0, 0.75);
+  background: rgba(255, 165, 0, 0.12);
+  color: #6b3f00;
+  transform: translateY(-1px);
+}
+
+.topbar-links .auth-register {
+  border: 1px solid rgba(255, 140, 0, 0.55);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: #241500;
+  box-shadow: 0 10px 24px rgba(255, 140, 0, 0.22);
+}
+
+.topbar-links .auth-register:hover {
+  color: #1f1200;
+  box-shadow: 0 14px 28px rgba(255, 140, 0, 0.28);
+  transform: translateY(-1px);
+}
+
 .nav-divider {
   width: 1px;
   height: 18px;
@@ -366,6 +404,12 @@ form button:hover {
 
   .topbar-links {
     justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .topbar-links .auth-link {
+    min-height: 36px;
+    padding: 0 13px;
   }
 
   .nav-divider {

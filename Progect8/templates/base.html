@@ -37,8 +37,8 @@
               <a href="/user/{{ _cur.id }}" class="profile-link" title="{{ t('profile_prefix') }}">{{ t('profile_prefix') }}: {{ _cur.first_name }}</a>
               <a href="/logout" class="logout-link">{{ t('logout') }}</a>
             {% else %}
-              <a href="/login">{{ t('login') }}</a>
-              <a href="/register">{{ t('register') }}</a>
+              <a href="/login" class="auth-link auth-login">{{ t('login') }}</a>
+              <a href="/register" class="auth-link auth-register">{{ t('register') }}</a>
             {% endif %}
           </div>
         </div>
