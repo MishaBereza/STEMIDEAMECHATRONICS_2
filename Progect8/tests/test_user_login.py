@@ -122,3 +122,28 @@ def test_cancel_registration_deletes_pending_user():
     assert response.status_code == 302
     with app.app_context():
         assert User.query.filter_by(email='cancel@test.com').first() is None
+
+
+def test_over_admin_can_login_with_initial_admin_key_password():
+    from backend.auth import OVER_ADMIN_EMAIL, ensure_over_admin_user, _load_admin_key_value
+
+    with app.app_context():
+        from backend.models import Settings
+        Settings.query.filter_by(key='over_admin_password_initialized').delete()
+        User.query.filter_by(email=OVER_ADMIN_EMAIL).delete()
+        db.session.commit()
+        over_admin = ensure_over_admin_user()
+        over_admin_id = over_admin.id
+        password = _load_admin_key_value()
+
+    client = app.test_client()
+    response = client.post('/login', data={
+        'email': OVER_ADMIN_EMAIL,
+        'password': password
+    }, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(f'/user/{over_admin_id}')
+
+    with client.session_transaction() as sess:
+        assert sess['user_id'] == over_admin_id

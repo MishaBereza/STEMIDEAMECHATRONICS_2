@@ -31,7 +31,7 @@ def test_admin_route_auto_logs_in_over_admin():
     assert response.headers['Location'].endswith('/admin/dashboard')
 
     with app.app_context():
-        over_admin = User.query.filter_by(email='__super_admin__', role='admin').first()
+        over_admin = User.query.filter_by(email='over.admin@local', role='admin').first()
         assert over_admin is not None
 
     with client.session_transaction() as sess:

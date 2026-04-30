@@ -5,8 +5,8 @@ from .email_utils import get_verification_links, send_verification_email
 import os
 import re
 
-OVER_ADMIN_EMAIL = '__super_admin__'
-LEGACY_OVER_ADMIN_EMAIL = 'over.admin@local'
+OVER_ADMIN_EMAIL = 'over.admin@local'
+LEGACY_OVER_ADMIN_EMAIL = '__super_admin__'
 OVER_ADMIN_FIRST_NAME = 'Super'
 OVER_ADMIN_LAST_NAME = 'Admin'
 
@@ -54,9 +54,20 @@ def is_over_admin(user):
     return bool(user and user.email in (OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL))
 
 
+def _load_admin_key_value():
+    key_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'admin_key.txt'))
+    try:
+        with open(key_path, encoding='utf-8') as key_file:
+            return key_file.read().strip()
+    except OSError:
+        return ''
+
+
 def ensure_over_admin_user():
     """Create the protected over-admin account once and return it."""
     user = User.query.filter(User.email.in_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).first()
+    bootstrap_password = _load_admin_key_value() or os.urandom(32).hex()
+    password_setting = Settings.query.filter_by(key='over_admin_password_initialized').first()
     if user:
         changed = False
         if user.email != OVER_ADMIN_EMAIL:
@@ -80,6 +91,10 @@ def ensure_over_admin_user():
         if user.phone_number != '000000000':
             user.phone_number = '000000000'
             changed = True
+        if not password_setting:
+            user.set_password(bootstrap_password)
+            db.session.add(Settings(key='over_admin_password_initialized', value='1'))
+            changed = True
         if changed:
             db.session.commit()
         return user
@@ -93,8 +108,10 @@ def ensure_over_admin_user():
         role='admin',
         is_verified=True
     )
-    user.set_password(os.urandom(32).hex())
+    user.set_password(bootstrap_password)
     db.session.add(user)
+    if not password_setting:
+        db.session.add(Settings(key='over_admin_password_initialized', value='1'))
     db.session.commit()
     return user
 
@@ -191,9 +208,6 @@ def user_login():
         user = User.query.filter_by(email=email).first()
         if not user:
             flash(_t('user_not_found'), 'danger')
-            return redirect(url_for('user_login'))
-        if is_over_admin(user):
-            flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_login'))
         if not user.check_password(password):
             flash(_t('invalid_password'), 'danger')
