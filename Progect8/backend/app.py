@@ -1,10 +1,17 @@
-from flask import Flask, redirect, url_for, session, request, jsonify
+from flask import Flask, redirect, url_for, session, request, jsonify, flash
 from .models import db
 from .translations import get_text
 from .app_helpers import get_current_user, inject_user, translation, admin_required
+from .email_utils import mail
 import os
 from sqlalchemy import inspect, text
 from datetime import datetime
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+except Exception:
+    pass
 
 app = Flask(__name__)
 
@@ -23,12 +30,23 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.dirname(__file__), '..', 'data.db')
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY','dev-secret')
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() in ('1', 'true', 'yes', 'on')
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'false').lower() in ('1', 'true', 'yes', 'on')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['MAIL_SUPPRESS_SEND'] = os.environ.get('MAIL_SUPPRESS_SEND', 'false').lower() in ('1', 'true', 'yes', 'on')
 
 # Set template folder to the templates directory in the project root
 app.template_folder = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app.static_folder = os.path.join(os.path.dirname(__file__), '..', 'static')
 
 db.init_app(app)
+mail.init_app(app)
+
+# Email is configured from MAIL_* environment variables.
 
 
 def migrate_evaluation_table():
@@ -80,6 +98,14 @@ def migrate_user_table():
         db.session.execute(text("ALTER TABLE user ADD COLUMN phone_country_code VARCHAR(10) NOT NULL DEFAULT '+380'"))
     if 'phone_number' not in existing_columns:
         db.session.execute(text("ALTER TABLE user ADD COLUMN phone_number VARCHAR(30) NOT NULL DEFAULT ''"))
+    if 'is_verified' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN is_verified BOOLEAN DEFAULT 0"))
+    if 'verification_token' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN verification_token VARCHAR(64)"))
+    if 'last_login_at' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN last_login_at DATETIME"))
+    if 'login_token' not in existing_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN login_token VARCHAR(64)"))
     db.session.commit()
 
 with app.app_context():
@@ -87,6 +113,8 @@ with app.app_context():
     db.create_all()
     migrate_user_table()
     migrate_evaluation_table()
+    from .auth import ensure_over_admin_user
+    ensure_over_admin_user()
 
 @app.context_processor
 def inject_user_processor():
@@ -124,6 +152,33 @@ from .tournaments import index, tournament_page, leaderboard, get_team_details
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
 from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round, admin_tournament_evaluation_settings
+from .email_utils import verify_user, cancel_registration
+
+
+# Email verification routes
+@app.route('/verify/<token>')
+def verify_email(token):
+    """Verify user email and activate account"""
+    from .translations import get_text
+    success, user = verify_user(token)
+    if success:
+        flash(get_text('account_verified', session.get('language', 'en')), 'success')
+        return redirect('/login')
+    else:
+        flash(get_text('invalid_verification_token', session.get('language', 'en')), 'danger')
+        return redirect('/')
+
+
+@app.route('/verify/cancel/<token>')
+def cancel_verify_email(token):
+    """Cancel registration and delete account"""
+    from .translations import get_text
+    if cancel_registration(token):
+        flash(get_text('registration_cancelled', session.get('language', 'en')), 'info')
+    else:
+        flash(get_text('invalid_cancellation_token', session.get('language', 'en')), 'danger')
+    return redirect('/')
+
 
 # Register routes
 app.add_url_rule('/', 'index', index, methods=['GET'])

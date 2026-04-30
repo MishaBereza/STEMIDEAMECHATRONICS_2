@@ -40,12 +40,13 @@ def tournament_page(tid):
     round_entries = []
 
     for round_item in rounds:
+        round_is_open = round_item.status.lower() in ('active', 'draft')
         can_submit = False
 
         if session.get('admin'):
-            can_submit = t.status in ['Submission', 'Running'] and round_item.status == 'Active'
+            can_submit = t.status in ['Submission', 'Running'] and round_is_open
         elif user and myteam:
-            can_submit = t.status in ['Submission', 'Running'] and round_item.status == 'Active'
+            can_submit = t.status in ['Submission', 'Running'] and round_is_open
 
         round_entries.append({
             'round': round_item,

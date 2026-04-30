@@ -4,6 +4,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Tournament, Team, Round, Submission, EvaluationCriteria
 from .translations import get_text
 from sqlalchemy import or_
+from .auth import is_over_admin
 
 
 def _t(key, **kwargs):
@@ -45,7 +46,7 @@ def admin_users():
 
 def admin_delete_user(uid):
     u = User.query.get_or_404(uid)
-    if u.role == 'admin':
+    if is_over_admin(u) or u.role == 'admin':
         flash(_t('cannot_delete_admin_user'), 'warning')
         return redirect('/admin/users')
 
@@ -86,6 +87,10 @@ def admin_delete_user(uid):
 
 def change_user_role(uid):
     u = User.query.get_or_404(uid)
+    if is_over_admin(u):
+        flash(_t('cannot_delete_admin_user'), 'warning')
+        return redirect('/admin/users')
+
     new_role = request.form.get('role')
     if new_role in ['team', 'jury', 'admin']:
         u.role = new_role

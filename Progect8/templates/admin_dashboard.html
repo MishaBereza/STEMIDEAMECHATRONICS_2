@@ -29,7 +29,7 @@
     <div class="admin-card-arrow manage">{{ t('create') }} / {{ t('edit') }} / {{ t('delete') }}</div>
   </a>
 
-  <a href="{{ url_for('create_tournament') }}" class="admin-card create-tournament">
+  <a href="{{ url_for('admin_tournaments_create_redirect') }}" class="admin-card create-tournament">
     <div class="admin-card-icon">{{ t('create') }}</div>
     <div class="admin-card-label create">{{ t('create') }} {{ t('tournament_page') }}</div>
     <div class="admin-card-arrow create">{{ t('name') }} / {{ t('description') }}</div>

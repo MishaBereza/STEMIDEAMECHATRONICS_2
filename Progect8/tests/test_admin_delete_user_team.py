@@ -42,3 +42,31 @@ def test_admin_delete_user_and_team():
             session['admin'] = True
             resp = admin_delete_team(team.id)
         assert db.session.get(Team, team.id) is None
+
+
+def test_super_admin_cannot_be_deleted_or_demoted():
+    from backend.auth import ensure_over_admin_user
+    from backend.admin import admin_delete_user, change_user_role
+    from flask import session
+
+    with app.app_context():
+        super_admin = ensure_over_admin_user()
+        super_admin_id = super_admin.id
+
+    with app.test_request_context(method='POST'):
+        session['admin'] = True
+        admin_delete_user(super_admin_id)
+
+    with app.app_context():
+        super_admin = db.session.get(User, super_admin_id)
+        assert super_admin is not None
+        assert super_admin.role == 'admin'
+
+    with app.test_request_context(method='POST', data={'role': 'team'}):
+        session['admin'] = True
+        change_user_role(super_admin_id)
+
+    with app.app_context():
+        super_admin = db.session.get(User, super_admin_id)
+        assert super_admin is not None
+        assert super_admin.role == 'admin'

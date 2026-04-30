@@ -1,8 +1,14 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
 from .translations import get_text
+from .email_utils import get_verification_links, send_verification_email
 import os
 import re
+
+OVER_ADMIN_EMAIL = '__super_admin__'
+LEGACY_OVER_ADMIN_EMAIL = 'over.admin@local'
+OVER_ADMIN_FIRST_NAME = 'Super'
+OVER_ADMIN_LAST_NAME = 'Admin'
 
 
 def _t(key, **kwargs):
@@ -41,7 +47,64 @@ def load_admin_password():
 
 def get_admin_user():
     """Get the primary admin user from the database"""
-    return User.query.filter_by(role='admin').first()
+    return ensure_over_admin_user()
+
+
+def is_over_admin(user):
+    return bool(user and user.email in (OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL))
+
+
+def ensure_over_admin_user():
+    """Create the protected over-admin account once and return it."""
+    user = User.query.filter(User.email.in_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).first()
+    if user:
+        changed = False
+        if user.email != OVER_ADMIN_EMAIL:
+            user.email = OVER_ADMIN_EMAIL
+            changed = True
+        if user.role != 'admin':
+            user.role = 'admin'
+            changed = True
+        if not user.is_verified:
+            user.is_verified = True
+            changed = True
+        if user.verification_token:
+            user.verification_token = None
+            changed = True
+        if user.first_name != OVER_ADMIN_FIRST_NAME:
+            user.first_name = OVER_ADMIN_FIRST_NAME
+            changed = True
+        if user.last_name != OVER_ADMIN_LAST_NAME:
+            user.last_name = OVER_ADMIN_LAST_NAME
+            changed = True
+        if user.phone_number != '000000000':
+            user.phone_number = '000000000'
+            changed = True
+        if changed:
+            db.session.commit()
+        return user
+
+    user = User(
+        first_name=OVER_ADMIN_FIRST_NAME,
+        last_name=OVER_ADMIN_LAST_NAME,
+        email=OVER_ADMIN_EMAIL,
+        phone_country_code='+380',
+        phone_number='000000000',
+        role='admin',
+        is_verified=True
+    )
+    user.set_password(os.urandom(32).hex())
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+def login_over_admin():
+    user = ensure_over_admin_user()
+    session['admin'] = True
+    session['admin_user_id'] = user.id
+    session['user_id'] = user.id
+    return user
 
 
 def save_admin_password(new_password):
@@ -90,16 +153,26 @@ def register_user():
             bio=bio,
             phone_country_code=phone_country_code,
             phone_number=phone_number,
-            role='team'
+            role='team',
+            is_verified=False
         )
         user.set_password(password)
 
         db.session.add(user)
         db.session.commit()
-        session['user_id'] = user.id
+        
+        # Keep the account pending until the user confirms the email link.
+        email_sent = send_verification_email(user)
 
-        flash(_t('registered_successfully'), 'success')
-        return redirect('/')
+        if email_sent:
+            flash(_t('verification_email_sent'), 'info')
+        else:
+            links = get_verification_links(user)
+            flash(
+                f"Email could not be sent. Local verification link: {links['verify_url']}",
+                'warning'
+            )
+        return redirect('/login')
 
     return render_template('register.html', phone_country_codes=PHONE_COUNTRY_CODES, default_phone_country_code='+380')
 
@@ -119,10 +192,28 @@ def user_login():
         if not user:
             flash(_t('user_not_found'), 'danger')
             return redirect(url_for('user_login'))
+        if is_over_admin(user):
+            flash(_t('invalid_password'), 'danger')
+            return redirect(url_for('user_login'))
         if not user.check_password(password):
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_login'))
+        
+        # Newly registered users keep a verification token until they confirm.
+        # Legacy/test accounts without a token are allowed to log in.
+        if user.verification_token and not user.is_verified:
+            flash(_t('account_not_verified'), 'warning')
+            return redirect(url_for('user_login'))
 
+        # Store previous login time before updating
+        from datetime import datetime
+        user.last_login_at = datetime.now()
+        db.session.commit()
+        
+        # Send login notification email
+        from .email_utils import send_login_notification
+        send_login_notification(user)
+        
         session['user_id'] = user.id
         flash(_t('logged_in_successfully'), 'success')
         return redirect(url_for('user_profile', uid=user.id))
@@ -137,17 +228,16 @@ def user_logout():
 
 
 def admin_panel():
-    if request.method == 'POST':
-        current_password = load_admin_password()
-        if request.form.get('password') == current_password:
-            session['admin'] = True
-            return redirect('/admin/dashboard')
-        flash(_t('invalid_password'), 'danger')
-    return render_template('admin_login.html')
+    login_over_admin()
+    return redirect('/admin/dashboard')
 
 
 def admin_logout():
+    admin_user_id = session.get('admin_user_id')
     session.pop('admin', None)
+    session.pop('admin_user_id', None)
+    if admin_user_id and session.get('user_id') == admin_user_id:
+        session.pop('user_id', None)
     return redirect('/')
 
 

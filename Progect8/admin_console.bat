@@ -47,11 +47,11 @@ echo ====================================
 echo     ADMIN CONSOLE
 echo ====================================
 echo.
-echo 1. Clear database
+echo 1. Clear database and recreate over-admin
 echo 2. Create demo data
 echo 3. Reset and start fresh
-echo 4. View admin password
-echo 5. Change admin password
+echo 4. Switch this device to super-admin
+echo 5. Ensure super-admin exists
 echo 6. List jury/admin users
 echo 7. Set user status
 echo 8. Emergency stop server
@@ -63,8 +63,8 @@ set /p choice="Select option (1-10): "
 if "%choice%"=="1" goto clear_db
 if "%choice%"=="2" goto demo_data
 if "%choice%"=="3" goto reset_fresh
-if "%choice%"=="4" goto view_password
-if "%choice%"=="5" goto change_password
+if "%choice%"=="4" goto switch_super_admin
+if "%choice%"=="5" goto ensure_over_admin
 if "%choice%"=="6" goto list_users
 if "%choice%"=="7" goto set_status
 if "%choice%"=="8" goto emergency_stop
@@ -76,11 +76,15 @@ goto menu
 
 :clear_db
 echo.
-if exist "instance\data.db" (
-    del "instance\data.db"
-    echo Database cleared successfully!
+echo WARNING: This will delete all users, admins, teams, tournaments, rounds, submissions and settings.
+echo The protected over-admin account will be recreated automatically.
+set /p confirm_clear="Type DELETE to continue: "
+if /i not "%confirm_clear%"=="DELETE" (
+    echo Cancelled.
+) else if exist "%VENV_PY%" (
+    call "%VENV_PY%" scripts\admin_tools.py clear-database
 ) else (
-    echo Database not found
+    echo Virtual environment not found. Run start.bat first.
 )
 pause
 goto menu
@@ -124,11 +128,23 @@ echo Done! Run start.bat to begin
 pause
 goto menu
 
-:view_password
+:switch_super_admin
 echo.
-echo Current admin password:
 if exist "%VENV_PY%" (
-    call "%VENV_PY%" -c "from backend.app import app; from backend.auth import get_or_create_admin_password; app.app_context().push(); print(get_or_create_admin_password())"
+    call "%VENV_PY%" scripts\admin_tools.py ensure-over-admin
+    echo Opening browser and switching this device to super-admin...
+    start "" "http://localhost:5000/admin"
+) else (
+    echo Virtual environment not found. Run start.bat first.
+)
+echo.
+pause
+goto menu
+
+:ensure_over_admin
+echo.
+if exist "%VENV_PY%" (
+    call "%VENV_PY%" scripts\admin_tools.py ensure-over-admin
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )
@@ -153,7 +169,7 @@ echo.
 echo Users with jury or admin status:
 echo.
 if exist "%VENV_PY%" (
-    call "%VENV_PY%" -c "from backend.app import app; from backend.models import User; app.app_context().push(); users = User.query.filter(User.role.in_(['jury', 'admin'])).all(); [print(f'{u.email}: {u.first_name} {u.last_name} ({u.role})') for u in users] if users else print('No users found')"
+    call "%VENV_PY%" scripts\admin_tools.py list-admins
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )
@@ -169,7 +185,7 @@ if "%new_status%"=="0" set "status_text=team"
 if "%new_status%"=="1" set "status_text=jury"
 if "%new_status%"=="3" set "status_text=admin"
 if exist "%VENV_PY%" (
-    call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; app.app_context().push(); user = User.query.filter_by(email='%user_email%').first(); print('User not found' if not user else f'User {user.first_name} {user.last_name} status updated to %status_text%'); user and (setattr(user, 'role', '%status_text%'), db.session.commit())" 2>nul
+    call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; from backend.auth import is_over_admin; app.app_context().push(); user = User.query.filter_by(email='%user_email%').first(); blocked = bool(user and is_over_admin(user)); print('User not found' if not user else ('Super-admin is protected' if blocked else f'User {user.first_name} {user.last_name} status updated to %status_text%')); user and not blocked and (setattr(user, 'role', '%status_text%'), db.session.commit())" 2>nul
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )
@@ -192,10 +208,9 @@ goto menu
 :change_user_password
 echo.
 set /p target_email="Enter user email: "
-set /p admin_confirm_password="Enter admin password to confirm: "
 set /p new_user_password="Enter new password for user: "
 if exist "%VENV_PY%" (
-    call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; from backend.auth import load_admin_password; app.app_context().push(); admin_ok = ('%admin_confirm_password%' == load_admin_password()); user = User.query.filter_by(email='%target_email%').first() if admin_ok else None; print('Invalid admin password' if not admin_ok else ('User not found' if not user else 'User password changed successfully')); user and user.set_password('%new_user_password%'); user and db.session.commit() if admin_ok and user else None"
+    call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; from backend.auth import is_over_admin; app.app_context().push(); user = User.query.filter_by(email='%target_email%').first(); blocked = bool(user and is_over_admin(user)); print('User not found' if not user else ('Super-admin has no editable password' if blocked else 'User password changed successfully')); user and not blocked and user.set_password('%new_user_password%'); user and not blocked and db.session.commit()"
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )

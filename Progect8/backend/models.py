@@ -18,6 +18,14 @@ class User(db.Model):
     bio = db.Column(db.Text)
     role = db.Column(db.String(30), default='team')
     
+    # Email verification fields
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(64), unique=True, nullable=True)
+    
+    # Login notification fields
+    last_login_at = db.Column(db.DateTime, nullable=True)
+    login_token = db.Column(db.String(64), unique=True, nullable=True)
+    
     @property
     def name(self):
         return f"{self.first_name} {self.last_name}"

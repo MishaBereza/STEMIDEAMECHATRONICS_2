@@ -36,14 +36,14 @@ def submit_solution(rid):
                     if allowed:
                         teams.append(team)
 
-    status_ok = t and t.status.lower() in ('submission', 'running') and r.status.lower() == 'active'
+    status_ok = t and t.status.lower() in ('submission', 'running') and r.status.lower() in ('active', 'draft')
 
     if request.method == 'POST':
         if not t or t.status.lower() not in ('submission', 'running'):
             flash(_t('submissions_not_open'), 'warning')
             return redirect(url_for('tournament_page', tid=r.tournament_id))
 
-        if r.status.lower() != 'active':
+        if r.status.lower() not in ('active', 'draft'):
             flash(_t('round_not_active_for_submission'), 'warning')
             return redirect(url_for('tournament_page', tid=r.tournament_id))
 
@@ -146,7 +146,53 @@ def evaluate_submission(sid):
         criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()
 
     if not criteria:
-        if request.method == 'POST':
+        if request.method == 'POST' and any(f'score{i}' in request.form for i in range(1, 11)):
+            parsed_scores = []
+            for i in range(1, 11):
+                field = f'score{i}'
+                raw_value = request.form.get(field, '').strip()
+                if not raw_value:
+                    flash(_t('score_required', field=field), 'warning')
+                    return render_template('evaluate.html', s=s, criteria=criteria)
+                if len(raw_value) > 4:
+                    flash(_t('score_two_digits', field=field), 'warning')
+                    return render_template('evaluate.html', s=s, criteria=criteria)
+                try:
+                    score_value = float(raw_value)
+                except ValueError:
+                    flash(_t('score_number_range', field=field), 'warning')
+                    return render_template('evaluate.html', s=s, criteria=criteria)
+                if score_value < 0 or score_value > 10:
+                    flash(_t('score_between_range', field=field), 'warning')
+                    return render_template('evaluate.html', s=s, criteria=criteria)
+                parsed_scores.append(score_value)
+
+            evaluation = Evaluation(
+                submission_id=s.id,
+                jury_id=jury.id,
+                comment=request.form.get('comment', '').strip(),
+                score1=parsed_scores[0],
+                score2=parsed_scores[1],
+                score3=parsed_scores[2],
+                score4=parsed_scores[3],
+                score5=parsed_scores[4],
+                score6=parsed_scores[5],
+                score7=parsed_scores[6],
+                score8=parsed_scores[7],
+                score9=parsed_scores[8],
+                score10=parsed_scores[9],
+                score_tech=sum(parsed_scores)
+            )
+            db.session.add(evaluation)
+            try:
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                flash(_t('failed_save_evaluation'), 'danger')
+                return render_template('evaluate.html', s=s, criteria=criteria)
+            flash(_t('evaluation_saved'), 'success')
+            return redirect(url_for('jury_evaluate'))
+        elif request.method == 'POST':
             flash(_t('no_criteria_configured'), 'warning')
         return render_template('evaluate.html', s=s, criteria=criteria)
 

@@ -83,7 +83,7 @@ def team_page(teamid):
                     is_member = True
                     break
     can_edit = (is_member or session.get('admin'))
-    can_edit_members = (is_member and t and t.status == 'Registration') or session.get('admin')
+    can_edit_members = is_member or session.get('admin')
     can_submit = user and (user.id == team.captain_id or session.get('admin'))
     message = None
 
@@ -112,7 +112,9 @@ def team_page(teamid):
     if request.method == 'POST' and can_edit and t and not is_finished:
         repo = request.form.get('repo_url', '').strip()
         live = request.form.get('live_url', '').strip()
-        members_emails = [e.strip().lower() for e in request.form.getlist('members') if e.strip()]
+        members_emails = []
+        for value in request.form.getlist('members'):
+            members_emails.extend([email.strip().lower() for email in value.split(',') if email.strip()])
         if not repo:
             message = _t('github_repo_required')
         else:
