@@ -18,15 +18,24 @@ def _t(key, **kwargs):
 PHONE_COUNTRY_CODES = ['+380', '+39', '+49', '+33', '+44', '+1', '+34', '+48']
 
 
-def _normalize_phone_number(value):
-    return re.sub(r'\D+', '', value or '')
+def _normalize_phone_number(value, allow_plus=False):
+    value = (value or '').strip()
+    if allow_plus:
+        digits = re.sub(r'\D+', '', value)
+        return f"+{digits}" if value.startswith('+') and digits else digits
+    return re.sub(r'\D+', '', value)
 
 
 def _get_phone_form_data():
-    country_code = request.form.get('phone_country_code', '+380').strip()
-    phone_number = _normalize_phone_number(request.form.get('phone_number', '').strip())
+    raw_country_code = request.form.get('phone_country_code')
+    raw_phone_number = request.form.get('phone_number', '').strip()
+    if raw_country_code is None:
+        return '', _normalize_phone_number(raw_phone_number, allow_plus=True)
+
+    country_code = raw_country_code.strip()
+    phone_number = _normalize_phone_number(raw_phone_number)
     if country_code not in PHONE_COUNTRY_CODES:
-        country_code = '+380'
+        country_code = ''
     return country_code, phone_number
 
 
@@ -537,7 +546,5 @@ def user_change_phone():
 
     return render_template(
         'change_user_phone.html',
-        phone_country_codes=PHONE_COUNTRY_CODES,
-        default_phone_country_code=user.phone_country_code or '+380',
-        current_phone_number=user.phone_number or ''
+        current_phone_number=user.phone_display or ''
     )

@@ -30,14 +30,7 @@
 
     <!-- PHONE -->
     <label>{{ t('phone') }} *</label>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <select name="phone_country_code" style="max-width: 120px;">
-        {% for code in phone_country_codes %}
-          <option value="{{ code }}" {% if code == default_phone_country_code %}selected{% endif %}>{{ code }}</option>
-        {% endfor %}
-      </select>
-      <input type="tel" name="phone_number" inputmode="numeric" required placeholder="{{ t('phone_number') }}">
-    </div>
+    <input type="tel" name="phone_number" inputmode="tel" required placeholder="+380501112233">
 
     <!-- PASSWORD -->
     <label>{{ t('password') }} *</label>

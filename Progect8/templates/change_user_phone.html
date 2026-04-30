@@ -10,14 +10,7 @@
         </div>
         <div class="form-group">
           <label>{{ t('phone') }}</label>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <select name="phone_country_code" style="max-width: 120px;">
-              {% for code in phone_country_codes %}
-                <option value="{{ code }}" {% if code == default_phone_country_code %}selected{% endif %}>{{ code }}</option>
-              {% endfor %}
-            </select>
-            <input type="tel" name="phone_number" inputmode="numeric" value="{{ current_phone_number }}" required placeholder="{{ t('phone_number') }}">
-          </div>
+          <input type="tel" name="phone_number" inputmode="tel" value="{{ current_phone_number }}" required placeholder="+380501112233">
         </div>
         <div class="button-row">
           <button type="submit" class="action-btn success">{{ t('save') }}</button>
