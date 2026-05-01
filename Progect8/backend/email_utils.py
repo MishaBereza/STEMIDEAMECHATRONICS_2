@@ -3,6 +3,7 @@ Email helpers for account verification and login notifications.
 """
 import os
 import secrets
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from datetime import datetime
 from urllib.parse import urljoin
 
@@ -12,6 +13,7 @@ from flask_mail import Mail, Message
 from .models import db, User
 
 mail = Mail()
+_mail_executor = ThreadPoolExecutor(max_workers=2)
 
 
 def generate_token():
@@ -64,7 +66,19 @@ def _send_message(subject, recipient, text_body, html_body=None):
         return False
 
     message = Message(subject=subject, recipients=[recipient], body=text_body, html=html_body, sender=sender)
-    mail.send(message)
+    app = current_app._get_current_object()
+    timeout = current_app.config.get('MAIL_TIMEOUT') or 10
+
+    def _send_with_context():
+        with app.app_context():
+            mail.send(message)
+
+    future = _mail_executor.submit(_send_with_context)
+    try:
+        future.result(timeout=timeout)
+    except TimeoutError:
+        current_app.logger.error("Email sending timed out after %s seconds. To: %s; Subject: %s", timeout, recipient, subject)
+        return False
     return True
 
 
