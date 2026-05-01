@@ -53,10 +53,16 @@ def _send_message(subject, recipient, text_body, html_body=None):
         return False
 
     sender = current_app.config.get('MAIL_DEFAULT_SENDER')
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    
+    current_app.logger.info(f"_send_message check: SERVER={mail_server}, USERNAME={mail_username}, PASSWORD_set={bool(mail_password)}, SENDER={sender}")
+    
     mail_configured = bool(
-        current_app.config.get('MAIL_SERVER')
-        and current_app.config.get('MAIL_USERNAME')
-        and current_app.config.get('MAIL_PASSWORD')
+        mail_server
+        and mail_username
+        and mail_password
         and sender
     )
 
@@ -68,8 +74,10 @@ def _send_message(subject, recipient, text_body, html_body=None):
         return False
 
     if _should_use_sendgrid_api():
+        current_app.logger.info("Using SendGrid API")
         return _send_sendgrid_api(subject, recipient, text_body, html_body, sender)
-
+    
+    current_app.logger.info("Using SMTP via flask-mail")
     message = Message(subject=subject, recipients=[recipient], body=text_body, html=html_body, sender=sender)
     app = current_app._get_current_object()
     timeout = current_app.config.get('MAIL_TIMEOUT') or 10
