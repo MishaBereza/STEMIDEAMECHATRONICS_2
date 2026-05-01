@@ -9,7 +9,7 @@ from datetime import datetime
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'), encoding='utf-8-sig')
 except Exception:
     pass
 
@@ -38,6 +38,7 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 app.config['MAIL_SUPPRESS_SEND'] = os.environ.get('MAIL_SUPPRESS_SEND', 'false').lower() in ('1', 'true', 'yes', 'on')
+app.config['MAIL_DEBUG'] = os.environ.get('MAIL_DEBUG', 'false').lower() in ('1', 'true', 'yes', 'on')
 
 # Set template folder to the templates directory in the project root
 app.template_folder = os.path.join(os.path.dirname(__file__), '..', 'templates')
