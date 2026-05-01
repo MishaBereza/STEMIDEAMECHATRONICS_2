@@ -22,18 +22,36 @@ def test_admin_dashboard_contains_create_link():
     assert 'Create Tournament' in html or 'Створити Турнір' in html
 
 
-def test_admin_route_auto_logs_in_over_admin():
+def test_admin_route_requires_password_before_over_admin_login():
     client = app.test_client()
 
     response = client.get('/admin', follow_redirects=False)
 
+    assert response.status_code == 200
+    assert b'name="password"' in response.data
+
+    with client.session_transaction() as sess:
+        assert 'admin' not in sess
+        assert 'admin_user_id' not in sess
+
+
+def test_admin_route_logs_in_over_admin_with_password():
+    from backend.auth import load_admin_password
+
+    client = app.test_client()
+    with app.app_context():
+        password = load_admin_password()
+
+    response = client.post('/admin', data={'password': password}, follow_redirects=False)
+
     assert response.status_code == 302
     assert response.headers['Location'].endswith('/admin/dashboard')
+
+    with client.session_transaction() as sess:
+        assert sess['admin'] is True
+        admin_user_id = sess['admin_user_id']
 
     with app.app_context():
         over_admin = User.query.filter_by(email='over.admin@local', role='admin').first()
         assert over_admin is not None
-
-    with client.session_transaction() as sess:
-        assert sess['admin'] is True
-        assert sess['admin_user_id'] == over_admin.id
+        assert admin_user_id == over_admin.id
