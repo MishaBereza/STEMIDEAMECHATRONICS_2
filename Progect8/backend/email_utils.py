@@ -3,9 +3,11 @@ Email helpers for account verification and login notifications.
 """
 import os
 import secrets
+import json
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from datetime import datetime
 from urllib.parse import urljoin
+from urllib.request import Request, urlopen
 
 from flask import current_app, has_request_context, request
 from flask_mail import Mail, Message
@@ -65,6 +67,9 @@ def _send_message(subject, recipient, text_body, html_body=None):
         print(text_body)
         return False
 
+    if _should_use_sendgrid_api():
+        return _send_sendgrid_api(subject, recipient, text_body, html_body, sender)
+
     message = Message(subject=subject, recipients=[recipient], body=text_body, html=html_body, sender=sender)
     app = current_app._get_current_object()
     timeout = current_app.config.get('MAIL_TIMEOUT') or 10
@@ -79,6 +84,41 @@ def _send_message(subject, recipient, text_body, html_body=None):
     except TimeoutError:
         current_app.logger.error("Email sending timed out after %s seconds. To: %s; Subject: %s", timeout, recipient, subject)
         return False
+    return True
+
+
+def _should_use_sendgrid_api():
+    return (
+        current_app.config.get('MAIL_SERVER') == 'smtp.sendgrid.net'
+        and current_app.config.get('MAIL_PASSWORD', '').startswith('SG.')
+    )
+
+
+def _send_sendgrid_api(subject, recipient, text_body, html_body, sender):
+    timeout = current_app.config.get('MAIL_TIMEOUT') or 10
+    payload = {
+        'personalizations': [{'to': [{'email': recipient}]}],
+        'from': {'email': sender},
+        'subject': subject,
+        'content': [{'type': 'text/plain', 'value': text_body}],
+    }
+    if html_body:
+        payload['content'].append({'type': 'text/html', 'value': html_body})
+
+    request = Request(
+        'https://api.sendgrid.com/v3/mail/send',
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'Authorization': f"Bearer {current_app.config['MAIL_PASSWORD']}",
+            'Content-Type': 'application/json',
+        },
+        method='POST',
+    )
+
+    with urlopen(request, timeout=timeout) as response:
+        if response.status not in (200, 202):
+            current_app.logger.error("SendGrid API returned status %s for %s", response.status, recipient)
+            return False
     return True
 
 
