@@ -194,6 +194,14 @@ def register_user():
             flash(_t('verification_email_sent'), 'info')
         else:
             links = get_verification_links(user)
+            # Debug info for email failure
+            from flask import current_app
+            mail_server = current_app.config.get('MAIL_SERVER', 'NOT SET')
+            mail_username = current_app.config.get('MAIL_USERNAME', 'NOT SET')
+            mail_password_set = bool(current_app.config.get('MAIL_PASSWORD'))
+            mail_sender = current_app.config.get('MAIL_DEFAULT_SENDER', 'NOT SET')
+            debug_info = f"Email could not be sent. Config: SERVER={mail_server}, USERNAME={mail_username}, PASSWORD_set={mail_password_set}, SENDER={mail_sender}"
+            current_app.logger.error(debug_info)
             flash(
                 f"Email could not be sent. Local verification link: {links['verify_url']}",
                 'warning'
