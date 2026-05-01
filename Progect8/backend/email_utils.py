@@ -88,14 +88,17 @@ def _send_message(subject, recipient, text_body, html_body=None):
 
 
 def _should_use_sendgrid_api():
-    return (
-        current_app.config.get('MAIL_SERVER') == 'smtp.sendgrid.net'
-        and current_app.config.get('MAIL_PASSWORD', '').startswith('SG.')
-    )
+    mail_server = current_app.config.get('MAIL_SERVER', '')
+    mail_password = current_app.config.get('MAIL_PASSWORD', '')
+    is_sendgrid = mail_server == 'smtp.sendgrid.net' and mail_password.startswith('SG.')
+    current_app.logger.info(f"Email config: SERVER='{mail_server}', has_password={bool(mail_password)}, password_starts_SG={mail_password.startswith('SG.') if mail_password else False}, use_sendgrid_api={is_sendgrid}")
+    return is_sendgrid
 
 
 def _send_sendgrid_api(subject, recipient, text_body, html_body, sender):
     timeout = current_app.config.get('MAIL_TIMEOUT') or 10
+    current_app.logger.info(f"Sending via SendGrid API to {recipient}, subject: {subject}")
+    
     payload = {
         'personalizations': [{'to': [{'email': recipient}]}],
         'from': {'email': sender},
@@ -115,10 +118,15 @@ def _send_sendgrid_api(subject, recipient, text_body, html_body, sender):
         method='POST',
     )
 
-    with urlopen(request, timeout=timeout) as response:
-        if response.status not in (200, 202):
-            current_app.logger.error("SendGrid API returned status %s for %s", response.status, recipient)
-            return False
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            current_app.logger.info(f"SendGrid response status: {response.status}")
+            if response.status not in (200, 202):
+                current_app.logger.error("SendGrid API returned status %s for %s", response.status, recipient)
+                return False
+    except Exception as e:
+        current_app.logger.error(f"SendGrid API error: {e}")
+        raise
     return True
 
 
