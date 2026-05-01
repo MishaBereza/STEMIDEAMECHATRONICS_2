@@ -1,7 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
 from .translations import get_text
-from .email_utils import get_verification_links, send_verification_email
 import os
 import re
 
@@ -180,25 +179,16 @@ def register_user():
             phone_country_code=phone_country_code,
             phone_number=phone_number,
             role='team',
-            is_verified=False
+            is_verified=True
         )
         user.set_password(password)
 
         db.session.add(user)
         db.session.commit()
-        
-        # Keep the account pending until the user confirms the email link.
-        email_sent = send_verification_email(user)
 
-        if email_sent:
-            flash(_t('verification_email_sent'), 'info')
-        else:
-            links = get_verification_links(user)
-            flash(
-                f"Email could not be sent. Local verification link: {links['verify_url']}",
-                'warning'
-            )
-        return redirect('/login')
+        session['user_id'] = user.id
+        flash(_t('registered_successfully'), 'success')
+        return redirect(url_for('user_profile', uid=user.id))
 
     return render_template('register.html', phone_country_codes=PHONE_COUNTRY_CODES, default_phone_country_code='+380')
 
@@ -222,21 +212,11 @@ def user_login():
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_login'))
         
-        # Newly registered users keep a verification token until they confirm.
-        # Legacy/test accounts without a token are allowed to log in.
-        if user.verification_token and not user.is_verified:
-            flash(_t('account_not_verified'), 'warning')
-            return redirect(url_for('user_login'))
-
         # Store previous login time before updating
         from datetime import datetime
         user.last_login_at = datetime.now()
         db.session.commit()
-        
-        # Send login notification email
-        from .email_utils import send_login_notification
-        send_login_notification(user)
-        
+
         session['user_id'] = user.id
         flash(_t('logged_in_successfully'), 'success')
         return redirect(url_for('user_profile', uid=user.id))
