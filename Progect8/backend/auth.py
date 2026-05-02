@@ -3,7 +3,6 @@ from .models import db, User, Settings
 from .translations import get_text
 from .email_utils import get_verification_links, send_verification_email
 from .app_helpers import get_current_user
-from datetime import datetime
 import os
 import re
 
@@ -151,22 +150,10 @@ def register_user():
         last_name = request.form['last_name'].strip()
         email = request.form['email'].strip().lower()
         age = request.form.get('age')
-        dob = request.form.get('date_of_birth', '').strip()
         bio = request.form.get('bio', '')
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
         phone_country_code, phone_number = _get_phone_form_data()
-
-        dob_date = None
-        if dob:
-            try:
-                dob_date = datetime.strptime(dob, '%d/%m/%Y').date()
-                today = datetime.utcnow().date()
-                calculated_age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
-                age = str(max(calculated_age, 0))
-            except ValueError:
-                flash('Неправильна дата народження. Вкажіть у форматі DD/MM/YYYY.', 'warning')
-                return redirect('/register')
 
         if not password:
             flash(_t('password_empty'), 'warning')
@@ -189,7 +176,6 @@ def register_user():
             first_name=first_name,
             last_name=last_name,
             email=email,
-            date_of_birth=dob_date,
             age=int(age) if age and age.isdigit() else None,
             bio=bio,
             phone_country_code=phone_country_code,
@@ -569,7 +555,7 @@ def user_edit_profile():
         current_password = request.form.get('current_password', '').strip()
         first_name = request.form.get('first_name', '').strip()
         last_name = request.form.get('last_name', '').strip()
-        date_of_birth = request.form.get('date_of_birth', '').strip()
+        age = request.form.get('age', '').strip()
 
         if not current_password:
             flash(_t('current_password_required'), 'warning')
@@ -580,23 +566,10 @@ def user_edit_profile():
         if not first_name or not last_name:
             flash('Ім’я та прізвище обов’язкові.', 'warning')
             return redirect(url_for('user_edit_profile'))
-        if not date_of_birth:
-            flash('Дата народження обов’язкова.', 'warning')
-            return redirect(url_for('user_edit_profile'))
-
-        try:
-            dob_date = datetime.strptime(date_of_birth, '%d/%m/%Y').date()
-        except ValueError:
-            flash('Неправильна дата народження. Вкажіть у форматі DD/MM/YYYY.', 'warning')
-            return redirect(url_for('user_edit_profile'))
-
-        today = datetime.utcnow().date()
-        calculated_age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
 
         user.first_name = first_name
         user.last_name = last_name
-        user.date_of_birth = dob_date
-        user.age = max(calculated_age, 0)
+        user.age = int(age) if age.isdigit() else None
         db.session.commit()
         flash('Профіль успішно оновлено.', 'success')
         return redirect(url_for('user_profile', uid=user.id))

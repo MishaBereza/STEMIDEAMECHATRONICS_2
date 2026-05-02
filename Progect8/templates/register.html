@@ -46,10 +46,9 @@
       <button type="button" class="password-toggle" data-target="register-confirm-password" aria-label="Toggle password visibility">👁</button>
     </div>
 
-    <!-- DATE OF BIRTH -->
-    <label>Дата народження</label>
-    <input type="text" name="date_of_birth" id="date-of-birth" required placeholder="12/02/2008" maxlength="10" pattern="\d{2}/\d{2}/\d{4}">
-    <div id="age-display" style="font-size: 14px; color: #555; margin-top: 6px;">Повних років: <span id="age-value">0</span></div>
+    <!-- AGE -->
+    <label>{{ t('age') }}</label>
+    <input type="number" name="age" min="1" max="150" required>
     <input type="hidden" name="age" id="age-field">
 
     <!-- BIO -->
@@ -85,49 +84,7 @@
         this.textContent = isHidden ? '🙈' : '👁';
       });
     });
-    const dobInput = document.getElementById('date-of-birth');
-    const ageValue = document.getElementById('age-value');
-    const ageField = document.getElementById('age-field');
-
-    function updateAgeFromDob() {
-      let value = dobInput.value.replace(/[^0-9]/g, '');
-      if (value.length >= 3 && value.length <= 4 && !value.includes('/')) {
-        value = value.slice(0, 2) + '/' + value.slice(2);
-      }
-      if (value.length >= 5 && !value.slice(2, 3).includes('/')) {
-        value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4, 8);
-      }
-      if (value.length > 10) {
-        value = value.slice(0, 10);
-      }
-      dobInput.value = value;
-
-      const parts = value.split('/');
-      if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        const year = parseInt(parts[2], 10);
-        const dob = new Date(year, month - 1, day);
-        if (!isNaN(dob.getTime()) && dob.getDate() === day && dob.getMonth() === month - 1 && dob.getFullYear() === year) {
-          const today = new Date();
-          let age = today.getFullYear() - dob.getFullYear();
-          if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
-            age -= 1;
-          }
-          if (age < 0) {
-            age = 0;
-          }
-          ageValue.textContent = age;
-          ageField.value = age;
-          return;
-        }
-      }
-      ageValue.textContent = '0';
-      ageField.value = '';
-    }
-
-    dobInput.addEventListener('input', updateAgeFromDob);
-    dobInput.addEventListener('blur', updateAgeFromDob);  })();
+  })();
 </script>
 
 {% endblock %}

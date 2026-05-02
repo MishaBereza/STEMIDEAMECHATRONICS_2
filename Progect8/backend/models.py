@@ -14,7 +14,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False, default='')
     phone_country_code = db.Column(db.String(10), nullable=False, default='+380')
     phone_number = db.Column(db.String(30), nullable=False, default='')
-    date_of_birth = db.Column(db.Date, nullable=True)
     age = db.Column(db.Integer)
     bio = db.Column(db.Text)
     role = db.Column(db.String(30), default='team')
@@ -36,18 +35,6 @@ class User(db.Model):
         if self.phone_country_code and self.phone_number:
             return f"{self.phone_country_code} {self.phone_number}"
         return self.phone_number or ''
-
-    @property
-    def date_of_birth_display(self):
-        return self.date_of_birth.strftime('%d/%m/%Y') if self.date_of_birth else ''
-
-    @property
-    def age_display(self):
-        if self.date_of_birth:
-            today = datetime.utcnow().date()
-            age = today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
-            return max(age, 0)
-        return self.age
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
