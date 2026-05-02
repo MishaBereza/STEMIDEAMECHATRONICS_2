@@ -54,10 +54,12 @@
     </div>
   </div>
 
-  <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-    <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
-  </div>
-  <p style="font-size: 12px; color: #555; margin-top: 6px;">{{ t('use_email_switch') }}</p>
+  {% if not is_over_admin %}
+    <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <a href="/profile/switch" style="display: inline-block; padding: 12px 20px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_profile_by_email') }}</a>
+    </div>
+    <p style="font-size: 12px; color: #555; margin-top: 6px;">{{ t('use_email_switch') }}</p>
+  {% endif %}
 
   {% if get_current_user() and get_current_user().role in ['jury', 'admin'] %}
     <div style="margin-top: 20px;">
@@ -133,10 +135,10 @@
     {% endif %}
   </div>
 
-  {% if get_current_user() and get_current_user().id == user.id %}
+  {% if get_current_user() and get_current_user().id == user.id and not is_over_admin %}
     <div style="margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px;">
-      <a href="/profile/change-phone" style="display: inline-block; padding: 12px 20px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Редагувати себе</a>
-      <a href="/profile/change-phone" style="display: inline-block; padding: 12px 20px; background: #666; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_phone_number') }}</a>
+      <a href="/profile/edit" style="display: inline-block; padding: 12px 20px; background: #ffa500; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Редагувати себе</a>
+      <a href="/profile/change-phone" style="display: inline-block; padding: 12px 20px; background: #1f6feb; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_phone_number') }}</a>
       <a href="/profile/change-password" style="display: inline-block; padding: 12px 20px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{{ t('change_user_password') }}</a>
     </div>
   {% endif %}

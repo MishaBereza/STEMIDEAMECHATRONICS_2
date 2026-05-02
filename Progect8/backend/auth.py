@@ -517,6 +517,10 @@ def user_change_password():
         flash(_t('user_not_found'), 'danger')
         return redirect(url_for('user_login'))
 
+    if is_over_admin(user):
+        flash('Ця дія недоступна для over admin.', 'warning')
+        return redirect(url_for('user_profile', uid=user.id))
+
     if request.method == 'POST':
         current_password = request.form.get('current_password', '').strip()
         new_password = request.form.get('new_password', '').strip()
@@ -543,6 +547,48 @@ def user_change_password():
     return render_template('change_user_password.html')
 
 
+def user_edit_profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash(_t('please_login_first'), 'warning')
+        return redirect(url_for('user_login'))
+
+    user = db.session.get(User, user_id)
+    if not user:
+        session.pop('user_id', None)
+        flash(_t('user_not_found'), 'danger')
+        return redirect(url_for('user_login'))
+
+    if is_over_admin(user):
+        flash('Ця дія недоступна для over admin.', 'warning')
+        return redirect(url_for('user_profile', uid=user.id))
+
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '').strip()
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        age = request.form.get('age', '').strip()
+
+        if not current_password:
+            flash(_t('current_password_required'), 'warning')
+            return redirect(url_for('user_edit_profile'))
+        if not user.check_password(current_password):
+            flash(_t('invalid_password'), 'danger')
+            return redirect(url_for('user_edit_profile'))
+        if not first_name or not last_name:
+            flash('Ім’я та прізвище обов’язкові.', 'warning')
+            return redirect(url_for('user_edit_profile'))
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.age = int(age) if age.isdigit() else None
+        db.session.commit()
+        flash('Профіль успішно оновлено.', 'success')
+        return redirect(url_for('user_profile', uid=user.id))
+
+    return render_template('edit_profile.html', user=user)
+
+
 def user_change_phone():
     user_id = session.get('user_id')
     if not user_id:
@@ -554,6 +600,10 @@ def user_change_phone():
         session.pop('user_id', None)
         flash(_t('user_not_found'), 'danger')
         return redirect(url_for('user_login'))
+
+    if is_over_admin(user):
+        flash('Ця дія недоступна для over admin.', 'warning')
+        return redirect(url_for('user_profile', uid=user.id))
 
     if request.method == 'POST':
         current_password = request.form.get('current_password', '').strip()

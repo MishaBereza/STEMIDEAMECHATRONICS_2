@@ -149,7 +149,7 @@ def trigger_update():
     last_data_update['timestamp'] = datetime.utcnow()
 
 
-from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch, user_change_password, user_change_phone
+from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch, user_change_password, user_change_phone, user_edit_profile
 from .tournaments import index, tournament_page, leaderboard, get_team_details
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
@@ -200,6 +200,7 @@ app.add_url_rule('/edit_team_members/<int:teamid>', 'edit_team_members', edit_te
 app.add_url_rule('/admin/dashboard', 'admin_dashboard', admin_dashboard, methods=['GET'])
 app.add_url_rule('/admin/change_password', 'admin_change_password', admin_change_password, methods=['GET', 'POST'])
 app.add_url_rule('/profile/switch', 'profile_switch', profile_switch, methods=['GET', 'POST'])
+app.add_url_rule('/profile/edit', 'user_edit_profile', user_edit_profile, methods=['GET', 'POST'])
 app.add_url_rule('/profile/change-password', 'user_change_password', user_change_password, methods=['GET', 'POST'])
 app.add_url_rule('/profile/change-phone', 'user_change_phone', user_change_phone, methods=['GET', 'POST'])
 app.add_url_rule('/admin/users', 'admin_users', admin_users, methods=['GET'])

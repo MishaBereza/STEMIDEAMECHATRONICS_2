@@ -121,7 +121,15 @@ def user_profile(uid):
         else:
             participating.append(t)
 
-    return render_template('profile.html', user=u, teams_captain=teams_captain, teams_member=teams_member, participating=participating, past=past)
+    return render_template(
+        'profile.html',
+        user=u,
+        teams_captain=teams_captain,
+        teams_member=teams_member,
+        participating=participating,
+        past=past,
+        is_over_admin=is_over_admin(u)
+    )
 
 
 def admin_tournaments():
