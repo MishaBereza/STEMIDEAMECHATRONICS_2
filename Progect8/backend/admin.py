@@ -4,7 +4,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Tournament, Team, Round, Submission, EvaluationCriteria
 from .translations import get_text
 from sqlalchemy import or_
-from .auth import is_over_admin
+from .auth import is_over_admin, OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL
 
 
 def _t(key, **kwargs):
@@ -14,7 +14,7 @@ def _t(key, **kwargs):
 def admin_dashboard():
     return render_template(
         'admin_dashboard.html',
-        users_count=User.query.count(),
+        users_count=User.query.filter(User.email.notin_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).count(),
         tournaments_count=Tournament.query.count(),
         teams_count=Team.query.count(),
         submissions_count=Submission.query.count()
