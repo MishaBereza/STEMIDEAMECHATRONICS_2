@@ -7,7 +7,7 @@ if ROOT_DIR not in sys.path:
 
 from backend.app import app, db
 from backend.auth import OVER_ADMIN_EMAIL, ensure_over_admin_user, is_over_admin
-from backend.models import User
+from backend.models import User, Settings
 
 
 def clear_database():
@@ -37,10 +37,26 @@ def list_admins():
             print(f"{user.email}: {user.first_name} {user.last_name} ({user.role}){marker}")
 
 
+def toggle_over_admin():
+    with app.app_context():
+        setting = Settings.query.filter_by(key='over_admin_enabled').first()
+        if setting:
+            current = setting.value.lower() in ('true', '1', 'yes')
+            new_value = 'false' if current else 'true'
+            setting.value = new_value
+            print(f"Over admin {'disabled' if not current else 'enabled'}")
+        else:
+            setting = Settings(key='over_admin_enabled', value='false')
+            db.session.add(setting)
+            print("Over admin disabled")
+        db.session.commit()
+
+
 COMMANDS = {
     'clear-database': clear_database,
     'ensure-over-admin': ensure_over_admin,
     'list-admins': list_admins,
+    'toggle-over-admin': toggle_over_admin,
 }
 
 

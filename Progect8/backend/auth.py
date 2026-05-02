@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
 from .translations import get_text
 from .email_utils import get_verification_links, send_verification_email
+from .app_helpers import get_current_user
 import os
 import re
 
@@ -226,6 +227,11 @@ def user_login():
         if not user:
             flash(_t('user_not_found'), 'danger')
             return redirect(url_for('user_login'))
+        if is_over_admin(user):
+            setting = Settings.query.filter_by(key='over_admin_enabled').first()
+            if setting and setting.value.lower() in ('false', '0', 'no'):
+                flash('Over admin account is disabled', 'danger')
+                return redirect(url_for('user_login'))
         if not user.check_password(password):
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_login'))
@@ -255,6 +261,10 @@ def user_logout():
 
 
 def admin_panel():
+    current_user = get_current_user()
+    if current_user and is_over_admin(current_user):
+        login_over_admin()
+        return redirect('/admin/dashboard')
     if request.method == 'POST':
         password = request.form.get('password', '').strip()
         if password == load_admin_password():

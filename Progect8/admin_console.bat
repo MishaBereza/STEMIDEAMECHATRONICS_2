@@ -56,9 +56,10 @@ echo 6. List jury/admin users
 echo 7. Set user status
 echo 8. Emergency stop server
 echo 9. Change user password
-echo 10. Exit
+echo 10. Toggle over admin enabled/disabled
+echo 11. Exit
 echo.
-set /p choice="Select option (1-10): "
+set /p choice="Select option (1-11): "
 
 if "%choice%"=="1" goto clear_db
 if "%choice%"=="2" goto demo_data
@@ -69,7 +70,8 @@ if "%choice%"=="6" goto list_users
 if "%choice%"=="7" goto set_status
 if "%choice%"=="8" goto emergency_stop
 if "%choice%"=="9" goto change_user_password
-if "%choice%"=="10" exit /b 0
+if "%choice%"=="10" goto toggle_over_admin
+if "%choice%"=="11" exit /b 0
 echo Invalid choice
 timeout /t 2 >nul
 goto menu
@@ -211,6 +213,18 @@ set /p target_email="Enter user email: "
 set /p new_user_password="Enter new password for user: "
 if exist "%VENV_PY%" (
     call "%VENV_PY%" -c "from backend.app import app, db; from backend.models import User; from backend.auth import is_over_admin; app.app_context().push(); user = User.query.filter_by(email='%target_email%').first(); blocked = bool(user and is_over_admin(user)); print('User not found' if not user else ('Super-admin has no editable password' if blocked else 'User password changed successfully')); user and not blocked and user.set_password('%new_user_password%'); user and not blocked and db.session.commit()"
+) else (
+    echo Virtual environment not found. Run start.bat first.
+)
+echo.
+pause
+goto menu
+
+:toggle_over_admin
+echo.
+echo Toggling over admin status...
+if exist "%VENV_PY%" (
+    call "%VENV_PY%" scripts\admin_tools.py toggle-over-admin
 ) else (
     echo Virtual environment not found. Run start.bat first.
 )

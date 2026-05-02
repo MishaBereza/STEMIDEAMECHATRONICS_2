@@ -22,7 +22,8 @@ def admin_dashboard():
 
 
 def admin_users():
-    users = User.query.all()
+    from .auth import OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL
+    users = User.query.filter(User.email.notin_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).all()
     search = request.args.get('search', '').strip()
     if search:
         search_digits = ''.join(ch for ch in search if ch.isdigit())
@@ -40,7 +41,7 @@ def admin_users():
         ]
         if search_digits:
             filters.append(User.phone_number.ilike(f'%{search_digits}%'))
-        users = User.query.filter(or_(*filters)).all()
+        users = User.query.filter(User.email.notin_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).filter(or_(*filters)).all()
     return render_template('admin_users.html', users=users, search=search)
 
 
