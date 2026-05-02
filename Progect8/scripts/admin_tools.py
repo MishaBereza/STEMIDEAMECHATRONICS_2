@@ -38,17 +38,31 @@ def list_admins():
 
 
 def toggle_over_admin():
+    import sys
+    command = sys.argv[2] if len(sys.argv) > 2 else None
     with app.app_context():
         setting = Settings.query.filter_by(key='over_admin_enabled').first()
-        if setting:
+        if not setting:
+            setting = Settings(key='over_admin_enabled', value='true')
+            db.session.add(setting)
+        if command == 'enable':
+            if setting.value.lower() in ('true', '1', 'yes'):
+                print("Over admin is already enabled")
+            else:
+                setting.value = 'true'
+                print("Over admin enabled")
+        elif command == 'disable':
+            if setting.value.lower() in ('false', '0', 'no'):
+                print("Over admin is already disabled")
+            else:
+                setting.value = 'false'
+                print("Over admin disabled")
+        else:
+            # toggle
             current = setting.value.lower() in ('true', '1', 'yes')
             new_value = 'false' if current else 'true'
             setting.value = new_value
             print(f"Over admin {'disabled' if not current else 'enabled'}")
-        else:
-            setting = Settings(key='over_admin_enabled', value='false')
-            db.session.add(setting)
-            print("Over admin disabled")
         db.session.commit()
 
 

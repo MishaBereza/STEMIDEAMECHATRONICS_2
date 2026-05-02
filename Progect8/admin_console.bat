@@ -222,11 +222,35 @@ goto menu
 
 :toggle_over_admin
 echo.
-echo Toggling over admin status...
 if exist "%VENV_PY%" (
-    call "%VENV_PY%" scripts\admin_tools.py toggle-over-admin
+    call "%VENV_PY%" -c "from backend.app import app; from backend.models import Settings; app.app_context().push(); setting = Settings.query.filter_by(key='over_admin_enabled').first(); current = setting.value.lower() in ('true', '1', 'yes') if setting else True; print('Over admin is currently ENABLED' if current else 'Over admin is currently DISABLED')"
 ) else (
     echo Virtual environment not found. Run start.bat first.
+    pause
+    goto menu
+)
+echo.
+set /p action="Type ENABLE to enable or DISABLE to disable over admin: "
+if /i "%action%"=="ENABLE" (
+    if exist "%VENV_PY%" (
+        call "%VENV_PY%" scripts\admin_tools.py toggle-over-admin enable
+    ) else (
+        echo Virtual environment not found. Run start.bat first.
+    )
+) else if /i "%action%"=="DISABLE" (
+    echo WARNING: Disabling over admin will prevent it from logging in.
+    set /p confirm="Type CONFIRM to proceed: "
+    if /i "%confirm%"=="CONFIRM" (
+        if exist "%VENV_PY%" (
+            call "%VENV_PY%" scripts\admin_tools.py toggle-over-admin disable
+        ) else (
+            echo Virtual environment not found. Run start.bat first.
+        )
+    ) else (
+        echo Cancelled.
+    )
+) else (
+    echo Invalid action.
 )
 echo.
 pause
