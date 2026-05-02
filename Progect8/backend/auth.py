@@ -150,10 +150,22 @@ def register_user():
         last_name = request.form['last_name'].strip()
         email = request.form['email'].strip().lower()
         age = request.form.get('age')
+        dob = request.form.get('date_of_birth', '').strip()
         bio = request.form.get('bio', '')
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
         phone_country_code, phone_number = _get_phone_form_data()
+
+        if dob:
+            from datetime import datetime
+            try:
+                dob_date = datetime.strptime(dob, '%d/%m/%Y').date()
+                today = datetime.utcnow().date()
+                calculated_age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+                age = str(max(calculated_age, 0))
+            except ValueError:
+                flash('Неправильна дата народження. Вкажіть у форматі DD/MM/YYYY.', 'warning')
+                return redirect('/register')
 
         if not password:
             flash(_t('password_empty'), 'warning')
@@ -176,7 +188,7 @@ def register_user():
             first_name=first_name,
             last_name=last_name,
             email=email,
-            age=int(age) if age else None,
+            age=int(age) if age and age.isdigit() else None,
             bio=bio,
             phone_country_code=phone_country_code,
             phone_number=phone_number,
