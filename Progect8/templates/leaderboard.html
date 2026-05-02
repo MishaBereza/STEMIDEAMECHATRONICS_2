@@ -194,8 +194,8 @@
         {% endif %}
 
         <div class="leaderboard-toolbar">
-          <button class="leaderboard-export-btn" type="button" onclick="exportTable({{ tournament.id }})">
-            Export CSV
+          <button class="leaderboard-export-btn" type="button" onclick="window.open('/leaderboard/{{ tournament.id }}/export/pdf', '_blank')">
+            {{ t('export_pdf') }}
           </button>
         </div>
 

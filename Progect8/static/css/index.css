@@ -2,10 +2,10 @@
   position: relative;
   overflow: hidden;
   min-height: 500px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  border: 1px solid var(--panel-border);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.18);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 70px var(--shadow-strong);
 }
 
 .hero-section {
@@ -24,16 +24,16 @@
 .empty-state-box {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  border: 1px solid var(--panel-border);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 70px var(--shadow);
 }
 
 .hero-copy {
   padding: 42px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 247, 247, 1) 100%);
+    linear-gradient(180deg, var(--panel-strong) 0%, var(--bg-soft) 100%);
   z-index: 1;
 }
 
@@ -44,7 +44,7 @@
   background-image: url("/static/Assets/misha_logo.png");
   background-repeat: repeat;
   background-size: 250px 250px;
-  opacity: 0.12;
+  opacity: var(--hero-pattern-opacity);
   pointer-events: none;
   animation: hero-ornament-shift 18s linear infinite;
 }
@@ -66,8 +66,8 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: rgba(255, 165, 0, 0.1);
-  color: #ff8c00;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .hero-title {
@@ -76,7 +76,7 @@
   font-size: clamp(2.9rem, 7vw, 5.4rem);
   line-height: 0.95;
   letter-spacing: -0.04em;
-  color: #111111;
+  color: var(--text-strong);
 }
 
 .hero-text,
@@ -85,7 +85,7 @@
 .category-card p,
 .tournament-description,
 .empty-state-box p {
-  color: #666666;
+  color: var(--muted);
   line-height: 1.7;
 }
 
@@ -116,15 +116,15 @@
 }
 
 .primary-button {
-  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #ffffff;
 }
 
 .secondary-button,
 .panel-link {
-  border: 1px solid rgba(255, 165, 0, 0.3);
-  background: rgba(255, 255, 255, 0.9);
-  color: #333333;
+  border: 1px solid var(--accent-border);
+  background: var(--panel);
+  color: var(--text);
 }
 
 .primary-button:hover,
@@ -145,21 +145,21 @@
 .stat-chip {
   padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
 }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #333333;
+  color: var(--text);
 }
 
 .stat-label {
   display: block;
   margin-top: 6px;
-  color: #444444;
+  color: var(--muted-strong);
   font-size: 0.92rem;
 }
 
@@ -187,9 +187,9 @@
   padding: 18px;
   border-radius: 22px;
   background:
-    radial-gradient(circle at top right, rgba(255, 165, 0, 0.1), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.95));
-  border: 1px solid rgba(255, 165, 0, 0.2);
+    radial-gradient(circle at top right, var(--accent-soft), transparent 30%),
+    linear-gradient(180deg, var(--panel-strong), var(--panel));
+  border: 1px solid var(--panel-border);
 }
 
 .hero-panel-title {
@@ -201,7 +201,7 @@
 .hero-panel-text {
   margin: 0;
   max-width: 34ch;
-  color: #666666;
+  color: var(--muted);
   line-height: 1.75;
 }
 
@@ -216,6 +216,18 @@
   flex-direction: column;
   gap: 10px;
   margin-bottom: 22px;
+}
+
+.tournaments-section .section-heading {
+  width: min(760px, 100%);
+  padding: 22px 24px;
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, var(--panel-strong) 0%, var(--panel) 100%),
+    radial-gradient(circle at top right, var(--accent-soft), transparent 42%);
+  box-shadow: 0 16px 42px var(--shadow);
+  backdrop-filter: blur(8px);
 }
 
 .section-heading h2 {
@@ -274,7 +286,7 @@
   font-weight: 700;
   text-transform: uppercase;
   color: #ffffff;
-  background: linear-gradient(135deg, #32cd32 0%, #ffa500 100%);
+  background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
 }
 
 .tournament-description {
@@ -283,12 +295,12 @@
 
 .tournament-footer {
   margin-top: 22px;
-  color: #333333;
+  color: var(--text);
   font-weight: 700;
 }
 
 .arrow-mark {
-  color: #ffa500;
+  color: var(--accent);
 }
 
 .empty-state {
@@ -322,6 +334,11 @@
   .hero-copy,
   .hero-panel {
     padding: 24px;
+  }
+
+  .tournaments-section .section-heading {
+    padding: 18px;
+    border-radius: 16px;
   }
 
   .hero-stats {

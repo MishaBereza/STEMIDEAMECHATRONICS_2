@@ -8,8 +8,15 @@
 }
 
 .page-title {
+  width: min(860px, 100%);
   margin: 0 0 28px;
-  color: #333333;
+  padding: 18px 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 14px 36px var(--shadow);
+  backdrop-filter: blur(8px);
+  color: var(--text);
   font-size: clamp(1.9rem, 4vw, 2.6rem);
   font-weight: 800;
 }
@@ -24,9 +31,9 @@
   max-width: 680px;
   padding: 34px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 60px var(--shadow);
 }
 
 .form-group {
@@ -36,7 +43,7 @@
 .form-group label {
   display: block;
   margin-bottom: 10px;
-  color: #333333;
+  color: var(--text);
   font-weight: 700;
 }
 
@@ -46,17 +53,17 @@
   width: 100%;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid #cccccc;
-  background: #ffffff;
-  color: #333333;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-strong);
+  color: var(--text);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: rgba(255, 165, 0, 0.55);
-  box-shadow: 0 0 0 4px rgba(255, 165, 0, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .form-actions {
@@ -65,7 +72,7 @@
   gap: 12px;
   margin-top: 30px;
   padding-top: 22px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--panel-border);
 }
 
 .submit-btn,
@@ -142,15 +149,15 @@
 
 .submit-btn,
 .submit-btn:visited {
-  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #ffffff;
 }
 
 .secondary-btn,
 .secondary-btn:visited {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 165, 0, 0.3);
-  color: #333333;
+  background: var(--panel);
+  border: 1px solid var(--accent-border);
+  color: var(--text);
 }
 
 .danger-btn,
@@ -165,9 +172,9 @@
   min-height: 34px;
   padding: 0 14px;
   font-size: 0.88rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #333333;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
 }
 
 .admin-page .quick-status-btn,
@@ -181,8 +188,8 @@
 
 .quick-status-registration,
 .quick-status-registration:visited {
-  background: rgba(255, 215, 0, 0.14);
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
   color: #8f6b00 !important;
 }
 
@@ -249,10 +256,17 @@
 
 .back-link {
   margin-top: 22px;
+  width: min(520px, 100%);
+  padding: 14px 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 12px 30px var(--shadow);
+  backdrop-filter: blur(8px);
 }
 
 .back-link a {
-  color: #ffa500;
+  color: var(--accent-strong);
   text-decoration: none;
   font-weight: 700;
 }
@@ -261,9 +275,9 @@
 .search-panel {
   padding: 22px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 60px var(--shadow);
 }
 
 .search-form {
@@ -278,7 +292,7 @@
 
 .search-meta {
   margin: 12px 0 0;
-  color: #666666;
+  color: var(--muted);
   font-size: 0.92rem;
 }
 
@@ -287,9 +301,9 @@
   position: relative;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 60px var(--shadow);
 }
 
 .table-scroll {
@@ -316,20 +330,20 @@
 .admin-table th,
 .admin-table td {
   padding: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--panel-border);
   text-align: left;
   vertical-align: top;
-  color: #333333;
+  color: var(--text);
   position: relative;
   overflow: visible;
 }
 
 .admin-table th {
-  color: #ff8c00;
+  color: var(--accent-strong);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: rgba(255, 165, 0, 0.05);
+  background: var(--accent-soft);
 }
 
 .admin-table tr:last-child td {
@@ -337,7 +351,7 @@
 }
 
 .admin-table tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--panel-strong);
 }
 
 .table-actions,
@@ -380,7 +394,7 @@
 
 .empty-row {
   text-align: center;
-  color: #666666;
+  color: var(--muted);
 }
 
 .status-pill {
@@ -399,8 +413,8 @@
 }
 
 .status-pill.jury {
-  background: rgba(255, 165, 0, 0.1);
-  color: #ff8c00;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .status-pill.team,
@@ -410,7 +424,7 @@
 }
 
 .status-pill.pending {
-  background: rgba(255, 215, 0, 0.1);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
   color: #b8860b;
 }
 
@@ -459,21 +473,21 @@
 
 .admin-page .status-toggle {
   background: none;
-  border: 1px solid rgba(255, 165, 0, 0.4);
+  border: 1px solid var(--accent-border);
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text);
   transition: all 0.2s;
   min-width: 110px;
   text-align: left;
 }
 
 .admin-page .status-toggle:hover {
-  background: rgba(255, 165, 0, 0.1);
-  border-color: #ffa500;
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .admin-page .status-toggle::after {
@@ -487,8 +501,8 @@
   bottom: 100%;
   left: 0;
   min-width: 150px;
-  background: #ffffff;
-  border: 1px solid rgba(255, 165, 0, 0.3);
+  background: var(--panel-strong);
+  border: 1px solid var(--accent-border);
   border-radius: 8px;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
   z-index: 3000;
@@ -524,14 +538,14 @@
   background: none;
   text-align: left;
   font-size: 13px;
-  color: #333333;
+  color: var(--text);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .admin-page .dropdown-btn:hover {
-  background: rgba(255, 165, 0, 0.15);
-  color: #ff8c00;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 /* Status-specific colors for dropdown toggle */
@@ -541,8 +555,8 @@
 }
 
 .admin-page .status-toggle.status-registration {
-  background: rgba(255, 215, 0, 0.15);
-  border-color: rgba(255, 215, 0, 0.5);
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 50%, transparent);
 }
 
 .admin-page .status-toggle.status-running {
@@ -556,7 +570,7 @@
 }
 
 .admin-section-note {
-  color: #5f6f82;
+  color: var(--muted);
 }
 
 .status-select-form {
@@ -568,10 +582,10 @@
   margin: 0;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 165, 0, 0.35);
+  border: 1px solid var(--accent-border);
   font-size: 0.88rem;
   font-weight: 700;
-  color: #333333;
+  color: var(--text);
   cursor: pointer;
   appearance: auto;
 }
@@ -583,8 +597,8 @@
 }
 
 .admin-page .status-select.status-registration {
-  background: rgba(255, 215, 0, 0.15);
-  border-color: rgba(255, 215, 0, 0.5);
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 50%, transparent);
   color: #8f6b00;
 }
 

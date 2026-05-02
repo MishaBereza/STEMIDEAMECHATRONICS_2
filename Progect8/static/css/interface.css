@@ -6,9 +6,9 @@
 .surface-card {
   padding: 24px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 22px 60px var(--shadow);
 }
 
 .surface-card h2,
@@ -18,7 +18,7 @@
 }
 
 .muted-text {
-  color: #666666;
+  color: var(--muted);
 }
 
 .info-grid {
@@ -27,11 +27,11 @@
 }
 
 .info-line {
-  color: #333333;
+  color: var(--text);
 }
 
 .note-line {
-  color: #666666;
+  color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.7;
 }
@@ -43,7 +43,7 @@
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #333333;
+  color: var(--text);
   font-weight: 700;
 }
 
@@ -53,24 +53,24 @@
   width: 100%;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid #cccccc;
-  background: #ffffff;
-  color: #333333;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-strong);
+  color: var(--text);
 }
 
 .surface-card input:focus,
 .surface-card textarea:focus,
 .surface-card select:focus {
   outline: none;
-  border-color: rgba(255, 165, 0, 0.55);
-  box-shadow: 0 0 0 4px rgba(255, 165, 0, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .data-table-wrap {
   overflow-x: auto;
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
 }
 
 .data-table {
@@ -82,13 +82,13 @@
 .data-table th,
 .data-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--panel-border);
   text-align: left;
   vertical-align: top;
 }
 
 .data-table th {
-  color: #ff8c00;
+  color: var(--accent-strong);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -99,7 +99,7 @@
 }
 
 .data-table tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--panel-strong);
 }
 
 .tab-row {
@@ -116,16 +116,16 @@
   min-height: 42px;
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 165, 0, 0.3);
-  background: rgba(255, 255, 255, 0.9);
-  color: #333333;
+  border: 1px solid var(--accent-border);
+  background: var(--panel);
+  color: var(--text);
   text-decoration: none;
   font-weight: 700;
   cursor: pointer;
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #ffffff;
   border-color: transparent;
 }
@@ -147,7 +147,7 @@
 }
 
 .status-chip.pending {
-  background: rgba(255, 215, 0, 0.1);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
   color: #b8860b;
 }
 
@@ -164,8 +164,8 @@
 
 .status-chip.returned,
 .status-chip.info {
-  background: rgba(255, 165, 0, 0.1);
-  color: #ff8c00;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .stack-list {
@@ -176,24 +176,24 @@
 .evaluation-card {
   padding: 22px;
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
 }
 
 .evaluation-meta {
   display: grid;
   gap: 8px;
   margin-bottom: 14px;
-  color: #333333;
+  color: var(--text);
 }
 
 .comment-box {
   margin-top: 12px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  color: #333333;
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
 }
 
 .form-card {
@@ -224,8 +224,8 @@
   margin-bottom: 18px;
   padding: 20px;
   border-radius: 18px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 34%, transparent);
   color: #b8860b;
   text-align: center;
 }
@@ -259,12 +259,12 @@
 .member-item input {
   flex: 1;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--panel-border);
   border-radius: 4px;
 }
 
 .member-item button {
-  background: #ffa500;
+  background: var(--accent);
   color: white;
   border: none;
   padding: 8px 12px;
@@ -273,7 +273,7 @@
 }
 
 .member-item button:hover {
-  background: #ff8c00;
+  background: var(--accent-strong);
 }
 
 .leaderboard-rank.gold {
@@ -300,7 +300,7 @@
 details.surface-toggle summary {
   cursor: pointer;
   font-weight: 700;
-  color: #333333;
+  color: var(--text);
 }
 
 details.surface-toggle > div {

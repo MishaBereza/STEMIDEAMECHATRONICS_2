@@ -76,63 +76,71 @@
     </div>
   {% endif %}
 
-  <div style="margin-top: 40px;">
-    <h3>{{ t('teams_as_captain') }}</h3>
-    {% if teams_captain %}
-      <ul>
-        {% for team in teams_captain %}
-          <li>
-            <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
-            {% if team.tournament.status == 'Registration' %}
-              <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>-</p>
-    {% endif %}
+  <div class="profile-section-grid">
+    <section class="profile-section-card">
+      <h3>{{ t('teams_as_captain') }}</h3>
+      {% if teams_captain %}
+        <ul>
+          {% for team in teams_captain %}
+            <li>
+              <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
+              {% if team.tournament.status == 'Registration' %}
+                <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>-</p>
+      {% endif %}
+    </section>
 
-    <h3 style="margin-top:20px;">{{ t('teams_as_member') }}</h3>
-    {% if teams_member %}
-      <ul>
-        {% for team in teams_member %}
-          <li>
-            <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
-            {% if team.tournament.status == 'Registration' %}
-              <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>-</p>
-    {% endif %}
+    <section class="profile-section-card">
+      <h3>{{ t('teams_as_member') }}</h3>
+      {% if teams_member %}
+        <ul>
+          {% for team in teams_member %}
+            <li>
+              <a href="/tournament/{{ team.tournament_id }}">{{ team.name }}</a>
+              {% if team.tournament.status == 'Registration' %}
+                <a href="/edit_team_members/{{ team.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('edit_composition') }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>-</p>
+      {% endif %}
+    </section>
 
-    <h3 style="margin-top:24px;">{{ t('tournaments_participating') }}</h3>
-    {% if participating %}
-      <ul>
-        {% for tour in participating %}
-          <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a></li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>-</p>
-    {% endif %}
+    <section class="profile-section-card">
+      <h3>{{ t('tournaments_participating') }}</h3>
+      {% if participating %}
+        <ul>
+          {% for tour in participating %}
+            <li><a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>-</p>
+      {% endif %}
+    </section>
 
-    <h3 style="margin-top:24px;">{{ t('past_tournaments_finished') }}</h3>
-    {% if past %}
-      <ul>
-        {% for tour in past %}
-          <li>
-            <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a>
-            <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>-</p>
-    {% endif %}
+    <section class="profile-section-card">
+      <h3>{{ t('past_tournaments_finished') }}</h3>
+      {% if past %}
+        <ul>
+          {% for tour in past %}
+            <li>
+              <a href="/tournament/{{ tour.id }}">{{ tour.name }} - {{ translate_value(tour.status) }}</a>
+              <a href="/leaderboard/{{ tour.id }}" style="margin-left:10px; display:inline-block; padding:6px 12px; background:#ffa500; color:white; text-decoration:none; border-radius:4px; font-size:90%;">{{ t('leaderboard') }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>-</p>
+      {% endif %}
+    </section>
   </div>
 
   {% if get_current_user() and get_current_user().id == user.id and not is_over_admin %}

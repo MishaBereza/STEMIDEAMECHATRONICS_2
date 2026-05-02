@@ -5,9 +5,11 @@
 /* HEADER */
 
 .admin-header {
-  background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 215, 0, 0.2));
-  color: #333333;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background:
+    linear-gradient(135deg, var(--panel-strong) 0%, var(--panel) 100%),
+    radial-gradient(circle at top right, var(--accent-soft), transparent 42%);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
 
   padding:20px;
   border-radius:24px;
@@ -17,16 +19,21 @@
   display:flex;
   justify-content:space-between;
   align-items:center;
+  box-shadow:0 18px 46px var(--shadow);
+  backdrop-filter: blur(8px);
 }
 
 .admin-header-title{
   font-size:18px;
-  font-weight:600;
+  font-weight:800;
+  color: var(--text-strong);
 }
 
 .admin-header-description{
   font-size:13px;
-  opacity:.9;
+  margin-top:4px;
+  color: var(--muted);
+  font-weight:700;
 }
 
 
@@ -35,9 +42,9 @@
 .admin-logout-btn{
   padding:10px 20px;
 
-  background:rgba(255,255,255,.9);
-  color:#333333;
-  border: 1px solid rgba(255,165,0,.3);
+  background:var(--panel);
+  color:var(--text);
+  border: 1px solid var(--accent-border);
 
   border-radius:999px;
 
@@ -49,7 +56,7 @@
 }
 
 .admin-logout-btn:hover{
-  background:rgba(255,255,255,.95);
+  background:var(--panel-strong);
 }
 
 
@@ -96,7 +103,7 @@
 
   border-radius:16px;
 
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  box-shadow:0 12px 30px var(--shadow);
 
 }
 
@@ -104,7 +111,7 @@
 
   transform:none;
 
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  box-shadow:0 12px 30px var(--shadow);
 
 }
 
@@ -142,20 +149,20 @@
 ========================= */
 
 .admin-card{
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  border: 1px solid var(--panel-border);
 
   padding:25px;
 
   border-radius:24px;
 
-  box-shadow:0 22px 60px rgba(0,0,0,.1);
+  box-shadow:0 22px 60px var(--shadow);
 
   transition:.25s;
 
   text-decoration:none;
 
-  color:#333333;
+  color:var(--text);
 
 }
 
@@ -163,7 +170,7 @@
 
   transform:translateY(-3px);
 
-  box-shadow:0 26px 70px rgba(0,0,0,.15);
+  box-shadow:0 26px 70px var(--shadow-strong);
 
 }
 
@@ -177,44 +184,45 @@
   font-weight:bold;
 }
 
-.admin-card-number.users{color:#667eea;}
-.admin-card-number.tournaments{color:#28a745;}
-.admin-card-number.teams{color:#ffc107;}
-.admin-card-number.submissions{color:#17a2b8;}
-.admin-card-number.manage{color:#007bff;}
-.admin-card-number.create{color:#28a745;}
-.admin-card-number.password{color:#dc3545;}
+.admin-card-number.users{color:var(--accent);}
+.admin-card-number.tournaments{color:var(--success);}
+.admin-card-number.teams{color:var(--warning);}
+.admin-card-number.submissions{color:var(--accent-strong);}
+.admin-card-number.manage{color:var(--accent);}
+.admin-card-number.create{color:var(--success);}
+.admin-card-number.password{color:var(--danger);}
 
 .admin-card-label{
   font-weight:600;
   font-size:18px;
 }
 
-.admin-card-label.users{color:#667eea;}
-.admin-card-label.tournaments{color:#28a745;}
-.admin-card-label.teams{color:#ffc107;}
-.admin-card-label.submissions{color:#17a2b8;}
-.admin-card-label.manage{color:#007bff;}
-.admin-card-label.create{color:#28a745;}
-.admin-card-label.password{color:#dc3545;}
+.admin-card-label.users{color:var(--accent);}
+.admin-card-label.tournaments{color:var(--success);}
+.admin-card-label.teams{color:var(--warning);}
+.admin-card-label.submissions{color:var(--accent-strong);}
+.admin-card-label.manage{color:var(--accent);}
+.admin-card-label.create{color:var(--accent);}
+.admin-card-label.password{color:var(--danger);}
 
 .admin-card-arrow{
   font-size:12px;
 }
 
-.admin-card-arrow.users{color:#667eea;}
-.admin-card-arrow.manage{color:#007bff;}
-.admin-card-arrow.create{color:#28a745;}
-.admin-card-arrow.password{color:#dc3545;}
+.admin-card-arrow.users{color:var(--accent);}
+.admin-card-arrow.manage{color:var(--accent);}
+.admin-card-arrow.create{color:var(--accent);}
+.admin-card-arrow.password{color:var(--danger);}
 
 .admin-card-description{
   font-size:12px;
-  color:#666666;
+  color:var(--muted);
   margin-top:5px;
 }
 
 .admin-card.create-tournament{
-  background: linear-gradient(160deg, rgba(255, 165, 0, 0.1), rgba(255, 215, 0, 0.1));
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  border-color: var(--panel-border);
 }
 
 
@@ -231,17 +239,17 @@
 
   margin:60px auto;
 
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 245, 245, 0.95) 100%);
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  border: 1px solid var(--panel-border);
 
   padding:25px;
 
   border-radius:24px;
 
-  box-shadow:0 22px 60px rgba(0,0,0,.1);
+  box-shadow:0 22px 60px var(--shadow);
 
   text-decoration:none;
-  color:#333333;
+  color:var(--text);
 
 }
 
@@ -253,7 +261,7 @@
 
   transform:translateY(-2px);
 
-  box-shadow:0 10px 28px rgba(0,0,0,.16);
+  box-shadow:0 10px 28px var(--shadow-strong);
 
 }
 
@@ -274,9 +282,14 @@
 }
 
 .admin-tools-section p,
-.admin-tools-section li,
-.admin-back-link a {
+.admin-tools-section li {
   color: #d9e7fb;
+}
+
+.admin-back-link a {
+  color: var(--accent-strong);
+  font-weight: 800;
+  text-decoration: none;
 }
 
 

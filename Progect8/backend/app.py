@@ -150,7 +150,7 @@ def trigger_update():
 
 
 from .auth import register_user, user_login, user_logout, admin_panel, admin_logout, admin_change_password, jury_login, jury_evaluate, jury_logout, jury_part2, profile_switch, user_change_password, user_change_phone, user_edit_profile
-from .tournaments import index, tournament_page, leaderboard, get_team_details
+from .tournaments import index, tournament_page, leaderboard, leaderboard_export_pdf, get_team_details
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
 from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round, admin_tournament_evaluation_settings
@@ -191,6 +191,7 @@ app.add_url_rule('/tournament/<int:tid>', 'tournament_page', tournament_page, me
 app.add_url_rule('/tournament/<int:tid>/register', 'register_team', register_team, methods=['GET', 'POST'])
 app.add_url_rule('/round/<int:rid>/submit', 'submit_solution', submit_solution, methods=['GET', 'POST'])
 app.add_url_rule('/leaderboard/<int:tid>', 'leaderboard', leaderboard, methods=['GET'])
+app.add_url_rule('/leaderboard/<int:tid>/export/pdf', 'leaderboard_export_pdf', leaderboard_export_pdf, methods=['GET'])
 app.add_url_rule('/api/team/<int:team_id>/details', 'get_team_details', get_team_details, methods=['GET'])
 app.add_url_rule('/admin', 'admin_panel', admin_panel, methods=['GET', 'POST'])
 app.add_url_rule('/admin/logout', 'admin_logout', admin_logout, methods=['GET'])

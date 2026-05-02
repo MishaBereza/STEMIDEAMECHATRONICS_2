@@ -2,10 +2,11 @@
 .register-container {
   max-width: 500px;
   margin: 40px auto;
-  background: white;
+  background: var(--panel-strong);
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 5px 20px var(--shadow);
 }
 
 .register-title {
@@ -15,7 +16,7 @@
 
 .register-description {
   text-align: center;
-  color: #666;
+  color: var(--muted);
   margin-bottom: 25px;
 }
 
@@ -35,7 +36,7 @@
 .submit-button {
   flex: 1;
   padding: 12px;
-  background: #ffa500;
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: 6px;
@@ -44,14 +45,15 @@
 }
 
 .submit-button:hover {
-  background: #ff8c00;
+  background: var(--accent-strong);
 }
 
 .cancel-button {
   flex: 1;
   padding: 12px;
-  background: #f0f0f0;
-  color: #333333;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--accent-border);
   border-radius: 6px;
   text-align: center;
   text-decoration: none;
@@ -60,5 +62,5 @@
 }
 
 .cancel-button:hover {
-  background: #e0e0e0;
+  background: var(--accent-soft);
 }

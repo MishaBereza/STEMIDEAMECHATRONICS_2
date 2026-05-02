@@ -8,9 +8,9 @@
 .team-card,
 .empty-rounds {
   border-radius: 26px;
-  border: 1px solid rgba(255, 165, 0, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(245, 245, 245, 0.98) 100%);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+  box-shadow: 0 20px 50px var(--shadow);
 }
 
 .tournament-hero {
@@ -23,7 +23,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #ff8c00;
+  color: var(--accent-strong);
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -32,14 +32,14 @@
 
 .tournament-title {
   margin: 0;
-  color: #2d2418;
+  color: var(--text-strong);
   font-size: clamp(2rem, 5vw, 3.1rem);
 }
 
 .tournament-description {
   margin: 14px 0 0;
   max-width: 760px;
-  color: #5f6f82;
+  color: var(--muted);
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -48,8 +48,8 @@
   min-width: 200px;
   padding: 18px;
   border-radius: 22px;
-  background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.28), transparent 50%), #fffaf0;
-  border: 1px solid rgba(255, 165, 0, 0.2);
+  background: radial-gradient(circle at top right, var(--accent-soft), transparent 50%), var(--bg-soft);
+  border: 1px solid var(--panel-border);
 }
 
 .status-label,
@@ -57,7 +57,7 @@
 .meta-label {
   display: block;
   margin-bottom: 8px;
-  color: #8c7a63;
+  color: var(--muted-strong);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -76,7 +76,7 @@
 
 .status-chip.status-registration,
 .round-status-registration {
-  background: rgba(255, 215, 0, 0.16);
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
   color: #8f6b00;
 }
 
@@ -116,12 +116,12 @@
 .section-heading h3 {
   margin: 0;
   font-size: 1.6rem;
-  color: #2d2418;
+  color: var(--text-strong);
 }
 
 .section-heading p {
   margin: 0;
-  color: #7c8a9a;
+  color: var(--muted);
 }
 
 .round-list {
@@ -132,10 +132,10 @@
 .round-card {
   padding: 20px;
   border-radius: 22px;
-  border: 1px solid rgba(255, 165, 0, 0.16);
+  border: 1px solid var(--panel-border);
   background:
-    linear-gradient(135deg, rgba(255, 248, 235, 0.92) 0%, rgba(255, 255, 255, 0.98) 62%),
-    radial-gradient(circle at top right, rgba(255, 215, 0, 0.18), transparent 42%);
+    linear-gradient(135deg, var(--bg-soft) 0%, var(--panel-strong) 62%),
+    radial-gradient(circle at top right, var(--accent-soft), transparent 42%);
 }
 
 .round-card-top {
@@ -147,13 +147,13 @@
 
 .round-card h4 {
   margin: 4px 0 0;
-  color: #2d2418;
+  color: var(--text-strong);
   font-size: 1.2rem;
 }
 
 .round-level {
   margin: 0;
-  color: #ff8c00;
+  color: var(--accent-strong);
   font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -170,12 +170,12 @@
 .meta-item {
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(255, 165, 0, 0.12);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
 }
 
 .meta-item strong {
-  color: #2d2418;
+  color: var(--text-strong);
 }
 
 .round-actions,
@@ -205,14 +205,14 @@
 }
 
 .primary-action {
-  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #ffffff !important;
 }
 
 .secondary-action {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 165, 0, 0.26);
-  color: #333333 !important;
+  background: var(--panel-strong);
+  border: 1px solid var(--accent-border);
+  color: var(--text) !important;
 }
 
 .team-card,
@@ -223,12 +223,12 @@
 .team-card strong {
   display: block;
   margin-bottom: 16px;
-  color: #2d2418;
+  color: var(--text-strong);
   font-size: 1.2rem;
 }
 
 .empty-rounds {
-  color: #6e7a88;
+  color: var(--muted);
   text-align: center;
   font-weight: 700;
 }
