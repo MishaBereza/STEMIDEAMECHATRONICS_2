@@ -15,8 +15,123 @@
       <div class="page-glow page-glow-left"></div>
       <div class="page-glow page-glow-right"></div>
       <nav class="topbar">
+<div id="badge-team" class="topbar-badge-wrapper">
+
+  <div class="topbar-badge-pin"></div>
+
+  <div class="topbar-badge-rope"></div>
+
+  <div class="topbar-badge">
+
+    <div class="topbar-badge-header"></div>
+
+    <div class="topbar-badge-content">
+      
+
+  <div class="badge-title">
+    Учасники
+  </div>
+
+  <div class="badge-subtitle">
+    Учаснкии команди розробки
+  </div>
+
+<div class="badge-dropdowns">
+
+  <details class="badge-dropdown">
+    <summary>Меню 1</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 1
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 2</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 2
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 3</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 3
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 4</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 4
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 5</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 5
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 6</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 6
+    </div>
+  </details>
+
+  <details class="badge-dropdown">
+    <summary>Меню 7</summary>
+    <div class="badge-dropdown-content">
+      Текст меню 7
+    </div>
+  </details>
+
+</div>
+</div>
+
+    <div class="topbar-badge-footer"></div>
+
+  </div>
+
+</div>
+
+<!-- ВТОРОЙ БЕЙДЖ -->
+<div id="badge-members" class="topbar-badge-wrapper badge-second">
+
+  <div class="topbar-badge-pin"></div>
+
+  <div class="topbar-badge-rope"></div>
+
+  <div class="topbar-badge">
+
+    <div class="topbar-badge-header"></div>
+
+    <div class="topbar-badge-content">
+
+      <div class="badge-title">
+        Команда
+      </div>
+
+      <div class="badge-subtitle">
+        Розробники та організатори
+      </div>
+
+      <div class="badge-text">
+        Тут буде назва
+      </div>
+
+    </div>
+
+    <div class="topbar-badge-footer"></div>
+
+  </div>
+
+</div>
         <div class="topbar-inner">
-          <a href="/" class="brand-mark">{{ t('app_title') }}</a>
+          <div class="brand-mark-wrapper">
+            <a href="/" class="brand-mark">{{ t('app_title') }}</a>
+          </div>
           <div class="topbar-links">
             <a href="/">{{ t('home') }}</a>
             <span class="nav-divider"></span>
@@ -153,6 +268,60 @@
         });
       });
     </script>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const dropdowns = document.querySelectorAll('.badge-dropdown');
+
+  dropdowns.forEach((dropdown) => {
+
+    dropdown.addEventListener('toggle', () => {
+
+      if (dropdown.open) {
+
+        dropdowns.forEach((other) => {
+
+          if (other !== dropdown) {
+            other.removeAttribute('open');
+          }
+
+        });
+
+      }
+
+    });
+
+  });
+
+});
+</script>
     {% block scripts %}{% endblock %}
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const isHome =
+    window.location.pathname === '/' ||
+    window.location.pathname === '/home';
+
+  const badges = document.querySelectorAll('.topbar-badge-wrapper');
+
+  badges.forEach((badge) => {
+
+  if (!isHome) {
+    badge.classList.add('is-hidden');
+  }
+
+  const pin = badge.querySelector('.topbar-badge-pin');
+
+  pin.addEventListener('click', () => {
+    badge.classList.toggle('is-hidden');
+  });
+
+});
+
+});
+</script>
   </body>
 </html>
+

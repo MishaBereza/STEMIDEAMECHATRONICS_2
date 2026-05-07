@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     'en': {
         'home': 'Home',
-        'app_title': 'Dnipro Hopak',
+        'app_title': 'Дніпровський гопак',
         'profile_prefix': 'Profile',
         'register': 'Register as User',
         'demo_data': 'Create demo data',
@@ -322,7 +322,7 @@ TRANSLATIONS = {
     },
     'it': {
         'home': 'Home',
-        'app_title': 'Dnipro Hopak',
+        'app_title': 'Дніпровський гопак',
         'profile_prefix': 'Profilo',
         'register': 'Registrati come utente',
         'demo_data': 'Crea dati demo',
@@ -625,7 +625,7 @@ TRANSLATIONS = {
     },
     'de': {
         'home': 'Startseite',
-        'app_title': 'Dnipro Hopak',
+        'app_title': 'Дніпровський гопак',
         'profile_prefix': 'Profil',
         'register': 'Als Benutzer registrieren',
         'demo_data': 'Demo-Daten erstellen',
@@ -928,7 +928,7 @@ TRANSLATIONS = {
     },
     'fr': {
         'home': 'Accueil',
-        'app_title': 'Dnipro Hopak',
+        'app_title': 'Дніпровський гопак',
         'profile_prefix': 'Profil',
         'register': 'S’inscrire comme utilisateur',
         'demo_data': 'Créer des données de démonstration',

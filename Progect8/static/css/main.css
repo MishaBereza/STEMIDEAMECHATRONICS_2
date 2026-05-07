@@ -196,6 +196,7 @@ a {
 }
 
 .topbar-inner {
+  position: relative;
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
   padding: 16px 0;
@@ -203,6 +204,12 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+}
+
+.brand-mark-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .brand-mark {
@@ -215,14 +222,83 @@ a {
   font-family: var(--font-display);
 }
 
+.brand-mark-hanger {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+
+.badge-hanger {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 72px;
+}
+
+.badge-left {
+  left: -8px;
+}
+
+.badge-right {
+  right: -8px;
+}
+
+.badge-hanger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 18px;
+  background: linear-gradient(180deg, #bbb, #777);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.badge-hanger::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 35%, #f4f4f4, #999 55%);
+  border: 2px solid var(--panel-border);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.55), 0 2px 5px rgba(0,0,0,0.12);
+}
+
+.badge-pill {
+  position: relative;
+  margin-top: 22px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-strong);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.09);
+}
+
 .topbar-links {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
   color: var(--muted);
+  padding-right: 16px;
 }
+
 
 .topbar-links a {
   text-decoration: none;
@@ -642,4 +718,369 @@ form button:hover {
   .nav-divider {
     display: none;
   }
+}
+/* =========================================
+   TOPBAR BADGE
+========================================= */
+
+
+
+/* ОБЁРТКА */
+.topbar-badge-wrapper{
+  position:absolute;
+
+  top:78px;
+  right:10px;
+
+  width:240px;
+  height:360px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  pointer-events:auto;
+
+  z-index:2;
+}
+
+/* ГВОЗДЬ */
+.topbar-badge-pin{
+  position:absolute;
+
+  top:-14px;
+
+  width:18px;
+  height:18px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      #f5f5f5,
+      #777
+    );
+
+  box-shadow:
+    inset -2px -2px 4px rgba(0,0,0,0.35),
+    0 2px 5px rgba(0,0,0,0.3);
+
+  z-index:10;
+}
+
+/* ВЕРЁВКА */
+.topbar-badge-rope{
+  position:absolute;
+
+  top:4px;
+
+  width:4px;
+  height:86px;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #444,
+      #222
+    );
+}
+
+/* БЕЙДЖ */
+.topbar-badge{
+  position:relative;
+
+  width:auto;
+  height:auto;
+
+  min-width:220px;
+  max-width:220px;
+
+  padding-bottom:0;
+
+  margin-top:80px;
+
+  overflow:hidden;
+
+  border-radius:26px;
+
+  background: rgba(255, 251, 232, 0.82);
+
+  border:1px solid rgba(255,255,255,0.35);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.18),
+    inset 0 0 0 2px rgba(255,255,255,0.2);
+
+  transform-origin:top center;
+
+  animation:topbarBadgeSwing 5s ease-in-out infinite;
+}
+
+/* ВЕРХ */
+.topbar-badge-header{
+  height:90px;
+
+  border-radius:26px 26px 0 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent-strong)
+    );
+}
+
+/* ЛИНИИ */
+.topbar-badge-line{
+  width:72%;
+  height:14px;
+
+  margin:18px auto;
+
+  border-radius:999px;
+
+  background:rgba(170,170,170,0.22);
+}
+
+.topbar-badge-line.small{
+  width:52%;
+}
+
+/* НИЗ */
+.topbar-badge-footer{
+  position:relative;
+
+  width:100%;
+  height:8px;
+
+  margin-top:32px;
+
+  border-radius:0 0 26px 26px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent-strong)
+    );
+}
+
+/* КАЧАНИЕ */
+@keyframes topbarBadgeSwing{
+
+  0%{
+    transform:rotate(1deg);
+  }
+
+  50%{
+    transform:rotate(-1deg);
+  }
+
+  100%{
+    transform:rotate(1deg);
+  }
+
+}
+
+/* МОБИЛКА */
+@media (max-width: 1100px){
+
+  .topbar-badge-wrapper{
+    display:none;
+  }
+
+}
+/* ТЕКСТ ВНУТРИ БЕЙДЖА */
+.topbar-badge-content{
+  padding:14px 14px 32px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  text-align:center;
+}
+
+.badge-title{
+  font-size:1.3rem;
+  font-weight:800;
+
+  letter-spacing:0.12em;
+
+  color:var(--accent-strong);
+
+  margin-bottom:16px;
+}
+
+.badge-subtitle{
+  font-size:0.9rem;
+
+  color:var(--muted);
+
+  margin-bottom:30px;
+}
+
+.badge-text{
+  font-size:1rem;
+  font-weight:700;
+
+  color:var(--text-strong);
+
+  line-height:1.6;
+
+  word-break:break-word;
+
+  padding:0 10px;
+}
+
+/* ВТОРОЙ БЕЙДЖ */
+.badge-second{
+  left: 10px;
+  right:auto;
+
+  top:78px;
+}
+
+/* РАЗМЕР ПЕРВОГО БЕЙДЖА */
+.topbar-badge-wrapper:not(.badge-second) .topbar-badge{
+  min-height:600px !important;
+}
+
+
+.topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
+  padding-bottom:5px;
+}
+
+/* БЕЖЕВЫЙ БЛОК ПЕРВОГО БЕЙДЖА */
+.topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
+  min-height:420px !important;
+}
+
+/* DROPDOWN В ПЕРВОМ БЕЙДЖЕ */
+.badge-dropdowns{
+  width:100%;
+  margin-bottom:20px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.badge-dropdown{
+  width:100%;
+  border-radius:14px;
+
+  overflow:hidden;
+
+  background:rgba(255,255,255,0.4);
+
+  border:1px solid rgba(0,0,0,0.08);
+}
+
+.badge-dropdown summary{
+  list-style:none;
+
+  cursor:pointer;
+
+  padding:10px 14px;
+
+  font-size:0.85rem;
+  font-weight:700;
+
+  color:var(--accent-strong);
+
+  user-select:none;
+}
+
+.badge-dropdown summary{
+  list-style:none;
+
+  cursor:pointer;
+
+  padding:10px 14px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  font-size:0.85rem;
+  font-weight:700;
+
+  color:var(--accent-strong);
+
+  user-select:none;
+
+  transition:background 0.2s ease;
+}
+
+.badge-dropdown summary:hover{
+  background:rgba(255,255,255,0.25);
+}
+
+.badge-dropdown summary::after{
+  content:"▼";
+
+  font-size:0.7rem;
+
+  transition:transform 0.2s ease;
+}
+
+.badge-dropdown[open] summary::after{
+  transform:rotate(180deg);
+}
+
+.badge-dropdown summary::-webkit-details-marker{
+  display:none;
+}
+
+.badge-dropdown-content{
+  padding:0 14px 12px;
+
+  font-size:0.8rem;
+  line-height:1.5;
+
+  color:var(--text);
+}
+
+/* ТЕКСТ ВВЕРХУ У ПРАВОГО БЕЙДЖА */
+.topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
+  align-items:flex-start;
+  text-align:left;
+}
+/* СКРЫТЫЕ БЕЙДЖИ */
+.topbar-badge-wrapper.is-hidden .topbar-badge{
+  opacity:0;
+  transform:translateY(-20px) scale(0.9);
+
+  pointer-events:none;
+}
+
+/* ГВОЗДЬ ВСЕГДА ВИДЕН */
+.topbar-badge-wrapper.is-hidden .topbar-badge-pin,
+.topbar-badge-wrapper.is-hidden .topbar-badge-rope{
+  opacity:1;
+}
+
+/* АНИМАЦИЯ */
+.topbar-badge{
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.topbar-badge-pin{
+  cursor:pointer;
+}
+/* СКРЫТИЕ ВТОРОГО БЕЙДЖА */
+.topbar-badge-wrapper.is-hidden.badge-second .topbar-badge{
+  opacity:0;
+
+  transform:
+    translateY(-20px)
+    scale(0.9);
+
+  pointer-events:none;
 }
