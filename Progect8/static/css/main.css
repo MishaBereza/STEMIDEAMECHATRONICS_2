@@ -140,7 +140,7 @@ html[lang="fr"] {
 
 html {
   scroll-behavior: smooth;
-  zoom: 0.9;
+  zoom: 0.8;
 }
 
 body {
@@ -731,9 +731,9 @@ form button:hover {
   position:absolute;
 
   top:78px;
-  right:10px;
+  right:30px;
 
-  width:240px;
+  width:270px;
   height:360px;
 
   display:flex;
@@ -796,8 +796,8 @@ form button:hover {
   width:auto;
   height:auto;
 
-  min-width:220px;
-  max-width:220px;
+  min-width:250px;
+  max-width:250px;
 
   padding-bottom:0;
 
@@ -939,15 +939,24 @@ form button:hover {
 
 /* ВТОРОЙ БЕЙДЖ */
 .badge-second{
-  left: 10px;
+  left: 30px;
   right:auto;
 
   top:78px;
 }
 
+.badge-second .topbar-badge{
+  min-height:650px !important;
+}
+
+.badge-second .topbar-badge-content{
+  min-height:600px !important;
+  padding-bottom:5px;
+}
+
 /* РАЗМЕР ПЕРВОГО БЕЙДЖА */
 .topbar-badge-wrapper:not(.badge-second) .topbar-badge{
-  min-height:600px !important;
+  min-height:650px !important;
 }
 
 
@@ -957,7 +966,7 @@ form button:hover {
 
 /* БЕЖЕВЫЙ БЛОК ПЕРВОГО БЕЙДЖА */
 .topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
-  min-height:420px !important;
+  min-height:650px !important;
 }
 
 /* DROPDOWN В ПЕРВОМ БЕЙДЖЕ */
@@ -1084,4 +1093,25 @@ form button:hover {
     scale(0.9);
 
   pointer-events:none;
+}
+/* ЛОГО ВНИЗУ БЕЙДЖА */
+.badge-logo{
+  width:200px;
+  height:200px;
+
+  margin:60px auto 18px;
+
+  border-radius:22px;
+
+  background:
+    url("/static/fons/ukraine.png")
+    center/cover
+    no-repeat;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,0.18);
+
+  border:2px solid rgba(255,255,255,0.45);
+
+  flex-shrink:0;
 }
