@@ -96,6 +96,7 @@ def _leaderboard_scores(tournament):
 
 def _register_pdf_fonts():
     regular_candidates = [
+        r'C:\Windows\Fonts\arialuni.ttf',  # Arial Unicode MS supports all Unicode
         r'C:\Windows\Fonts\arial.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
@@ -250,25 +251,25 @@ def leaderboard_export_pdf(tid):
     )
 
     elements = [
-        Paragraph(escape(_t('app_title')), subtitle_style),
-        Paragraph(escape(_t('leaderboard')), title_style),
-        Paragraph(escape(t.name), subtitle_style),
+        Paragraph(_t('app_title'), subtitle_style),
+        Paragraph(_t('leaderboard'), title_style),
+        Paragraph(t.name, subtitle_style),
         Spacer(1, 10),
     ]
 
     table_data = [[_t('place'), _t('team'), _t('participants'), _t('total')]]
     for index, (team, score) in enumerate(team_scores, start=1):
-        label = escape(team.name)
+        label = team.name
         if index <= 3:
             label = f'{index}. {label}'
 
         # Збираємо список учасників
         participants = []
         if team.captain:
-            participants.append(f"{_t('captain')}: {escape(team.captain.name)}")
+            participants.append(f"{_t('captain')}: {team.captain.name}")
         for member in team.members:
             if member != team.captain:  # щоб не дублювати капітана
-                participants.append(escape(member.name))
+                participants.append(member.name)
         participants_text = ', '.join(participants) if participants else _t('no_teams_to_display')
 
         table_data.append([str(index), label, participants_text, f'{score:.2f}'])
