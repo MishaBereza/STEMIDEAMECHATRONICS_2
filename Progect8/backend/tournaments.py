@@ -95,16 +95,25 @@ def _leaderboard_scores(tournament):
 
 
 def _register_pdf_fonts():
+    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
     regular_candidates = [
+        os.path.join(fonts_dir, 'NotoSans-Regular.ttf'),
         r'C:\Windows\Fonts\arialuni.ttf',  # Arial Unicode MS supports all Unicode
         r'C:\Windows\Fonts\arial.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
     ]
     bold_candidates = [
+        os.path.join(fonts_dir, 'NotoSans-Bold.ttf'),
         r'C:\Windows\Fonts\arialbd.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
         '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
+        '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf',
     ]
 
     regular_path = next((path for path in regular_candidates if os.path.exists(path)), None)
