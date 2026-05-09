@@ -28,12 +28,18 @@
           {% set r = entry.round %}
           <article class="round-card">
             <div class="round-card-top">
-              <div>
+              <div class="round-card-copy">
                 <p class="round-level">{{ t('level') }} {{ r.level }}</p>
                 <h4>{{ r.title }}</h4>
               </div>
               <span class="round-status round-status-{{ r.status|lower }}">{{ translate_value(r.status) }}</span>
             </div>
+
+            {% if r.description %}
+              <div class="round-description">
+                {{ r.description }}
+              </div>
+            {% endif %}
 
             <div class="round-meta">
               <div class="meta-item">

@@ -27,6 +27,9 @@ def create_submission_fixture():
         db.session.add_all([jury, captain, tournament])
         db.session.commit()
 
+        tournament.assigned_juries.append(jury)
+        db.session.commit()
+
         team = Team(name='Team Eval', captain_id=captain.id, tournament_id=tournament.id)
         db.session.add(team)
         db.session.commit()
@@ -111,3 +114,39 @@ def test_evaluate_submission_rejects_invalid_score():
     with app.app_context():
         evaluation = Evaluation.query.filter_by(submission_id=submission_id, jury_id=jury_id).first()
         assert evaluation is None
+
+
+def test_jury_sees_only_assigned_tournament_submissions():
+    with app.app_context():
+        jury = User(first_name='Assigned', last_name='Jury', email='assigned@test.com', role='jury')
+        captain = User(first_name='Cap', last_name='Two', email='captwo@test.com', role='team')
+        visible_tournament = Tournament(name='Visible Cup', description='', status='Running')
+        hidden_tournament = Tournament(name='Hidden Cup', description='', status='Running')
+        db.session.add_all([jury, captain, visible_tournament, hidden_tournament])
+        db.session.commit()
+
+        visible_tournament.assigned_juries.append(jury)
+        db.session.commit()
+
+        visible_team = Team(name='Visible Team', captain_id=captain.id, tournament_id=visible_tournament.id)
+        hidden_team = Team(name='Hidden Team', captain_id=captain.id, tournament_id=hidden_tournament.id)
+        db.session.add_all([visible_team, hidden_team])
+        db.session.commit()
+
+        db.session.add_all([
+            Submission(team_id=visible_team.id, repo_url='https://github.com/example/visible'),
+            Submission(team_id=hidden_team.id, repo_url='https://github.com/example/hidden'),
+        ])
+        db.session.commit()
+
+        jury_id = jury.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['jury_id'] = jury_id
+
+    response = client.get('/jury/evaluate')
+
+    assert response.status_code == 200
+    assert b'Visible Team' in response.data
+    assert b'Hidden Team' not in response.data

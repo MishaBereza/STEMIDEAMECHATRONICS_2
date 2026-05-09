@@ -73,6 +73,20 @@ def _load_admin_key_value():
         return ''
 
 
+def _parse_bool(value):
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def is_over_admin_enabled():
+    setting = Settings.query.filter_by(key='over_admin_enabled').first()
+    if setting:
+        return _parse_bool(setting.value)
+    env_value = os.environ.get('OVER_ADMIN_ENABLED')
+    if env_value is not None:
+        return _parse_bool(env_value)
+    return False
+
+
 def ensure_over_admin_user():
     """Create the protected over-admin account once and return it."""
     user = User.query.filter(User.email.in_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).first()
@@ -228,8 +242,7 @@ def user_login():
             flash(_t('user_not_found'), 'danger')
             return redirect(url_for('user_login'))
         if is_over_admin(user):
-            setting = Settings.query.filter_by(key='over_admin_enabled').first()
-            if setting and setting.value.lower() in ('false', '0', 'no'):
+            if not is_over_admin_enabled():
                 flash('Over admin account is disabled', 'danger')
                 return redirect(url_for('user_login'))
         if not user.check_password(password):
@@ -301,8 +314,8 @@ def admin_change_password():
 def jury_login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
-        user = User.query.filter_by(email=email, role='jury').first()
-        if user:
+        user = User.query.filter_by(email=email).first()
+        if user and user.role in ['jury', 'admin']:
             session['jury_id'] = user.id
             flash(_t('logged_in_as_jury'), 'success')
             return redirect('/jury/evaluate')
@@ -387,6 +400,11 @@ def jury_evaluate():
             Tournament.status.ilike('%draft%')
         )
     ).order_by(Tournament.id.desc()).all()
+
+    assigned_ids = {t.id for t in jury.assigned_tournaments}
+    if not assigned_ids:
+        return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=None, teams=[], message_key='no_assigned_tournaments')
+    candidate_tournaments = [t for t in candidate_tournaments if t.id in assigned_ids]
 
     tournament = None
     active_tournament_ids = []

@@ -21,6 +21,11 @@
   font-weight: 800;
 }
 
+.page-title-wrap {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .admin-form-wrapper {
   display: flex;
   justify-content: center;
@@ -296,6 +301,40 @@
   font-size: 0.92rem;
 }
 
+.admin-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.admin-tab-btn.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border-color: transparent;
+  color: #ffffff;
+}
+
 .table-shell {
   margin-top: 22px;
   position: relative;
@@ -336,6 +375,15 @@
   color: var(--text);
   position: relative;
   overflow: visible;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.table-title-cell {
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .admin-table th {
@@ -612,6 +660,93 @@
   background: rgba(255, 99, 71, 0.12);
   border-color: rgba(255, 99, 71, 0.4);
   color: #8b0000;
+}
+
+.jury-assignment-list {
+  display: grid;
+  gap: 12px;
+}
+
+.jury-assignment-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--panel-strong);
+  cursor: pointer;
+}
+
+.jury-assignment-item input[type="checkbox"] {
+  margin-top: 4px;
+}
+
+.jury-assignment-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.jury-assignment-copy strong {
+  color: var(--text-strong);
+}
+
+.jury-search-input {
+  width: 100%;
+}
+
+.jury-picker-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.jury-picker-panel {
+  padding: 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  background: var(--panel);
+}
+
+.jury-picker-title {
+  margin: 0 0 14px;
+  color: var(--text-strong);
+  font-size: 1.05rem;
+}
+
+.jury-picker-list {
+  display: grid;
+  gap: 12px;
+}
+
+.jury-picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: var(--panel-strong);
+}
+
+.jury-picker-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.jury-picker-copy span,
+.jury-picker-copy strong {
+  overflow-wrap: anywhere;
+}
+
+.jury-picker-action {
+  flex: 0 0 auto;
+}
+
+.jury-picker-hidden,
+.jury-picker-empty-hidden {
+  display: none;
 }
 
 @media (max-width: 720px) {

@@ -10,12 +10,12 @@
     <form method="post" class="admin-form">
       <div class="form-group">
         <label for="name">{{ t('name') }}</label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" required maxlength="33">
       </div>
 
       <div class="form-group">
         <label for="description">{{ t('description') }}</label>
-        <textarea id="description" name="description" rows="4"></textarea>
+        <textarea id="description" name="description" rows="4" maxlength="113"></textarea>
       </div>
 
       <div class="form-group">

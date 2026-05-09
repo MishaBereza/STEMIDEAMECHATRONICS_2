@@ -140,7 +140,14 @@ def evaluate_submission(sid):
             return redirect('/admin')
 
     s = Submission.query.get_or_404(sid)
-    tournament = db.session.get(Tournament, s.round.tournament_id) if s.round else None
+    tournament_id = s.round.tournament_id if s.round else (s.team.tournament_id if s.team else None)
+    tournament = db.session.get(Tournament, tournament_id) if tournament_id else None
+
+    assigned_ids = {t.id for t in jury.assigned_tournaments}
+    if not tournament or tournament.id not in assigned_ids:
+        flash(_t('tournament_access_denied'), 'warning')
+        return redirect(url_for('jury_evaluate'))
+
     criteria = []
     if tournament:
         criteria = EvaluationCriteria.query.filter_by(tournament_id=tournament.id).order_by(EvaluationCriteria.order).all()

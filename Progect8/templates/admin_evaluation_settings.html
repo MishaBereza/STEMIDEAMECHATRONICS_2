@@ -132,6 +132,11 @@
 <div class="admin-page">
   <h2 class="page-title">{{ t('jury_evaluation_settings') }} - {{ tournament.name }}</h2>
 
+  <div class="admin-tab-row">
+    <a href="{{ url_for('admin_tournament_evaluation_settings', tid=tournament.id) }}" class="admin-tab-btn active">{{ t('criteria') }}</a>
+    <a href="{{ url_for('admin_tournament_jury_settings', tid=tournament.id) }}" class="admin-tab-btn">{{ t('jury_short') }}</a>
+  </div>
+
   <div class="info-text">
     {{ t('jury_criteria_help_text') }}
   </div>

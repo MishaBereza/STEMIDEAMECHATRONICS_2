@@ -4,27 +4,27 @@
 {% endblock %}
 {% block content %}
 <div class="admin-page">
-  <h2 class="page-title">{{ t('create_round') }}: {{ tournament.name }}</h2>
+  <h2 class="page-title">{{ t('edit') if is_edit else t('create_round') }}: {{ tournament.name }}</h2>
 
   <div class="admin-form-wrapper">
     <form method="post" class="admin-form">
       <div class="form-group">
         <label for="title">{{ t('title') }}</label>
-        <input type="text" id="title" name="title" required>
+        <input type="text" id="title" name="title" required maxlength="50" value="{{ round_item.title if round_item else '' }}">
       </div>
 
       <div class="form-group">
         <label for="description">{{ t('description') }}</label>
-        <textarea id="description" name="description" rows="4"></textarea>
+        <textarea id="description" name="description" rows="4" maxlength="200">{{ round_item.description if round_item else '' }}</textarea>
       </div>
 
       <div class="form-group">
         <label for="level">{{ t('round_level') }}</label>
-        <input type="number" id="level" name="level" value="1" min="1">
+        <input type="number" id="level" name="level" value="{{ round_item.level if round_item else 1 }}" min="1">
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="submit-btn">{{ t('create') }}</button>
+        <button type="submit" class="submit-btn">{{ t('save') if is_edit else t('create') }}</button>
         <a href="{{ url_for('admin_tournament_rounds', tid=tournament.id) }}" class="secondary-btn">{{ t('back') }}</a>
       </div>
     </form>

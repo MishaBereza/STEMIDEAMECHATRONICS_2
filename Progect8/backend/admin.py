@@ -133,8 +133,26 @@ def user_profile(uid):
 
 
 def admin_tournaments():
-    tournaments = Tournament.query.all()
-    return render_template('admin_tournaments.html', tournaments=tournaments)
+    view = request.args.get('view', 'active').strip().lower()
+    if view not in ('active', 'archived'):
+        view = 'active'
+
+    query = Tournament.query
+    if view == 'archived':
+        query = query.filter_by(is_archived=True)
+    else:
+        query = query.filter_by(is_archived=False)
+
+    tournaments = query.order_by(Tournament.id.desc()).all()
+    active_count = Tournament.query.filter_by(is_archived=False).count()
+    archived_count = Tournament.query.filter_by(is_archived=True).count()
+    return render_template(
+        'admin_tournaments.html',
+        tournaments=tournaments,
+        view=view,
+        active_count=active_count,
+        archived_count=archived_count,
+    )
 
 
 def admin_tournaments_create_redirect():
@@ -151,6 +169,38 @@ def admin_tournament_rounds(tid):
     t = Tournament.query.get_or_404(tid)
     rounds = Round.query.filter_by(tournament_id=t.id).order_by(Round.level.asc(), Round.id.asc()).all()
     return render_template('round_editor.html', tournament=t, rounds=rounds)
+
+
+def admin_tournament_jury_settings(tid):
+    tournament = Tournament.query.get_or_404(tid)
+
+    if request.method == 'POST':
+        selected_ids = set()
+        for raw_id in request.form.getlist('jury_user_ids'):
+            if raw_id.isdigit():
+                selected_ids.add(int(raw_id))
+
+        eligible_users = User.query.filter(User.role.in_(['jury', 'admin'])).all()
+        eligible_ids = {user.id for user in eligible_users if not is_over_admin(user)}
+
+        tournament.assigned_juries = [user for user in eligible_users if user.id in selected_ids and user.id in eligible_ids]
+        db.session.commit()
+
+        flash(_t('jury_assignments_saved'), 'success')
+        from .app import trigger_update
+        trigger_update()
+        return redirect(url_for('admin_tournament_jury_settings', tid=tournament.id))
+
+    jury_users = User.query.filter(User.role.in_(['jury', 'admin'])).order_by(User.role.asc(), User.first_name.asc(), User.last_name.asc()).all()
+    jury_users = [user for user in jury_users if not is_over_admin(user)]
+    assigned_ids = {user.id for user in tournament.assigned_juries}
+
+    return render_template(
+        'admin_tournament_jury.html',
+        tournament=tournament,
+        jury_users=jury_users,
+        assigned_ids=assigned_ids,
+    )
 
 
 def admin_delete_team(teamid):
@@ -290,6 +340,32 @@ def delete_tournament(tid):
     return redirect('/admin/tournaments')
 
 
+def archive_tournament(tid):
+    t = Tournament.query.get_or_404(tid)
+    t.is_archived = True
+    db.session.commit()
+    flash(_t('tournament_archived'), 'success')
+    from .app import trigger_update
+    trigger_update()
+    redirect_view = request.form.get('redirect_view', 'active').strip().lower()
+    if redirect_view not in ('active', 'archived'):
+        redirect_view = 'active'
+    return redirect(url_for('admin_tournaments', view=redirect_view))
+
+
+def unarchive_tournament(tid):
+    t = Tournament.query.get_or_404(tid)
+    t.is_archived = False
+    db.session.commit()
+    flash(_t('tournament_unarchived'), 'success')
+    from .app import trigger_update
+    trigger_update()
+    redirect_view = request.form.get('redirect_view', 'archived').strip().lower()
+    if redirect_view not in ('active', 'archived'):
+        redirect_view = 'active'
+    return redirect(url_for('admin_tournaments', view=redirect_view))
+
+
 def create_round(tid):
     tournament = Tournament.query.get_or_404(tid)
 
@@ -321,6 +397,33 @@ def create_round(tid):
         return redirect(url_for('admin_tournament_rounds', tid=tournament.id))
 
     return render_template('admin_create_round.html', tournament=tournament)
+
+
+def edit_round(rid):
+    round_item = Round.query.get_or_404(rid)
+    tournament = Tournament.query.get_or_404(round_item.tournament_id)
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        level_raw = request.form.get('level', '').strip()
+
+        if not title:
+            flash(_t('round_title_required'), 'warning')
+            return render_template('admin_create_round.html', tournament=tournament, round_item=round_item, is_edit=True)
+
+        round_item.title = title
+        round_item.description = description
+        round_item.level = int(level_raw) if level_raw else 1
+
+        db.session.commit()
+
+        flash(_t('round_updated', title=title), 'success')
+        from .app import trigger_update
+        trigger_update()
+        return redirect(url_for('admin_tournament_rounds', tid=tournament.id))
+
+    return render_template('admin_create_round.html', tournament=tournament, round_item=round_item, is_edit=True)
 
 
 def admin_round_start(rid):

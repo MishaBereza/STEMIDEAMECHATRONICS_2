@@ -110,11 +110,24 @@ def migrate_user_table():
         db.session.execute(text("ALTER TABLE user ADD COLUMN login_token VARCHAR(64)"))
     db.session.commit()
 
+
+def migrate_tournament_table():
+    inspector = inspect(db.engine)
+    if 'tournament' not in inspector.get_table_names():
+        return
+
+    existing_columns = {column['name'] for column in inspector.get_columns('tournament')}
+    if 'is_archived' not in existing_columns:
+        db.session.execute(text("ALTER TABLE tournament ADD COLUMN is_archived BOOLEAN NOT NULL DEFAULT FALSE"))
+    db.session.commit()
+    db.session.commit()
+
 with app.app_context():
     # Create tables during app setup because Flask 3.x removed before_first_request.
     db.create_all()
     migrate_user_table()
     migrate_evaluation_table()
+    migrate_tournament_table()
     from .auth import ensure_over_admin_user
     ensure_over_admin_user()
 
@@ -153,7 +166,7 @@ from .auth import register_user, user_login, user_logout, admin_panel, admin_log
 from .tournaments import index, tournament_page, leaderboard, leaderboard_export_pdf, get_team_details
 from .teams import register_team, team_page, edit_team_members, team_round_results
 from .submissions import submit_solution, evaluate_submission
-from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, change_user_role, admin_tournament_rounds, create_round, admin_tournament_evaluation_settings
+from .admin import admin_round_start, admin_round_close, delete_round, admin_dashboard, admin_users, admin_delete_user, user_profile, admin_tournaments, admin_tournaments_create_redirect, admin_tournament_teams, admin_delete_team, admin_team_decide, create_tournament, edit_tournament, update_tournament_status, delete_tournament, archive_tournament, unarchive_tournament, change_user_role, admin_tournament_rounds, create_round, edit_round, admin_tournament_evaluation_settings, admin_tournament_jury_settings
 from .email_utils import verify_user, cancel_registration
 
 
@@ -217,8 +230,12 @@ app.add_url_rule('/admin/tournament/create', 'create_tournament', create_tournam
 app.add_url_rule('/admin/tournament/<int:tid>/edit', 'edit_tournament', edit_tournament, methods=['GET', 'POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/status', 'update_tournament_status', update_tournament_status, methods=['POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/delete', 'delete_tournament', delete_tournament, methods=['POST'])
+app.add_url_rule('/admin/tournament/<int:tid>/archive', 'archive_tournament', archive_tournament, methods=['POST'])
+app.add_url_rule('/admin/tournament/<int:tid>/unarchive', 'unarchive_tournament', unarchive_tournament, methods=['POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/rounds', 'admin_tournament_rounds', admin_tournament_rounds, methods=['GET'])
+app.add_url_rule('/admin/tournament/<int:tid>/jury', 'admin_tournament_jury_settings', admin_tournament_jury_settings, methods=['GET', 'POST'])
 app.add_url_rule('/admin/tournament/<int:tid>/rounds/new', 'create_round', create_round, methods=['GET', 'POST'])
+app.add_url_rule('/admin/round/<int:rid>/edit', 'edit_round', edit_round, methods=['GET', 'POST'])
 app.add_url_rule('/admin/round/<int:rid>/start', 'admin_round_start', admin_round_start, methods=['POST'])
 app.add_url_rule('/admin/round/<int:rid>/close', 'admin_round_close', admin_round_close, methods=['POST'])
 app.add_url_rule('/admin/round/<int:rid>/delete', 'delete_round', delete_round, methods=['POST'])

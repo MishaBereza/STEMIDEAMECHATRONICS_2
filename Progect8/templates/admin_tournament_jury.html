@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/admin.css">
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <h2 class="page-title">{{ t('jury_settings') }} - {{ tournament.name }}</h2>
+
+  <div class="admin-tab-row">
+    <a href="{{ url_for('admin_tournament_evaluation_settings', tid=tournament.id) }}" class="admin-tab-btn">{{ t('criteria') }}</a>
+    <a href="{{ url_for('admin_tournament_jury_settings', tid=tournament.id) }}" class="admin-tab-btn active">{{ t('jury_short') }}</a>
+  </div>
+
+  <div class="search-panel">
+    <p class="search-meta">{{ t('jury_assignment_help_text') }}</p>
+  </div>
+
+  <div class="admin-form-wrapper">
+    <form method="post" class="admin-form" id="jury-assignment-form">
+      {% if jury_users %}
+        <div class="form-group">
+          <label for="jury-search">{{ t('search') }}</label>
+          <input
+            type="text"
+            id="jury-search"
+            class="jury-search-input"
+            placeholder="{{ t('search_jury_placeholder') }}"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="jury-picker-layout">
+          <section class="jury-picker-panel">
+            <h3 class="jury-picker-title">{{ t('selected_jury_members') }}</h3>
+            <div id="selected-jury-list" class="jury-picker-list">
+              {% for jury_user in jury_users %}
+                {% if jury_user.id in assigned_ids %}
+                  <div class="jury-picker-item" data-user-card data-user-id="{{ jury_user.id }}" data-selected="true" data-search="{{ (jury_user.first_name ~ ' ' ~ jury_user.last_name ~ ' ' ~ jury_user.email)|lower }}">
+                    <input type="hidden" name="jury_user_ids" value="{{ jury_user.id }}" data-hidden-input>
+                    <div class="jury-picker-copy">
+                      <strong>{{ jury_user.first_name }} {{ jury_user.last_name }}</strong>
+                      <span>{{ jury_user.email }}</span>
+                      <span class="status-pill {{ jury_user.role if jury_user.role in ['admin', 'jury'] else 'default' }}">
+                        {{ t('admin_short') if jury_user.role == 'admin' else t('jury_short') }}
+                      </span>
+                    </div>
+                    <button type="button" class="danger-btn jury-picker-action" data-remove-user>{{ t('remove') }}</button>
+                  </div>
+                {% endif %}
+              {% endfor %}
+              <p class="empty-row{% if assigned_ids %} jury-picker-empty-hidden{% endif %}" id="selected-jury-empty">{{ t('no_selected_jury_members') }}</p>
+            </div>
+          </section>
+
+          <section class="jury-picker-panel">
+            <h3 class="jury-picker-title">{{ t('available_jury_members') }}</h3>
+            <div id="available-jury-list" class="jury-picker-list">
+              {% for jury_user in jury_users %}
+                <div
+                  class="jury-picker-item{% if jury_user.id in assigned_ids %} jury-picker-hidden{% endif %}"
+                  data-user-card
+                  data-user-id="{{ jury_user.id }}"
+                  data-selected="{% if jury_user.id in assigned_ids %}true{% else %}false{% endif %}"
+                  data-search="{{ (jury_user.first_name ~ ' ' ~ jury_user.last_name ~ ' ' ~ jury_user.email)|lower }}"
+                >
+                  <div class="jury-picker-copy">
+                    <strong>{{ jury_user.first_name }} {{ jury_user.last_name }}</strong>
+                    <span>{{ jury_user.email }}</span>
+                    <span class="status-pill {{ jury_user.role if jury_user.role in ['admin', 'jury'] else 'default' }}">
+                      {{ t('admin_short') if jury_user.role == 'admin' else t('jury_short') }}
+                    </span>
+                  </div>
+                  <button type="button" class="submit-btn jury-picker-action" data-add-user>{{ t('add') }}</button>
+                </div>
+              {% endfor %}
+              <p class="empty-row jury-picker-empty-hidden" id="available-jury-empty">{{ t('no_jury_search_results') }}</p>
+            </div>
+          </section>
+        </div>
+      {% else %}
+        <p class="empty-row">{{ t('no_jury_users_available') }}</p>
+      {% endif %}
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">{{ t('save_settings') }}</button>
+        <a href="{{ url_for('admin_tournaments') }}" class="secondary-btn">{{ t('back') }}</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const form = document.getElementById('jury-assignment-form');
+    if (!form) return;
+
+    const searchInput = document.getElementById('jury-search');
+    const selectedList = document.getElementById('selected-jury-list');
+    const availableList = document.getElementById('available-jury-list');
+    const selectedEmpty = document.getElementById('selected-jury-empty');
+    const availableEmpty = document.getElementById('available-jury-empty');
+
+    if (!searchInput || !selectedList || !availableList) return;
+
+    const createHiddenInput = (userId) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'jury_user_ids';
+      input.value = userId;
+      input.setAttribute('data-hidden-input', '');
+      return input;
+    };
+
+    const updateEmptyStates = () => {
+      const selectedCards = Array.from(selectedList.querySelectorAll('[data-user-card]'));
+      const visibleAvailableCards = Array.from(availableList.querySelectorAll('[data-user-card]')).filter((card) => !card.classList.contains('jury-picker-hidden'));
+
+      if (selectedEmpty) {
+        selectedEmpty.classList.toggle('jury-picker-empty-hidden', selectedCards.length > 0);
+      }
+      if (availableEmpty) {
+        availableEmpty.classList.toggle('jury-picker-empty-hidden', visibleAvailableCards.length > 0);
+      }
+    };
+
+    const applySearch = () => {
+      const query = searchInput.value.trim().toLowerCase();
+      const availableCards = Array.from(availableList.querySelectorAll('[data-user-card]'));
+
+      availableCards.forEach((card) => {
+        const isSelected = card.dataset.selected === 'true';
+        const matches = !query || card.dataset.search.includes(query);
+        card.classList.toggle('jury-picker-hidden', isSelected || !matches);
+      });
+
+      updateEmptyStates();
+    };
+
+    const moveToSelected = (card) => {
+      const userId = card.dataset.userId;
+      card.dataset.selected = 'true';
+      card.classList.remove('jury-picker-hidden');
+
+      const addButton = card.querySelector('[data-add-user]');
+      if (addButton) {
+        addButton.remove();
+      }
+
+      if (!card.querySelector('[data-hidden-input]')) {
+        card.prepend(createHiddenInput(userId));
+      }
+
+      let removeButton = card.querySelector('[data-remove-user]');
+      if (!removeButton) {
+        removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'danger-btn jury-picker-action';
+        removeButton.textContent = '{{ t("remove") }}';
+        removeButton.setAttribute('data-remove-user', '');
+        card.appendChild(removeButton);
+      }
+
+      selectedList.appendChild(card);
+      syncMirrorCard(userId, true);
+      applySearch();
+    };
+
+    const moveToAvailable = (card) => {
+      const userId = card.dataset.userId;
+      card.dataset.selected = 'false';
+
+      const hiddenInput = card.querySelector('[data-hidden-input]');
+      if (hiddenInput) {
+        hiddenInput.remove();
+      }
+
+      const removeButton = card.querySelector('[data-remove-user]');
+      if (removeButton) {
+        removeButton.remove();
+      }
+
+      let addButton = card.querySelector('[data-add-user]');
+      if (!addButton) {
+        addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.className = 'submit-btn jury-picker-action';
+        addButton.textContent = '{{ t("add") }}';
+        addButton.setAttribute('data-add-user', '');
+        card.appendChild(addButton);
+      }
+
+      availableList.appendChild(card);
+      syncMirrorCard(userId, false);
+      applySearch();
+    };
+
+    const syncMirrorCard = (userId, selected) => {
+      const mirrorCards = Array.from(document.querySelectorAll(`[data-user-card][data-user-id="${userId}"]`));
+      mirrorCards.forEach((mirrorCard) => {
+        if (selected && mirrorCard.parentElement === availableList) {
+          mirrorCard.dataset.selected = 'true';
+          mirrorCard.classList.add('jury-picker-hidden');
+        }
+        if (!selected && mirrorCard.parentElement === availableList) {
+          mirrorCard.dataset.selected = 'false';
+        }
+      });
+    };
+
+    form.addEventListener('click', (event) => {
+      const addButton = event.target.closest('[data-add-user]');
+      if (addButton) {
+        moveToSelected(addButton.closest('[data-user-card]'));
+        return;
+      }
+
+      const removeButton = event.target.closest('[data-remove-user]');
+      if (removeButton) {
+        moveToAvailable(removeButton.closest('[data-user-card]'));
+      }
+    });
+
+    searchInput.addEventListener('input', applySearch);
+    applySearch();
+  })();
+</script>
+{% endblock %}

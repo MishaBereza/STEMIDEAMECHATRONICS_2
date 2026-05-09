@@ -2,6 +2,7 @@ from flask import session, flash, redirect, url_for
 from .models import User, db
 from .translations import get_text, TRANSLATIONS
 from functools import wraps
+from markupsafe import Markup, escape
 
 
 def get_current_user():
@@ -44,9 +45,21 @@ def translation():
         key = value_key_map.get(str(value).strip().lower())
         return get_text(key, lang) if key else value
 
+    def wrap_text(value, chunk_size):
+        if value is None:
+            return ''
+
+        text = str(value)
+        if not text or chunk_size <= 0:
+            return escape(text)
+
+        chunks = [escape(text[i:i + chunk_size]) for i in range(0, len(text), chunk_size)]
+        return Markup('<br>').join(chunks)
+
     return {
         't': t,
         'translate_value': translate_value,
+        'wrap_text': wrap_text,
         'lang': lang,
         'supported_languages': list(TRANSLATIONS.keys())
     }

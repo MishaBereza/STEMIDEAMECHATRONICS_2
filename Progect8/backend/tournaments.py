@@ -2,7 +2,7 @@ from io import BytesIO
 import os
 from xml.sax.saxutils import escape
 
-from flask import render_template, flash, redirect, url_for, session, jsonify, send_file
+from flask import render_template, flash, redirect, url_for, session, jsonify, send_file, request
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter
@@ -150,17 +150,26 @@ def _draw_pdf_page(canvas, doc, theme, lang):
 
 
 def index():
-    tournaments = Tournament.query.all()
+    filter_type = request.args.get('filter', 'available').strip().lower()
+    search = request.args.get('search', '').strip()
+    if filter_type not in ('available', 'finished'):
+        filter_type = 'available'
+
+    tournaments = Tournament.query.filter_by(is_archived=False).all()
+
     registration_tournaments_count = Tournament.query.filter(
         or_(
             Tournament.status.ilike('%register%'),
             Tournament.status.ilike('%registration%')
         )
-    ).count()
+    ).filter_by(is_archived=False).count()
+
     return render_template(
         'index.html',
         tournaments=tournaments,
-        registration_tournaments_count=registration_tournaments_count
+        registration_tournaments_count=registration_tournaments_count,
+        filter_type=filter_type,
+        search=search
     )
 
 

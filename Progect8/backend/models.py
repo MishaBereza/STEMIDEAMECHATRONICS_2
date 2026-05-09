@@ -6,6 +6,12 @@ db = SQLAlchemy()
 
 # Roles: admin, team, jury
 
+tournament_jury_assignments = db.Table(
+    'tournament_jury_assignments',
+    db.Column('tournament_id', db.Integer, db.ForeignKey('tournament.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(120), nullable=False)
@@ -25,6 +31,13 @@ class User(db.Model):
     # Login notification fields
     last_login_at = db.Column(db.DateTime, nullable=True)
     login_token = db.Column(db.String(64), unique=True, nullable=True)
+
+    assigned_tournaments = db.relationship(
+        'Tournament',
+        secondary=tournament_jury_assignments,
+        back_populates='assigned_juries',
+        lazy='dynamic'
+    )
     
     @property
     def name(self):
@@ -53,7 +66,15 @@ class Tournament(db.Model):
 
     status = db.Column(db.String(30), default="Draft")
 
+    is_archived = db.Column(db.Boolean, default=False)
+
     rounds = db.relationship('Round', backref='tournament', lazy=True)
+    assigned_juries = db.relationship(
+        'User',
+        secondary=tournament_jury_assignments,
+        back_populates='assigned_tournaments',
+        lazy='dynamic'
+    )
 
 
 # association table for many-to-many between teams and users (members)

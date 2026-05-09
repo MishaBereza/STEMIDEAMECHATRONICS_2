@@ -3,6 +3,7 @@
   <link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
 {% block content %}
+  {% set initial_filter = filter_type if filter_type in ['available', 'finished'] else 'available' %}
   <div class="hero-stage">
     <section class="hero-section">
       <div class="hero-copy">
@@ -27,15 +28,30 @@
   </div>
 
   <section class="tournaments-section">
-    <div class="section-heading">
+    <div class="section-heading" data-initial-filter="{{ initial_filter }}" data-initial-search="{{ search }}">
       <span class="section-kicker">{{ t('tournaments') }}</span>
       <h2>{{ t('open_arenas_title') }}</h2>
       <p>{{ t('open_arenas_text') }}</p>
+
+      <div class="search-form">
+        <input type="text" name="search" value="{{ search }}" placeholder="{{ t('search_by_name') }}" class="search-input" data-filter-search>
+      </div>
+
+      <div class="tab-row">
+        <button type="button" class="tab-btn{% if initial_filter == 'available' %} active{% endif %}" data-filter-tab="available">{{ t('available_tournaments') }}</button>
+        <button type="button" class="tab-btn{% if initial_filter == 'finished' %} active{% endif %}" data-filter-tab="finished">{{ t('finished_tournaments') }}</button>
+      </div>
     </div>
 
     <div class="tournaments-grid">
       {% for t_item in tournaments %}
-        <a href="/tournament/{{t_item.id}}" class="tournament-link">
+        <a
+          href="/tournament/{{t_item.id}}"
+          class="tournament-link"
+          data-tournament-card
+          data-filter-status="{{ 'finished' if t_item.status == 'Finished' else 'available' }}"
+          data-filter-name="{{ t_item.name|lower }}"
+        >
           <article class="tournament-card">
             <div class="tournament-topline">
               <span class="tournament-pill">{{ t('tournament_card_label') }}</span>
@@ -49,7 +65,7 @@
           </article>
         </a>
       {% else %}
-        <div class="empty-state">
+        <div class="empty-state" data-empty-all>
           <div class="empty-state-box">
             <span class="section-kicker">{{ t('no_live_items') }}</span>
             <h3>{{ t('no_tournaments') }}</h3>
@@ -57,6 +73,78 @@
           </div>
         </div>
       {% endfor %}
+      <div class="empty-state empty-state-hidden" data-empty-filtered>
+        <div class="empty-state-box">
+          <span class="section-kicker">{{ t('no_live_items') }}</span>
+          <h3>{{ t('no_tournaments') }}</h3>
+          <p>{{ t('create_first_contest') }}</p>
+        </div>
+      </div>
     </div>
   </section>
+  <script>
+    (() => {
+      const heading = document.querySelector('.tournaments-section .section-heading');
+      if (!heading) return;
+
+      const searchInput = heading.querySelector('[data-filter-search]');
+      const tabs = Array.from(heading.querySelectorAll('[data-filter-tab]'));
+      const cards = Array.from(document.querySelectorAll('[data-tournament-card]'));
+      const emptyAll = document.querySelector('[data-empty-all]');
+      const emptyFiltered = document.querySelector('[data-empty-filtered]');
+
+      if (!searchInput || !tabs.length || !cards.length) {
+        if (emptyFiltered) emptyFiltered.remove();
+        return;
+      }
+
+      let activeFilter = heading.dataset.initialFilter || 'available';
+
+      const syncUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('filter', activeFilter);
+        const searchValue = searchInput.value.trim();
+        if (searchValue) {
+          params.set('search', searchValue);
+        } else {
+          params.delete('search');
+        }
+        const nextQuery = params.toString();
+        const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
+        window.history.replaceState({}, '', nextUrl);
+      };
+
+      const applyFilters = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const matchesFilter = card.dataset.filterStatus === activeFilter;
+          const matchesSearch = !query || card.dataset.filterName.includes(query);
+          const isVisible = matchesFilter && matchesSearch;
+          card.classList.toggle('is-hidden', !isVisible);
+          if (isVisible) visibleCount += 1;
+        });
+
+        tabs.forEach((tab) => {
+          tab.classList.toggle('active', tab.dataset.filterTab === activeFilter);
+        });
+
+        if (emptyAll) emptyAll.classList.add('empty-state-hidden');
+        if (emptyFiltered) emptyFiltered.classList.toggle('empty-state-hidden', visibleCount > 0);
+
+        syncUrl();
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          activeFilter = tab.dataset.filterTab;
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+      applyFilters();
+    })();
+  </script>
 {% endblock %}
