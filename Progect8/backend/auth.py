@@ -140,12 +140,16 @@ def ensure_over_admin_user():
     return user
 
 
-def login_over_admin():
-    user = ensure_over_admin_user()
+def login_admin_user(user):
     session['admin'] = True
     session['admin_user_id'] = user.id
     session['user_id'] = user.id
     return user
+
+
+def login_over_admin():
+    user = ensure_over_admin_user()
+    return login_admin_user(user)
 
 
 def save_admin_password(new_password):
@@ -276,14 +280,35 @@ def user_logout():
 def admin_panel():
     current_user = get_current_user()
     if current_user and is_over_admin(current_user):
-        login_over_admin()
+        login_admin_user(current_user)
         return redirect('/admin/dashboard')
+
     if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '').strip()
-        if password == load_admin_password():
-            login_over_admin()
+        if not email:
+            flash(_t('email_required'), 'warning')
+            return redirect(url_for('admin_panel'))
+        if not password:
+            flash(_t('password_empty'), 'warning')
+            return redirect(url_for('admin_panel'))
+
+        user = User.query.filter_by(email=email).first()
+        if not user or user.role != 'admin':
+            flash(_t('user_not_found'), 'danger')
+            return redirect(url_for('admin_panel'))
+        if is_over_admin(user) and not is_over_admin_enabled():
+            flash('Over admin account is disabled', 'danger')
+            return redirect(url_for('admin_panel'))
+        if not user.check_password(password):
+            flash(_t('invalid_password'), 'danger')
+            return redirect(url_for('admin_panel'))
+
+        login_admin_user(user)
+        if is_over_admin(user):
             return redirect('/admin/dashboard')
-        flash(_t('invalid_password'), 'danger')
+        flash(_t('logged_in_successfully'), 'success')
+        return redirect('/admin/dashboard')
     return render_template('admin_login.html')
 
 
@@ -297,6 +322,12 @@ def admin_logout():
 
 
 def admin_change_password():
+    admin_user_id = session.get('admin_user_id')
+    admin_user = db.session.get(User, admin_user_id) if admin_user_id else None
+    if not admin_user or admin_user.role != 'admin':
+        flash(get_text('please_login_as_admin', session.get('language', 'en')), 'warning')
+        return redirect(url_for('admin_panel'))
+
     if request.method == 'POST':
         new_password = request.form.get('new_password', '').strip()
         confirm = request.form.get('confirm_password', '').strip()
@@ -305,7 +336,8 @@ def admin_change_password():
         elif new_password != confirm:
             flash(_t('passwords_do_not_match'), 'warning')
         else:
-            save_admin_password(new_password)
+            admin_user.set_password(new_password)
+            db.session.commit()
             flash(_t('admin_password_changed'), 'success')
             return redirect(url_for('admin_dashboard'))
     return render_template('admin_change_password.html')

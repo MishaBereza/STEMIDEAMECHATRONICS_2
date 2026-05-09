@@ -130,7 +130,10 @@ def test_over_admin_can_login_with_initial_admin_key_password():
     with app.app_context():
         from backend.models import Settings
         Settings.query.filter_by(key='over_admin_password_initialized').delete()
+        Settings.query.filter_by(key='over_admin_enabled').delete()
         User.query.filter_by(email=OVER_ADMIN_EMAIL).delete()
+        db.session.commit()
+        db.session.add(Settings(key='over_admin_enabled', value='1'))
         db.session.commit()
         over_admin = ensure_over_admin_user()
         over_admin_id = over_admin.id
