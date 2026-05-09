@@ -150,3 +150,33 @@ def test_jury_sees_only_assigned_tournament_submissions():
     assert response.status_code == 200
     assert b'Visible Team' in response.data
     assert b'Hidden Team' not in response.data
+
+
+def test_jury_sees_assigned_tournament_submissions_even_with_unexpected_status():
+    with app.app_context():
+        jury = User(first_name='Status', last_name='Jury', email='statusjury@test.com', role='jury')
+        captain = User(first_name='Cap', last_name='Three', email='capthree@test.com', role='team')
+        tournament = Tournament(name='Status Cup', description='', status='Active')
+        db.session.add_all([jury, captain, tournament])
+        db.session.commit()
+
+        tournament.assigned_juries.append(jury)
+        db.session.commit()
+
+        team = Team(name='Status Team', captain_id=captain.id, tournament_id=tournament.id)
+        db.session.add(team)
+        db.session.commit()
+
+        db.session.add(Submission(team_id=team.id, repo_url='https://github.com/example/status'))
+        db.session.commit()
+
+        jury_id = jury.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['jury_id'] = jury_id
+
+    response = client.get('/jury/evaluate')
+
+    assert response.status_code == 200
+    assert b'Status Team' in response.data

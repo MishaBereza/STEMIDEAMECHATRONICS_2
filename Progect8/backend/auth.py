@@ -371,7 +371,6 @@ def jury_evaluate():
             session.pop('admin', None)
             return redirect('/admin')
 
-    from sqlalchemy import or_
     from .models import Submission, Evaluation, Team, Tournament, Round
     from datetime import datetime
 
@@ -421,25 +420,11 @@ def jury_evaluate():
         if dirty:
             db.session.commit()
 
-    candidate_tournaments = Tournament.query.filter(
-        or_(
-            Tournament.status.ilike('%finished%'),
-            Tournament.status.ilike('%completed%'),
-            Tournament.status.ilike('%closed%'),
-            Tournament.status.ilike('%running%'),
-            Tournament.status.ilike('%submission%'),
-            Tournament.status.ilike('%registration%'),
-            Tournament.status.ilike('%draft%')
-        )
-    ).order_by(Tournament.id.desc()).all()
-
-    assigned_ids = {t.id for t in jury.assigned_tournaments}
-    if not assigned_ids:
+    candidate_tournaments = list(jury.assigned_tournaments.order_by(Tournament.id.desc()).all())
+    if not candidate_tournaments:
         return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=None, teams=[], message_key='no_assigned_tournaments')
-    candidate_tournaments = [t for t in candidate_tournaments if t.id in assigned_ids]
 
     tournament = None
-    active_tournament_ids = []
     for ct in candidate_tournaments:
         has_submission = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id == ct.id).first()
         has_team_submit = Team.query.filter(
@@ -448,7 +433,6 @@ def jury_evaluate():
             Team.repo_url != ''
         ).first()
         if has_submission or has_team_submit:
-            active_tournament_ids.append(ct.id)
             if not tournament:
                 tournament = ct
 
