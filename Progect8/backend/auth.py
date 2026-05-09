@@ -366,7 +366,7 @@ def jury_evaluate():
             return redirect('/jury/login')
     else:
         # Admin access
-        jury = get_admin_user()
+        jury = get_current_user()
         if not jury or jury.role != 'admin':
             session.pop('admin', None)
             return redirect('/admin')
@@ -495,7 +495,7 @@ def jury_part2():
             return redirect('/jury/login')
     else:
         # Admin access
-        jury = get_admin_user()
+        jury = get_current_user()
         if not jury or jury.role != 'admin':
             session.pop('admin', None)
             return redirect('/admin')

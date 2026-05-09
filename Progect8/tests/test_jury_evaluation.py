@@ -180,3 +180,38 @@ def test_jury_sees_assigned_tournament_submissions_even_with_unexpected_status()
 
     assert response.status_code == 200
     assert b'Status Team' in response.data
+
+
+def test_assigned_admin_sees_own_name_and_assigned_submissions_in_jury_panel():
+    with app.app_context():
+        admin = User(first_name='Real', last_name='Admin', email='realadmin@test.com', role='admin', is_verified=True)
+        admin.set_password('secret123')
+        captain = User(first_name='Cap', last_name='Four', email='capfour@test.com', role='team')
+        tournament = Tournament(name='Admin Cup', description='', status='Running')
+        db.session.add_all([admin, captain, tournament])
+        db.session.commit()
+
+        tournament.assigned_juries.append(admin)
+        db.session.commit()
+
+        team = Team(name='Admin Team', captain_id=captain.id, tournament_id=tournament.id)
+        db.session.add(team)
+        db.session.commit()
+
+        db.session.add(Submission(team_id=team.id, repo_url='https://github.com/example/admin'))
+        db.session.commit()
+
+        admin_id = admin.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['admin'] = True
+        sess['admin_user_id'] = admin_id
+        sess['user_id'] = admin_id
+
+    response = client.get('/jury/evaluate')
+
+    assert response.status_code == 200
+    assert b'Real Admin' in response.data
+    assert b'Super Admin' not in response.data
+    assert b'Admin Team' in response.data
