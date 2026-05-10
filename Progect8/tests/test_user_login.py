@@ -31,6 +31,32 @@ def test_existing_user_can_login_by_email():
         assert sess['user_id'] == user_id
 
 
+def test_user_login_clears_stale_admin_and_jury_session_flags():
+    with app.app_context():
+        user = User(first_name='Plain', last_name='User', email='plain@test.com', role='team')
+        user.set_password('secret123')
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['admin'] = True
+        sess['admin_user_id'] = 999
+        sess['jury_id'] = 555
+
+    response = client.post('/login', data={'email': 'plain@test.com', 'password': 'secret123'}, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith(f'/user/{user_id}')
+
+    with client.session_transaction() as sess:
+        assert sess['user_id'] == user_id
+        assert 'admin' not in sess
+        assert 'admin_user_id' not in sess
+        assert 'jury_id' not in sess
+
+
 def test_login_shows_error_for_missing_user():
     client = app.test_client()
     response = client.post('/login', data={'email': 'missing@test.com', 'password': 'secret123'}, follow_redirects=True)

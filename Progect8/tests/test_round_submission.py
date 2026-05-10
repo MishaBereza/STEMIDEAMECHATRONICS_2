@@ -139,6 +139,71 @@ def test_submission_only_in_submission_status():
     assert b'Submissions are not open' in resp2.data
 
 
+def test_round_submit_hides_foreign_teams_after_stale_admin_session_is_cleared_by_login():
+    tid, rid = create_tournament_and_round()
+    with app.app_context():
+        captain = User(first_name='Captain', last_name='Own', email='owncap@example.com')
+        member = User(first_name='Member', last_name='Own', email='ownmember@example.com')
+        outsider = User(first_name='Captain', last_name='Other', email='othercap@example.com')
+        captain.set_password('secret123')
+        member.set_password('secret123')
+        outsider.set_password('secret123')
+        db.session.add_all([captain, member, outsider])
+        db.session.commit()
+
+        own_team = Team(name='Own Team', captain_id=captain.id, tournament_id=tid)
+        db.session.add(own_team)
+        db.session.flush()
+        own_team.members.append(member)
+        foreign_team = Team(name='Foreign Team', captain_id=outsider.id, tournament_id=tid)
+        db.session.add(foreign_team)
+        db.session.commit()
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['admin'] = True
+        sess['admin_user_id'] = 777
+
+    login_response = client.post('/login', data={'email': 'ownmember@example.com', 'password': 'secret123'}, follow_redirects=False)
+    assert login_response.status_code == 302
+
+    response = client.get(f'/round/{rid}/submit')
+
+    assert response.status_code == 200
+    assert b'Own Team' in response.data
+    assert b'Foreign Team' not in response.data
+
+
+def test_admin_cannot_submit_for_foreign_team_without_membership():
+    tid, rid = create_tournament_and_round()
+    with app.app_context():
+        admin = User(first_name='Admin', last_name='Viewer', email='adminviewer@example.com', role='admin')
+        admin.set_password('secret123')
+        captain = User(first_name='Captain', last_name='Only', email='captainonly@example.com')
+        db.session.add_all([admin, captain])
+        db.session.commit()
+
+        team = Team(name='Protected Team', captain_id=captain.id, tournament_id=tid)
+        db.session.add(team)
+        db.session.commit()
+        admin_id = admin.id
+        team_id = team.id
+
+    client = app.test_client()
+    login(client, admin_id, admin=True)
+
+    response = client.get(f'/round/{rid}/submit')
+    assert b'Protected Team' not in response.data
+
+    post_response = client.post(f'/round/{rid}/submit', data={
+        'team_id': team_id,
+        'repo_url': 'https://repo',
+        'demo_url': '',
+        'description': ''
+    }, follow_redirects=True)
+    assert b'not allowed' in post_response.data
+
+
 def test_tournament_with_no_rounds_shows_attach():
     # create tournament with no rounds
     with app.app_context():

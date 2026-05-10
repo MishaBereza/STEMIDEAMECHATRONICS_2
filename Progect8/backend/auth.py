@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
 from .translations import get_text
@@ -17,6 +19,23 @@ def _t(key, **kwargs):
 
 
 PHONE_COUNTRY_CODES = ['+380', '+39', '+49', '+33', '+44', '+1', '+34', '+48']
+
+
+def _submission_ready_for_evaluation(submission, now=None):
+    now = now or datetime.utcnow()
+    if submission.round:
+        round_status = (submission.round.status or '').strip().lower()
+        return round_status == 'closed' or bool(submission.round.end_at and submission.round.end_at <= now)
+
+    tournament = submission.team.tournament if submission.team else None
+    tournament_status = (tournament.status if tournament else '').strip().lower()
+    return tournament_status in ('finished', 'completed', 'closed')
+
+
+def _clear_elevated_session():
+    session.pop('admin', None)
+    session.pop('admin_user_id', None)
+    session.pop('jury_id', None)
 
 
 def _normalize_phone_number(value, allow_plus=False):
@@ -260,10 +279,10 @@ def user_login():
             return redirect(url_for('user_login'))
 
         # Store previous login time before updating
-        from datetime import datetime
         user.last_login_at = datetime.now()
         db.session.commit()
 
+        _clear_elevated_session()
         session['user_id'] = user.id
         flash(_t('logged_in_successfully'), 'success')
         return redirect(url_for('user_profile', uid=user.id))
@@ -272,6 +291,7 @@ def user_login():
 
 
 def user_logout():
+    _clear_elevated_session()
     session.pop('user_id', None)
     flash(_t('logged_out'), 'info')
     return redirect(url_for('index'))
@@ -348,6 +368,7 @@ def jury_login():
         email = request.form.get('email', '').strip().lower()
         user = User.query.filter_by(email=email).first()
         if user and user.role in ['jury', 'admin']:
+            _clear_elevated_session()
             session['jury_id'] = user.id
             flash(_t('logged_in_as_jury'), 'success')
             return redirect('/jury/evaluate')
@@ -372,7 +393,6 @@ def jury_evaluate():
             return redirect('/admin')
 
     from .models import Submission, Evaluation, Team, Tournament, Round
-    from datetime import datetime
 
     def sync_team_submissions(tournaments):
         if not tournaments:
@@ -445,21 +465,16 @@ def jury_evaluate():
     sync_team_submissions(candidate_tournaments)
 
     now = datetime.utcnow()
-    finished_round = Round.query.filter(Round.tournament_id.in_([t.id for t in candidate_tournaments]), Round.end_at <= now).first()
     submissions = Submission.query.join(Team, Submission.team_id == Team.id).filter(Team.tournament_id.in_([t.id for t in candidate_tournaments])).all()
-    team_level_submissions = Team.query.filter(
-        Team.tournament_id.in_([t.id for t in candidate_tournaments]),
-        Team.repo_url.isnot(None),
-        Team.repo_url != ''
-    ).all()
+    ready_submissions = [submission for submission in submissions if _submission_ready_for_evaluation(submission, now)]
 
-    if not finished_round and not submissions and not team_level_submissions and tournament.status.lower() not in ('finished', 'completed', 'closed'):
+    if not ready_submissions and tournament.status.lower() not in ('finished', 'completed', 'closed'):
         return render_template('jury_evaluate.html', team_evaluations=[], current_user=jury, tournament=tournament, teams=[], message_key='evaluation_not_started')
 
     teams = Team.query.filter(Team.tournament_id.in_([t.id for t in candidate_tournaments])).all()
     pending_evaluations = []
     reviewed_evaluations = []
-    for s in submissions:
+    for s in ready_submissions:
         if s.team:
             already = Evaluation.query.filter_by(submission_id=s.id, jury_id=jury.id).first()
             if already:
@@ -520,6 +535,7 @@ def profile_switch():
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('profile_switch'))
 
+        _clear_elevated_session()
         session['user_id'] = target.id
         flash(_t('switched_profile_to', email=target.email), 'success')
         return redirect(url_for('user_profile', uid=target.id))

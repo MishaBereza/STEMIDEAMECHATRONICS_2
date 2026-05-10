@@ -1,10 +1,11 @@
 import os
 import sys
+from datetime import datetime, timedelta
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backend.app import app, db
-from backend.models import Evaluation, Submission, Team, Tournament, User
+from backend.models import Evaluation, Submission, Team, Tournament, User, Round
 
 
 def setup_module(module):
@@ -34,8 +35,19 @@ def create_submission_fixture():
         db.session.add(team)
         db.session.commit()
 
+        round_item = Round(
+            tournament_id=tournament.id,
+            title='Round 1',
+            level=1,
+            status='Closed',
+            end_at=datetime.utcnow() - timedelta(hours=1)
+        )
+        db.session.add(round_item)
+        db.session.commit()
+
         submission = Submission(
             team_id=team.id,
+            round_id=round_item.id,
             repo_url='https://github.com/example/repo',
             description='Submission for evaluation'
         )
@@ -133,9 +145,26 @@ def test_jury_sees_only_assigned_tournament_submissions():
         db.session.add_all([visible_team, hidden_team])
         db.session.commit()
 
+        visible_round = Round(
+            tournament_id=visible_tournament.id,
+            title='Visible Round',
+            level=1,
+            status='Closed',
+            end_at=datetime.utcnow() - timedelta(hours=1)
+        )
+        hidden_round = Round(
+            tournament_id=hidden_tournament.id,
+            title='Hidden Round',
+            level=1,
+            status='Closed',
+            end_at=datetime.utcnow() - timedelta(hours=1)
+        )
+        db.session.add_all([visible_round, hidden_round])
+        db.session.commit()
+
         db.session.add_all([
-            Submission(team_id=visible_team.id, repo_url='https://github.com/example/visible'),
-            Submission(team_id=hidden_team.id, repo_url='https://github.com/example/hidden'),
+            Submission(team_id=visible_team.id, round_id=visible_round.id, repo_url='https://github.com/example/visible'),
+            Submission(team_id=hidden_team.id, round_id=hidden_round.id, repo_url='https://github.com/example/hidden'),
         ])
         db.session.commit()
 
@@ -167,7 +196,17 @@ def test_jury_sees_assigned_tournament_submissions_even_with_unexpected_status()
         db.session.add(team)
         db.session.commit()
 
-        db.session.add(Submission(team_id=team.id, repo_url='https://github.com/example/status'))
+        round_item = Round(
+            tournament_id=tournament.id,
+            title='Status Round',
+            level=1,
+            status='Closed',
+            end_at=datetime.utcnow() - timedelta(hours=1)
+        )
+        db.session.add(round_item)
+        db.session.commit()
+
+        db.session.add(Submission(team_id=team.id, round_id=round_item.id, repo_url='https://github.com/example/status'))
         db.session.commit()
 
         jury_id = jury.id
@@ -198,7 +237,17 @@ def test_assigned_admin_sees_own_name_and_assigned_submissions_in_jury_panel():
         db.session.add(team)
         db.session.commit()
 
-        db.session.add(Submission(team_id=team.id, repo_url='https://github.com/example/admin'))
+        round_item = Round(
+            tournament_id=tournament.id,
+            title='Admin Round',
+            level=1,
+            status='Closed',
+            end_at=datetime.utcnow() - timedelta(hours=1)
+        )
+        db.session.add(round_item)
+        db.session.commit()
+
+        db.session.add(Submission(team_id=team.id, round_id=round_item.id, repo_url='https://github.com/example/admin'))
         db.session.commit()
 
         admin_id = admin.id
@@ -215,3 +264,87 @@ def test_assigned_admin_sees_own_name_and_assigned_submissions_in_jury_panel():
     assert b'Real Admin' in response.data
     assert b'Super Admin' not in response.data
     assert b'Admin Team' in response.data
+
+
+def test_jury_does_not_see_submissions_until_round_is_closed():
+    with app.app_context():
+        jury = User(first_name='Late', last_name='Jury', email='latejury@test.com', role='jury')
+        captain = User(first_name='Cap', last_name='Five', email='capfive@test.com', role='team')
+        tournament = Tournament(name='Late Cup', description='', status='Running')
+        db.session.add_all([jury, captain, tournament])
+        db.session.commit()
+
+        tournament.assigned_juries.append(jury)
+        db.session.commit()
+
+        team = Team(name='Hidden Until Closed', captain_id=captain.id, tournament_id=tournament.id)
+        db.session.add(team)
+        db.session.commit()
+
+        round_item = Round(
+            tournament_id=tournament.id,
+            title='Open Round',
+            level=1,
+            status='Active',
+            end_at=datetime.utcnow() + timedelta(hours=1)
+        )
+        db.session.add(round_item)
+        db.session.commit()
+
+        db.session.add(Submission(team_id=team.id, round_id=round_item.id, repo_url='https://github.com/example/open'))
+        db.session.commit()
+
+        jury_id = jury.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['jury_id'] = jury_id
+
+    response = client.get('/jury/evaluate')
+
+    assert response.status_code == 200
+    assert b'Hidden Until Closed' not in response.data
+    assert b'Evaluation has not started yet' in response.data
+
+
+def test_direct_evaluation_is_blocked_until_round_is_closed():
+    with app.app_context():
+        jury = User(first_name='Block', last_name='Jury', email='blockjury@test.com', role='jury')
+        captain = User(first_name='Cap', last_name='Six', email='capsix@test.com', role='team')
+        tournament = Tournament(name='Blocked Cup', description='', status='Running')
+        db.session.add_all([jury, captain, tournament])
+        db.session.commit()
+
+        tournament.assigned_juries.append(jury)
+        db.session.commit()
+
+        team = Team(name='Blocked Team', captain_id=captain.id, tournament_id=tournament.id)
+        db.session.add(team)
+        db.session.commit()
+
+        round_item = Round(
+            tournament_id=tournament.id,
+            title='Blocked Round',
+            level=1,
+            status='Active',
+            end_at=datetime.utcnow() + timedelta(hours=1)
+        )
+        db.session.add(round_item)
+        db.session.commit()
+
+        submission = Submission(team_id=team.id, round_id=round_item.id, repo_url='https://github.com/example/blocked')
+        db.session.add(submission)
+        db.session.commit()
+
+        jury_id = jury.id
+        submission_id = submission.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['jury_id'] = jury_id
+
+    response = client.get(f'/evaluate/{submission_id}', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Evaluation has not started yet' in response.data
+    assert b'Blocked Team' not in response.data
