@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block head %}
   <link rel="stylesheet" href="/static/css/interface.css">
   <style>
@@ -217,7 +217,7 @@
                   <td>
                     <div class="team-name-cell">
                       <span>{{ team.name }}</span>
-                      <button class="team-details-btn" type="button" onclick="openTeamDetails({{ team.id }})" title="View team details">&#9432;</button>
+                      <button class="team-details-btn" type="button" onclick="openTeamDetails({{ team.id }})" title="{{ t('view_team_details') }}">&#9432;</button>
                     </div>
                   </td>
                   <td class="leaderboard-score">{{ "{:.2f}".format(score) }}</td>

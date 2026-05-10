@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, session
 from .models import db, User, Settings
@@ -241,7 +241,7 @@ def register_user():
             debug_info = f"Email could not be sent. Config: SERVER={mail_server}, USERNAME={mail_username}, PASSWORD_set={mail_password_set}, SENDER={mail_sender}"
             current_app.logger.error(debug_info)
             flash(
-                f"Email could not be sent. Local verification link: {links['verify_url']}",
+                _t('verification_email_failed_local_link', url=links['verify_url']),
                 'warning'
             )
         return redirect('/login')
@@ -266,7 +266,7 @@ def user_login():
             return redirect(url_for('user_login'))
         if is_over_admin(user):
             if not is_over_admin_enabled():
-                flash('Over admin account is disabled', 'danger')
+                flash(_t('over_admin_disabled'), 'danger')
                 return redirect(url_for('user_login'))
         if not user.check_password(password):
             flash(_t('invalid_password'), 'danger')
@@ -318,7 +318,7 @@ def admin_panel():
             flash(_t('user_not_found'), 'danger')
             return redirect(url_for('admin_panel'))
         if is_over_admin(user) and not is_over_admin_enabled():
-            flash('Over admin account is disabled', 'danger')
+            flash(_t('over_admin_disabled'), 'danger')
             return redirect(url_for('admin_panel'))
         if not user.check_password(password):
             flash(_t('invalid_password'), 'danger')
@@ -556,7 +556,7 @@ def user_change_password():
         return redirect(url_for('user_login'))
 
     if is_over_admin(user):
-        flash('Ця дія недоступна для over admin.', 'warning')
+        flash(_t('action_unavailable_over_admin'), 'warning')
         return redirect(url_for('user_profile', uid=user.id))
 
     if request.method == 'POST':
@@ -598,7 +598,7 @@ def user_edit_profile():
         return redirect(url_for('user_login'))
 
     if is_over_admin(user):
-        flash('Ця дія недоступна для over admin.', 'warning')
+        flash(_t('action_unavailable_over_admin'), 'warning')
         return redirect(url_for('user_profile', uid=user.id))
 
     if request.method == 'POST':
@@ -614,14 +614,14 @@ def user_edit_profile():
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('user_edit_profile'))
         if not first_name or not last_name:
-            flash('Ім’я та прізвище обов’язкові.', 'warning')
+            flash(_t('first_last_required'), 'warning')
             return redirect(url_for('user_edit_profile'))
 
         user.first_name = first_name
         user.last_name = last_name
         user.age = int(age) if age.isdigit() else None
         db.session.commit()
-        flash('Профіль успішно оновлено.', 'success')
+        flash(_t('profile_updated'), 'success')
         return redirect(url_for('user_profile', uid=user.id))
 
     return render_template('edit_profile.html', user=user)
@@ -640,7 +640,7 @@ def user_change_phone():
         return redirect(url_for('user_login'))
 
     if is_over_admin(user):
-        flash('Ця дія недоступна для over admin.', 'warning')
+        flash(_t('action_unavailable_over_admin'), 'warning')
         return redirect(url_for('user_profile', uid=user.id))
 
     if request.method == 'POST':

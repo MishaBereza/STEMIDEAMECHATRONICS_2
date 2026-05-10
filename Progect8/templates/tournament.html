@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block head %}
   <link rel="stylesheet" href="/static/css/tournament.css">
 {% endblock %}
@@ -64,7 +64,7 @@
             {% endif %}
           </article>
         {% else %}
-          <div class="empty-rounds">Attach rounds. {{ t('attach') }}</div>
+          <div class="empty-rounds">{{ t('attach') }}</div>
         {% endfor %}
       </div>
     </section>
