@@ -281,12 +281,12 @@ def leaderboard_export_pdf(tid):
         if index <= 3:
             label = f'{index}. {label}'
 
-        # Збираємо список учасників
+        # Build the participants list
         participants = []
         if team.captain:
             participants.append(f"{_t('captain')}: {team.captain.name}")
         for member in team.members:
-            if member != team.captain:  # щоб не дублювати капітана
+            if member != team.captain:  # Avoid duplicating the captain
                 participants.append(member.name)
         participants_text = ', '.join(participants) if participants else _t('no_teams_to_display')
 

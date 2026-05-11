@@ -726,7 +726,7 @@ form button:hover {
 
 
 
-/* ОБЁРТКА */
+/* WRAPPER */
 .topbar-badge-wrapper{
   position:absolute;
 
@@ -745,7 +745,7 @@ form button:hover {
   z-index:2;
 }
 
-/* ГВОЗДЬ */
+/* PIN */
 .topbar-badge-pin{
   position:absolute;
 
@@ -770,7 +770,7 @@ form button:hover {
   z-index:10;
 }
 
-/* ВЕРЁВКА */
+/* ROPE */
 .topbar-badge-rope{
   position:absolute;
 
@@ -789,7 +789,7 @@ form button:hover {
     );
 }
 
-/* БЕЙДЖ */
+/* BADGE */
 .topbar-badge{
   position:relative;
 
@@ -820,7 +820,7 @@ form button:hover {
   animation:topbarBadgeSwing 5s ease-in-out infinite;
 }
 
-/* ВЕРХ */
+/* TOP */
 .topbar-badge-header{
   height:90px;
 
@@ -834,7 +834,7 @@ form button:hover {
     );
 }
 
-/* ЛИНИИ */
+/* LINES */
 .topbar-badge-line{
   width:72%;
   height:14px;
@@ -850,7 +850,7 @@ form button:hover {
   width:52%;
 }
 
-/* НИЗ */
+/* BOTTOM */
 .topbar-badge-footer{
   position:relative;
 
@@ -869,7 +869,7 @@ form button:hover {
     );
 }
 
-/* КАЧАНИЕ */
+/* SWING */
 @keyframes topbarBadgeSwing{
 
   0%{
@@ -886,7 +886,7 @@ form button:hover {
 
 }
 
-/* МОБИЛКА */
+/* MOBILE */
 @media (max-width: 1100px){
 
   .topbar-badge-wrapper{
@@ -894,7 +894,7 @@ form button:hover {
   }
 
 }
-/* ТЕКСТ ВНУТРИ БЕЙДЖА */
+/* TEXT INSIDE THE BADGE */
 .topbar-badge-content{
   padding:14px 14px 32px;
 
@@ -937,7 +937,7 @@ form button:hover {
   padding:0 10px;
 }
 
-/* ВТОРОЙ БЕЙДЖ */
+/* SECOND BADGE */
 .badge-second{
   left: 30px;
   right:auto;
@@ -954,7 +954,7 @@ form button:hover {
   padding-bottom:5px;
 }
 
-/* РАЗМЕР ПЕРВОГО БЕЙДЖА */
+/* FIRST BADGE SIZE */
 .topbar-badge-wrapper:not(.badge-second) .topbar-badge{
   min-height:650px !important;
 }
@@ -964,12 +964,12 @@ form button:hover {
   padding-bottom:5px;
 }
 
-/* БЕЖЕВЫЙ БЛОК ПЕРВОГО БЕЙДЖА */
+/* BEIGE BLOCK OF THE FIRST BADGE */
 .topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
   min-height:650px !important;
 }
 
-/* DROPDOWN В ПЕРВОМ БЕЙДЖЕ */
+/* DROPDOWN IN THE FIRST BADGE */
 .badge-dropdowns{
   width:100%;
   margin-bottom:20px;
@@ -1055,12 +1055,12 @@ form button:hover {
   color:var(--text);
 }
 
-/* ТЕКСТ ВВЕРХУ У ПРАВОГО БЕЙДЖА */
+/* TEXT AT THE TOP OF THE RIGHT BADGE */
 .topbar-badge-wrapper:not(.badge-second) .topbar-badge-content{
   align-items:flex-start;
   text-align:left;
 }
-/* СКРЫТЫЕ БЕЙДЖИ */
+/* HIDDEN BADGES */
 .topbar-badge-wrapper.is-hidden .topbar-badge{
   opacity:0;
   transform:translateY(-20px) scale(0.9);
@@ -1068,13 +1068,13 @@ form button:hover {
   pointer-events:none;
 }
 
-/* ГВОЗДЬ ВСЕГДА ВИДЕН */
+/* PIN ALWAYS REMAINS VISIBLE */
 .topbar-badge-wrapper.is-hidden .topbar-badge-pin,
 .topbar-badge-wrapper.is-hidden .topbar-badge-rope{
   opacity:1;
 }
 
-/* АНИМАЦИЯ */
+/* ANIMATION */
 .topbar-badge{
   transition:
     opacity 0.25s ease,
@@ -1084,7 +1084,7 @@ form button:hover {
 .topbar-badge-pin{
   cursor:pointer;
 }
-/* СКРЫТИЕ ВТОРОГО БЕЙДЖА */
+/* HIDE THE SECOND BADGE */
 .topbar-badge-wrapper.is-hidden.badge-second .topbar-badge{
   opacity:0;
 
@@ -1094,7 +1094,7 @@ form button:hover {
 
   pointer-events:none;
 }
-/* ЛОГО ВНИЗУ БЕЙДЖА */
+/* LOGO AT THE BOTTOM OF THE BADGE */
 .badge-logo{
   width:200px;
   height:200px;

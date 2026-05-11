@@ -19,15 +19,15 @@ def adjust_difficulty(current_level, average_score):
 
 
 def generate_new_round(current_level, scores):
-    # Додаток А: аналіз середнього балу
-    # (функція calculate_average_score)
+    # Appendix A: average score analysis
+    # (calculate_average_score function)
     avg = calculate_average_score(scores)
 
-    # Додаток В: адаптивний механізм зміни рівня
-    # (функція adjust_difficulty)
+    # Appendix B: adaptive difficulty adjustment mechanism
+    # (adjust_difficulty function)
     new_level = adjust_difficulty(current_level, avg)
 
-    # Додаток С: генерація обʼєкту нового раунду
+    # Appendix C: generation of the new round object
     return {
         "round_level": new_level,
         "average_score": avg,
