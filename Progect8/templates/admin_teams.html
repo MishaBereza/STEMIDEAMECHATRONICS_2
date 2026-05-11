@@ -31,7 +31,7 @@
               </td>
               <td>
                 <div class="table-actions">
-                  <a href="/edit_team_members/{{ team.id }}" class="inline-btn">{{ t('edit_composition') }}</a>
+                  <a href="{{ url_for('edit_team_members', teamid=team.id, next=url_for('admin_tournament_teams', tid=tournament.id)) }}" class="inline-btn">{{ t('edit_composition') }}</a>
                   {% if team.submission_status == 'Pending' %}
                     <form method="post" action="/admin/team/{{ team.id }}/decide" class="table-actions">
                       <button name="decision" value="accept" class="inline-btn">{{ t('accepted') }}</button>

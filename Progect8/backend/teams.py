@@ -196,6 +196,8 @@ def edit_team_members(teamid):
         return redirect(url_for('team_page', teamid=teamid))
 
     message = None
+    return_url = request.args.get('next') or request.form.get('next')
+
     if request.method == 'POST' and can_edit_members:
         members_emails = [e.strip().lower() for e in request.form.getlist('members') if e.strip()]
         if request.form.get('action') == 'update_members':
@@ -209,11 +211,15 @@ def edit_team_members(teamid):
             db.session.commit()
             message = _t('members_updated')
 
+    back_url = return_url or url_for('team_page', teamid=team.id)
+
     return render_template(
         'edit_team_members.html',
         team=team,
         tournament=t,
-        message=message
+        message=message,
+        back_url=back_url,
+        return_url=return_url
     )
 
 
