@@ -47,61 +47,27 @@ echo ====================================
 echo     ADMIN CONSOLE
 echo ====================================
 echo.
-echo 1. Clear database and recreate over-admin
-echo 2. Create demo data
-echo 3. Reset and start fresh
-echo 4. Switch this device to super-admin
-echo 5. Ensure super-admin exists
-echo 6. List jury/admin users
-echo 7. Set user status
-echo 8. Emergency stop server
-echo 9. Change user password
-echo 10. Toggle over admin enabled/disabled
-echo 11. Exit
+echo 1. Reset and start fresh
+echo 2. Ensure super-admin exists
+echo 3. List jury/admin users
+echo 4. Set user status
+echo 5. Emergency stop server
+echo 6. Change user password
+echo 7. Toggle over admin enabled/disabled
+echo 8. Exit
 echo.
-set /p choice="Select option (1-11): "
+set /p choice="Select option (1-8): "
 
-if "%choice%"=="1" goto clear_db
-if "%choice%"=="2" goto demo_data
-if "%choice%"=="3" goto reset_fresh
-if "%choice%"=="4" goto switch_super_admin
-if "%choice%"=="5" goto ensure_over_admin
-if "%choice%"=="6" goto list_users
-if "%choice%"=="7" goto set_status
-if "%choice%"=="8" goto emergency_stop
-if "%choice%"=="9" goto change_user_password
-if "%choice%"=="10" goto toggle_over_admin
-if "%choice%"=="11" exit /b 0
+if "%choice%"=="1" goto reset_fresh
+if "%choice%"=="2" goto ensure_over_admin
+if "%choice%"=="3" goto list_users
+if "%choice%"=="4" goto set_status
+if "%choice%"=="5" goto emergency_stop
+if "%choice%"=="6" goto change_user_password
+if "%choice%"=="7" goto toggle_over_admin
+if "%choice%"=="8" exit /b 0
 echo Invalid choice
 timeout /t 2 >nul
-goto menu
-
-:clear_db
-echo.
-echo WARNING: This will delete all users, admins, teams, tournaments, rounds, submissions and settings.
-echo The protected over-admin account will be recreated automatically.
-set /p confirm_clear="Type DELETE to continue: "
-if /i not "%confirm_clear%"=="DELETE" (
-    echo Cancelled.
-) else if exist "%VENV_PY%" (
-    call "%VENV_PY%" scripts\admin_tools.py clear-database
-) else (
-    echo Virtual environment not found. Run start.bat first.
-)
-pause
-goto menu
-
-:demo_data
-echo.
-echo Creating demo data...
-set FLASK_APP=backend.app
-if exist "%VENV_PY%" (
-    call "%VENV_PY%" -c "from backend.app import app; from backend.models import db; app.app_context().push(); db.create_all(); print('Demo data created')"
-) else (
-    echo Virtual environment not found. Run start.bat first.
-)
-echo.
-pause
 goto menu
 
 :reset_fresh
@@ -127,19 +93,6 @@ if exist "%VENV_PY%" (
     call "%VENV_PY%" -m pip install -r requirements.txt >nul 2>&1
 )
 echo Done! Run start.bat to begin
-pause
-goto menu
-
-:switch_super_admin
-echo.
-if exist "%VENV_PY%" (
-    call "%VENV_PY%" scripts\admin_tools.py ensure-over-admin
-    echo Opening browser and switching this device to super-admin...
-    start "" "http://localhost:5000/admin"
-) else (
-    echo Virtual environment not found. Run start.bat first.
-)
-echo.
 pause
 goto menu
 
