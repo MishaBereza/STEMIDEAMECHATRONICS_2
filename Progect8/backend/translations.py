@@ -1646,7 +1646,7 @@ TRANSLATIONS = {
         'badge_role_user_rep_content': 'Представник користувачів - Ханко Єгор Валентинович',
         'badge_team_title': 'Команда',
         'badge_team_subtitle': 'Розробники та організатори',
-        'badge_team_name_text': 'Нова назва: Дніпропетровський ГОПАК Стара назва: stemideamechatronics',
+        'badge_team_name_text': 'stemideamechatronics',
         'platform_access': 'Доступ до платформи',
         'search_by_email': 'Пошук за email...',
         'search': 'Пошук',
