@@ -366,16 +366,18 @@ def admin_change_password():
 
 
 def jury_login():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        user = User.query.filter_by(email=email).first()
-        if user and user.role in ['jury', 'admin']:
-            _clear_elevated_session()
-            session['jury_id'] = user.id
-            flash(_t('logged_in_as_jury'), 'success')
-            return redirect('/jury/evaluate')
+    current_user = get_current_user()
+    if not current_user:
+        flash(_t('please_login_first'), 'warning')
+        return redirect(url_for('user_login'))
+    if current_user.role not in ['jury', 'admin']:
         flash(_t('invalid_jury_member'), 'danger')
-    return render_template('jury_login.html')
+        return redirect(url_for('user_profile', uid=current_user.id))
+
+    _clear_elevated_session()
+    session['jury_id'] = current_user.id
+    flash(_t('logged_in_as_jury'), 'success')
+    return redirect('/jury/evaluate')
 
 
 def jury_evaluate():

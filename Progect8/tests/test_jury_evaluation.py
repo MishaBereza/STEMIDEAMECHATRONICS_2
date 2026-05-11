@@ -348,3 +348,33 @@ def test_direct_evaluation_is_blocked_until_round_is_closed():
     assert response.status_code == 200
     assert b'Evaluation has not started yet' in response.data
     assert b'Blocked Team' not in response.data
+
+
+def test_jury_login_uses_current_logged_in_user_without_email_form():
+    with app.app_context():
+        jury = User(first_name='Auto', last_name='Jury', email='autojury@test.com', role='jury', is_verified=True)
+        jury.set_password('secret123')
+        db.session.add(jury)
+        db.session.commit()
+        jury_id = jury.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['user_id'] = jury_id
+
+    response = client.get('/jury/login', follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith('/jury/evaluate')
+
+    with client.session_transaction() as sess:
+        assert sess['jury_id'] == jury_id
+
+
+def test_jury_login_redirects_anonymous_user_to_regular_login():
+    client = app.test_client()
+
+    response = client.get('/jury/login', follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers['Location'].endswith('/login')
