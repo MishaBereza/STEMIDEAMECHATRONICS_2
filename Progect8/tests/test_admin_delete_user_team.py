@@ -70,3 +70,28 @@ def test_super_admin_cannot_be_deleted_or_demoted():
         super_admin = db.session.get(User, super_admin_id)
         assert super_admin is not None
         assert super_admin.role == 'admin'
+
+
+def test_regular_admin_can_be_deleted():
+    from backend.admin import admin_delete_user
+    from flask import session
+
+    with app.app_context():
+        User.query.filter_by(email='delete-admin@example.com').delete()
+        admin = User(
+            first_name='Delete',
+            last_name='Admin',
+            email='delete-admin@example.com',
+            role='admin',
+            is_verified=True,
+        )
+        db.session.add(admin)
+        db.session.commit()
+        admin_id = admin.id
+
+    with app.test_request_context(method='POST'):
+        session['admin'] = True
+        admin_delete_user(admin_id)
+
+    with app.app_context():
+        assert db.session.get(User, admin_id) is None

@@ -150,7 +150,7 @@ body {
   color: var(--text);
   background:
     var(--page-bg-overlay),
-    var(--page-bg-image) center top / cover fixed no-repeat,
+    var(--page-bg-image) center top / cover no-repeat,
     var(--bg);
 }
 
@@ -161,7 +161,7 @@ a {
 .page-shell {
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: 125vh;
 }
 
 .page-glow {

@@ -103,7 +103,7 @@ def is_over_admin_enabled():
     env_value = os.environ.get('OVER_ADMIN_ENABLED')
     if env_value is not None:
         return _parse_bool(env_value)
-    return False
+    return True
 
 
 def ensure_over_admin_user():
@@ -111,6 +111,9 @@ def ensure_over_admin_user():
     user = User.query.filter(User.email.in_([OVER_ADMIN_EMAIL, LEGACY_OVER_ADMIN_EMAIL])).first()
     bootstrap_password = _load_admin_key_value() or os.urandom(32).hex()
     password_setting = Settings.query.filter_by(key='over_admin_password_initialized').first()
+    enabled_setting = Settings.query.filter_by(key='over_admin_enabled').first()
+    if not enabled_setting:
+        db.session.add(Settings(key='over_admin_enabled', value='true'))
     if user:
         changed = False
         if user.email != OVER_ADMIN_EMAIL:
@@ -320,7 +323,7 @@ def admin_panel():
         if is_over_admin(user) and not is_over_admin_enabled():
             flash(_t('over_admin_disabled'), 'danger')
             return redirect(url_for('admin_panel'))
-        if not user.check_password(password):
+        if password != load_admin_password():
             flash(_t('invalid_password'), 'danger')
             return redirect(url_for('admin_panel'))
 
@@ -356,8 +359,7 @@ def admin_change_password():
         elif new_password != confirm:
             flash(_t('passwords_do_not_match'), 'warning')
         else:
-            admin_user.set_password(new_password)
-            db.session.commit()
+            save_admin_password(new_password)
             flash(_t('admin_password_changed'), 'success')
             return redirect(url_for('admin_dashboard'))
     return render_template('admin_change_password.html')

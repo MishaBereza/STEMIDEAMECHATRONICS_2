@@ -14,10 +14,6 @@
             <th>{{ t('name') }}</th>
             <th>{{ t('captain') }}</th>
             <th>{{ t('members') }}</th>
-            <th>{{ t('repo') }}</th>
-            <th>{{ t('live') }}</th>
-            <th>{{ t('comments') }}</th>
-            <th>{{ t('status') }}</th>
             <th>{{ t('actions') }}</th>
           </tr>
         </thead>
@@ -32,15 +28,6 @@
                 {% else %}
                   -
                 {% endfor %}
-              </td>
-              <td>{{ team.repo_url or '-' }}</td>
-              <td>{{ team.live_url or '-' }}</td>
-              <td>{{ team.comments or '-' }}</td>
-              <td>
-                {% set team_status = (team.submission_status or 'None')|lower %}
-                <span class="status-pill {{ team_status if team_status in ['pending', 'accepted', 'rejected', 'returned'] else 'default' }}">
-                  {{ t(team_status) if team_status in ['pending', 'accepted', 'rejected', 'returned'] else (team.submission_status or '-') }}
-                </span>
               </td>
               <td>
                 <div class="table-actions">
