@@ -96,7 +96,7 @@ def test_round_submit_membership_and_repo():
         s = Submission.query.filter_by(team_id=team_id, round_id=rid).first()
         assert s is not None
 
-    # create another team and ensure captain1 cannot submit for it
+    # create another team and ensure captain1 still cannot submit for it
     with app.app_context():
         cap2 = User(first_name='Captain', last_name='Two', email='capX@example.com')
         db.session.add(cap2)
@@ -112,6 +112,9 @@ def test_round_submit_membership_and_repo():
         'description': ''
     }, follow_redirects=True)
     assert b'not allowed' in resp.data
+    with app.app_context():
+        s2 = Submission.query.filter_by(team_id=team2_id, round_id=rid).first()
+        assert s2 is None
 
 
 def test_submission_only_in_submission_status():

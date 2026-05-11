@@ -47,7 +47,7 @@ def admin_users():
 
 def admin_delete_user(uid):
     u = User.query.get_or_404(uid)
-    if is_over_admin(u) or u.role == 'admin':
+    if is_over_admin(u):
         flash(_t('cannot_delete_admin_user'), 'warning')
         return redirect('/admin/users')
 
