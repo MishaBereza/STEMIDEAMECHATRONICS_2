@@ -928,9 +928,13 @@ form button:hover {
   font-size:1rem;
   font-weight:700;
 
+  display:inline-block;
   color:transparent;
-  background-image:linear-gradient(90deg, #4f8edc 0%, #4f8edc 40%, #7fb0e2 50%, #f7d55b 60%, #f7d55b 100%);
+  background-image:linear-gradient(90deg, #0057b8 0%, #4e8ad8 35%, #f1d55d 65%, #ffd700 100%);
+  background-size:100% 100%;
+  background-repeat:no-repeat;
   -webkit-background-clip:text;
+  -moz-background-clip:text;
   background-clip:text;
   -webkit-text-fill-color:transparent;
 
