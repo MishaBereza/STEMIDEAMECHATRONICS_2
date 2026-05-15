@@ -10,3 +10,6 @@ platform for ivant
 3)копіюєте посилання та відкриваете у своєму браузері
 більше деталей у файлі How start.txt
 
+
+Створено командою STEMIDEAMECHATRONICS
+
